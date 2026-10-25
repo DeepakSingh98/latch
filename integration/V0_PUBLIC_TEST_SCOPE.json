@@ -1,0 +1,28 @@
+{
+  "schema": "latch-v0-public-test-scope-v1",
+  "excluded_files": {
+    "tests/operations/test_muon_oracle.py": "Only tests excluded MoE4 muon_oracle and nested vendored muon_update, neither public runtime.",
+    "tests/operations/test_p7b.py": "Historical run()-only harness depends on unbundled integration_p9.family_images and cops3a_vision. No pytest test functions; standalone execution is not public coverage.",
+    "tests/operations/test_mixed_attention.py": "Historical run()-only harness depends on unbundled pops5d_region. No pytest test functions; standalone execution is not public coverage."
+  },
+  "excluded_cases": {
+    "tests/operations/test_square_sum_api.py::test_prepare_cli_requires_explicit_permission_and_forwards_option": "Only tests excluded MoE4 prepare CLI. Compiler public API permission/forwarding cases remain."
+  },
+  "extracted_fixtures": [
+    {
+      "path": "tests/operations/fixtures/softmax_vjp_audit.py",
+      "source_commit": "adde6ca52b556df8585edfb6c7ade3a241964620",
+      "source_path": "src/megakernel_lab/moe4/arithmetic_build_audit.py",
+      "function": "softmax_vjp_matrix_dtypes",
+      "function_sha256": "a250064132eafd6dec01436ebea4d7ba6f115636fc98c98e7d546fe19b3baea2",
+      "behavior_changes": false
+    }
+  ],
+  "note": "No runtime source changes, test skips, or numerical tolerance changes. Original tests remain preserved in immutable donor commits.",
+  "static_review": {
+    "parsed_python_files": 513,
+    "missing_or_excluded_project_namespace_imports": 0,
+    "inspection_scope": "retained runtime, examples, operations tests and TinyMoE tests, excluding pure MoE4 oracle; historical bare-import harnesses separately identified above",
+    "runtime_execution": false
+  }
+}

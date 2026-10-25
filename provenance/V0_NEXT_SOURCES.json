@@ -1,0 +1,486 @@
+{
+  "intakes": [
+    {
+      "base": "d3d2edb04df9f98074d8e0d60c8ab5ff6682292d",
+      "branch": "codex/latch-selective-10",
+      "commit": "a983c26f70beb82818206113b63c236c1127f946",
+      "files_at_donor_commit": {
+        "src/megakernel_lab/operation_compiler/accumulation_rules.py": "277d36da476c4a8baac068f923d79e4f12bf20bdd57a37a3e5f35e2550d4d687",
+        "src/megakernel_lab/operation_compiler/api.py": "fd45a2a4a57eb67f4ecc9e8b48a75070dfd8b05e7ba81a5b6bdcdd7c6daf2cca",
+        "src/megakernel_lab/operation_compiler/attention_pack.py": "92098108d546861800ab0e964e3b516f6bb1daad55dbd7e3d407100ed5d64c73",
+        "src/megakernel_lab/operation_compiler/attention_rules.py": "d7b05ffb28ba2450add684e2554fab3e3ca330763debfccc9e923912cbe84187",
+        "src/megakernel_lab/operation_compiler/bf16_sdpa.py": "e69e04281cc2ca3963990b5f26861daff377a674ebb6e505744d45d40d9fc231",
+        "src/megakernel_lab/operation_compiler/binding_guard.py": "c553bab7d4ea4bc88f479caf141c49810f0ad346effe4d34595b171175b56fb2",
+        "src/megakernel_lab/operation_compiler/cast_concat.py": "8702e5e06152a8093a33e2df7c3313f7a5f1463733134df9a013cfa873ba09e3",
+        "src/megakernel_lab/operation_compiler/compose.py": "ef3db3c7e772aafdceda6dd13c81d0d7ff9ecca653fcd249bf76bfb60408a613",
+        "src/megakernel_lab/operation_compiler/compose_attention.py": "7e0fa02289e4d62bf9ec709ae0e8235aec9a2daf9b5262ea7d5be97654fcab36",
+        "src/megakernel_lab/operation_compiler/execution_plan.py": "68d79a014511e655de3ad431b95f577d937f8c1bb7ee0ef0f7da7ee629db532a",
+        "src/megakernel_lab/operation_compiler/flat_long_attention.py": "cc5582d70cf9be6cd8e75e3b7c61a044902db58d7c98fb1e7ab317e1ead27c3b",
+        "src/megakernel_lab/operation_compiler/full_sum_inline.py": "934094397ba0d4728da2c11bced5c5de88cab99eba03c427a0370bad1732766a",
+        "src/megakernel_lab/operation_compiler/gradient_consumption.py": "b6496a8c75a54868fdb02286fdf8015e686ceecb9e288d149d2460c7729a9ac9",
+        "src/megakernel_lab/operation_compiler/group_rules.py": "9500c3b09d8db29f0e3bad5e4d65324216594a3f4fbb78dfc220fe691a0acad4",
+        "src/megakernel_lab/operation_compiler/kernels/attention_pack.cuh": "87a93896df3d3301805c9f0afefc43276cd16f768287d70ef043eedff3cc1ceb",
+        "src/megakernel_lab/operation_compiler/kernels/pops4b_wg.cuh": "90da6ba946f9c3e0b72722cdc2ba56377e467e0ea03ae441ec5c3180b09dfedf",
+        "src/megakernel_lab/operation_compiler/kernels/ragged_experts.cuh": "0dc3bce6f27737ac87aa01f8d10b6dac76f606d43971c6ce244b0277f84943fe",
+        "src/megakernel_lab/operation_compiler/kernels/ragged_order_scan.cuh": "fb91aff75b21db852cc04d9bfcc596f52db677d6e2456c62ae7362ecf2642edc",
+        "src/megakernel_lab/operation_compiler/kernels/ragged_tma.cuh": "68487c3417d4351567fa5c95956bd0912f1ab227af9509b873d1f6044e6e1b76",
+        "src/megakernel_lab/operation_compiler/kernels/ragged_tma_acc.cuh": "aa9a1b8f54cc8f57c0c379c66fcb33f55dd97673e518298c22a96344049a85ed",
+        "src/megakernel_lab/operation_compiler/layout_canonical.py": "96c4e325ad7ece4182a6293e3d07347b4366c3bf7583e9fa704714c7ce8dc879",
+        "src/megakernel_lab/operation_compiler/lower.py": "a2945faf7bf44dce82518181cb86e7651f17be1d143c6db4ecb4cc7f707ccc71",
+        "src/megakernel_lab/operation_compiler/matrix_adapters/provider.py": "8f91c1d58fb736878709c61bdf3cd46e75e87aecc1ffd0524e1197c77549dc11",
+        "src/megakernel_lab/operation_compiler/matrix_schedule.py": "3d8733c0cd9594c940706719731f7712472e6756bee5adad695fbc1879f36549",
+        "src/megakernel_lab/operation_compiler/matrix_tma_split.py": "0a45e8d15d56d21968b81de90832b04eaa06d1d96118091c0cd7b6539396fb9f",
+        "src/megakernel_lab/operation_compiler/norm_fusion.py": "4892daf591f4f55d8edb52ca3d6eb769afb76e9adc46652f5f6f6e494dfc9333",
+        "src/megakernel_lab/operation_compiler/permutation_gradients.py": "0e0f790787361ea25e2a48d43479b14194959727ff31ee2a74bf02270dea79f5",
+        "src/megakernel_lab/operation_compiler/prologue_batch.py": "c11d6fa92568cead724063929ba7778468c78c1ae2398abba0f5403f1e8031b4",
+        "src/megakernel_lab/operation_compiler/ragged_experts.py": "b3c2d84760b0e75f373ccfefd3306642c1be0aa7ab6d2eb70445fdd0d744ce26",
+        "src/megakernel_lab/operation_compiler/ragged_experts_lower.py": "73f9bfc94aec698293150b5dc85c0ed4870d5719fa004a9164a23c997bb617c7",
+        "src/megakernel_lab/operation_compiler/row_chain.py": "047878d8e8731bfeac95d9bc35ce73a43e3a57627b972a175df5fecd49b1cc33",
+        "src/megakernel_lab/operation_compiler/runtime.py": "bb6c681723977abe3c598c2004927cf5fa2f7bf38fa08371fb2dd97fa80c9537",
+        "src/megakernel_lab/operation_compiler/square_sum_association.py": "bc4f4063ef8085508a31cb16484721e8cb6085fae53f4bbc26933fc7dc0e0ee1",
+        "src/megakernel_lab/operation_compiler/state_placement.py": "476bd690a70164a0f6d5b8ed4436e65dbb0fd69a02279d4fa97c80f8728a5959",
+        "src/megakernel_lab/operation_compiler/step17_intervals.py": "31b4820216ffd6d725b3f5f3231b5c08642746676e136977599e9be6c4a5cfae",
+        "src/megakernel_lab/operation_compiler/transformer_lower.py": "eae0e1bd21599365ea9aba3b212a882fb93421c2e44a5ac92284b4fa420571b7",
+        "src/megakernel_lab/operation_compiler/update_schedule.py": "8a43d8897d4c2ce628872ad8ff4a45111d8e7f4e611289b65082ed6e1216903a",
+        "src/megakernel_lab/tinymoe/build.py": "2e3fceb8bde18664c031d50baa4b05e4daa2187efd0d6844fb8b2124b7f30586",
+        "src/megakernel_lab/tinymoe/learning/build.py": "f54146965ddac8bb94a49bdb9fc9d848fede9c5dec5d3ab868c12dda93ed75af",
+        "src/megakernel_lab/tinymoe/model.py": "7872bac47ab7e610d6eba996f5dd3c37695f26352cdf4b65a9642db7867ff13d",
+        "src/megakernel_lab/tinymoe/native.py": "7750f8cee5f6757381011b8ddd40aa81c086721fe61919245d8cb2f85d61beb0",
+        "src/megakernel_lab/tinymoe/variant.py": "242734c96b90c3f8f1fec1e4cf2f03caea761d51b3cfdbb5b884ac2b095218a7",
+        "tests/operations/test_accumulation_rules.py": "065121226b0e1fe8f3e235d175f455a64c7c04f6bf598213b63c8901658c4638",
+        "tests/operations/test_attention_rules.py": "023ae68741ff69f991546071ddec1a2c10707b359e97e0c4b67e485f1a53912f",
+        "tests/operations/test_layout_canonical.py": "3567010a0d2d1fc16b231384eaa360c01e6090de6a8aa947f6a6b6dd05764aaf",
+        "tests/operations/test_matrix_tma_split.py": "d65445dd6634597c0f17b4d72f77bf99098c5a6d4b6c86f6da5c79673eae1677",
+        "tests/operations/test_norm_fusion.py": "08905606b0290fc9612c3c8d48f0604975f9360d2a3dec4fc08fa3ac4addd13e",
+        "tests/operations/test_permutation_gradients.py": "7695731bb548737d3337c005b47cffa9f9799594f0c06bedce492422aaa150c2",
+        "tests/operations/test_prologue_batch.py": "88c2b24aeae5a1cf7c2eecff314286a1ae4830eb5fc60bea301f1756e3859629",
+        "tests/operations/test_ragged_experts.py": "ae1672ccce782665b0b58056214db470b91414fd8887e91610939f3378f33cc3",
+        "tests/operations/test_unchanged_state_writes.py": "9b82f56e8a1eaafdaaaf43324e5b1cd963287053ef32e19f817ece973872495f",
+        "tests/test_tinymoe_variant.py": "41791bc6a6c40eaada879b5b8d65b3542bc4a73d4a51e1a2082b6a1091c7062d"
+      },
+      "lane": "LATCH-TINYMOE-COMBINED / LATCH-SELECTIVE-10 C16 compiler base",
+      "note": "common compiler base of every V0-NEXT donor (EGRAD, DISPATCH-GRAD, PROLOGUE, XMAT, FUSE, ATTN, MATRIX, SELECTIVE-CADENCE port, SELECTIVE-10 C16 rules, native pointer guard, FINER variants)",
+      "paths": [
+        "src",
+        "tests"
+      ],
+      "source_commits": [
+        "a983c26f70beb82818206113b63c236c1127f946",
+        "dc4bbdb9220fda534658793c88efa984dbf9a18c",
+        "fab34461084d802c9ff3d90594c682595fad22a6",
+        "50806292e949fbdf82511efae80e3ad0cd9b8513",
+        "7230a213d2176bd57553b34191b709f5d5964590",
+        "7da98b88e84c1243297fcb353eed02d41f28b24b",
+        "5c0ea1ce3ccf14e5fdb4b434c2cdaedae60f6b74",
+        "7f289a582a8b0b61b0b1712da5f3813108ff6474",
+        "4e30d19189e87d72867db519ca3d1071a9ee0543",
+        "2378a062e3989ea5c04f80cb66236553f6a59af4",
+        "38f23c31796cd76bc77c5ef97a5c32fe8cc6445e",
+        "fe7f64452f3b12313aed02a40719fb1a5acb9a4b",
+        "f395d5a2bf3d8e2b5ba6c8f20ca40e4f9495270c",
+        "e372d69bcfc8a97be7eeae811f5eff654522afef",
+        "a199821bd6ecdf7d605028e6f9bd95186f02c8eb",
+        "40502325db52a3b39c8fc47aacbdefe5998e0fa0",
+        "1752017cd9837dac0016a08bae227618fc79aec8",
+        "398626cfb1240898885f3b096f9e510d97a8e7da",
+        "d9d49636a9cccfc9fe2e10e7250bd1d3a04bd0cf",
+        "63128be5597ac62bda668bb19a27ab19ebb79db4",
+        "bedea2356ee5af1f99f96c23da496d20a20f4145",
+        "8ddc62878a7faafae73ebbea32efeaae7969cfc7",
+        "dac90a66bd3320a1dd404c760b6136902f3d380c",
+        "29c925f3b6797b45cf321b172e6444d41bf75b3c",
+        "e8e2ad2dbbebc04a663f7900fe36d40c02b7b6ad",
+        "7e5f887e1c8768f84ea6fc43e37b2c3c5d41e72e",
+        "27ab447bd15ea40fc1ee0b1b2ba6c2f98df941e6",
+        "b691136e5af7ba9993a04ee98cde238ba1ec571a",
+        "d932adec386c634c39e1a15c7ad673bc631b0129",
+        "565d3f687c8c84cf0a79d3541e3943e405e0854e",
+        "892290bc9c3b2f0ecfb7b570410faccc4b676194",
+        "ff4a04069c0834eecf5176080a131b65e09006db",
+        "9d0c2b7f00cd92e4bcc719074f21da4c66a139be",
+        "80105c7f9a88a089ffbb9fb6c1a0aebfedcef8ee",
+        "33de5b2d6dfd401bb9264ec222e3c363726113f6",
+        "6c88bb761b687280bd4ba022b6f8f110203f5f7f",
+        "543c61601d5a66fead054676c4e1e77f2a229e10",
+        "8c06408ae8fec222318cf745af44b106a1350019",
+        "73eefd67f84da3b3828e336d6d164676d3c5ef71",
+        "b7d770acaec55cf3116c335ce1b0be945cf6eef9",
+        "bd3ed59e2429db664369757ec0112cf1be1e05ff",
+        "30b353cd64b9d3c5a3974d405cb55b70892b89a4",
+        "5b8a7393e4a11d60dd52c7c9eadbaaefb873effd",
+        "03a53a1bc2ba427a37bfd23e669e3f5a564baed8",
+        "63977913a8b83bc9d7833f6a06c5ec37c156c8da",
+        "e8cce78fcdcca7da2873fa9ec740035b001c0008",
+        "d31e11853c511aa644d237d7c34051411ed42794",
+        "dd11de5c1425a0a307e7e25e62cf02ba84310071",
+        "081d10879f921eb818917c743a4a68862a727168",
+        "0d1c8316be5501bc98fc424a8b1050bdc633fcee",
+        "4615bc1054435b787c8ffe72e1a66d124655f342",
+        "b869b9f99e1b844b76a7e51c6e9a13ea91a1a8f1",
+        "1a0ec3d57f88318748bbcd55efe0543750b71155",
+        "d5267cfdc3d629132c5f069fdd79f9a434f33d11",
+        "868750e02b4273f791d82d4c4b53503e2d85a3c9",
+        "ac62ed05b2fb8e3fc6de32e194d6c7d0877fd242",
+        "77c3f0ae4549e6a8dc2c9228752e81ec0acc9482",
+        "73f07e292907a48ac219721d8abf7d7e1ebe5d91",
+        "8390dfdcc8f0137f70dce0fedef2af599de9e867",
+        "c026eff7ea2c2d3e6fb10f4232e74ee41f565c51",
+        "a82362d57fa416ceb0f7a798cd30eeee0820f752",
+        "dd02b0a2d8e7cc1b06d26a16e7b2270b01fe8bae",
+        "903276db69945b12705e786a6f6740a2f07b1579",
+        "931f1e09daf4e2f18ba9cc6c3c8ad3b18b384dc8",
+        "9edcb333b9dc28b67f469fbf79b9d402b3f2e914",
+        "e9ceba4c189ccbbc17e47436c46bccd1e2580687",
+        "ee27fd9faecbb0bb1aee182b78f3dd45579bba80",
+        "11dd433b54ee47253a00e4c1d570a5087c303314",
+        "2260bcf3b4d7b4be865f6dd8183cf3d5dacd5ba6",
+        "a2f7716e5c837bfb62aefd7ce6f309f6bcdef9ef",
+        "9ad7e2a65bf57492538f8f0fea0fe546ec221de7",
+        "c400685217ce7e02850859f22139ac3b29ccdccc",
+        "365131e8797c0e61413dd871a44a9e1396643c31",
+        "94454429f73aded994c3dca29dc3e7dfa52c4189",
+        "b2a865d49cb0c0341ff0b7ff6871ba3bc2f3ca09",
+        "ddd1ae136d06edcbb115335bc4d95f872022e75f",
+        "4565cb82a9efb0e6978b435d7ec4a74d1ea9c804",
+        "4bb28985bf5d406ddc42a2e71c7539aee28b7d6a",
+        "a0b7940d0aca041b5b6cf0e687b38f414270040a",
+        "677e2e930ab3532d0d2c69b84e31a56e052dc063",
+        "ddf0fa01add4ce8d11cc673c2a0c1080bf133a33",
+        "a06e508656e6d8f934abc2129a40a10b96bcaa93",
+        "102d3e94043f1f6687268fdebf13eb367fdf7bb6",
+        "21e6225a5536ca748ffc7a083158c724328ed720",
+        "2a79002b53b977351c85abfce6ad32750a426ef8",
+        "5a4203b848613eb14d47c540b0ea52f6d54733bf",
+        "54657d789dc5f2ad1dba877d06df41523ac5ccb2",
+        "768e2f040a3e3278936f5b5a1af11ec75a5d7972",
+        "1e75eb97d57a9da51a49e9df4a84d60690d52790",
+        "25fa6562029a7ac5abafa386d54c5e956aa5e4b6",
+        "c854ccc000577c90a6c042ef5bf2d62e77226450",
+        "fbf5864697791ea8bee1fdf2d03a39830eb9f1a5",
+        "36943c6c3dcacca74721c3ffd093115ec4dabbb2",
+        "a4f5a95ccd9c2c9bb93a11ff0d4758ad9b48446f",
+        "d8b239681b77ba387529b537455d39df796b862c",
+        "ebb37cfadcbc2c44752222af7128f11de4cbfe55",
+        "4d9c4da5e584c27a7ae4ebdc8a21547d3255c3a9",
+        "b7e4a64b4aca0775dcb5deb6640a47095e726f7d",
+        "136b9cc965e3cc1156828acb727afdd86165e638",
+        "1410c995b4fbfafa23005cda34093ab7ea374ce5",
+        "60a720ce6e672c5f5009cb6890a29de81d534653",
+        "ca5d36f959a0bd11a0b7b2c4a20f5b12443fb148",
+        "c00ff72d4e6c33c0b6e4bc74832e22dbcb0256de",
+        "2d9fbd5c0ca15646093396a987d022af31784f46",
+        "69db35dcb4ca773a4fdcb43e53505346d385b19f",
+        "c862b5f87f538cf0dbcade84dcf222cdf3f60823",
+        "8e7de3b5bfb76d8820ceb3457564a43cea88ab24",
+        "1fb142ffb9faa845460e4af5cdc99dc6aed8869f",
+        "5f957ab2b3eb53351ce0abb48e86503a3f33777a",
+        "2d0e64da4e757d91eca5893bfc15fcd82aae9442",
+        "21ae5d06f0b0166b7c1174d19ad07d4ba400759b",
+        "604e0e6d2b2e4bb370f89b4c199cb3723e4a997f",
+        "843e65816186b55d1f8acfcea20034fb4979b7ed",
+        "f421fdd93ce6e9b31d5c1711dc1e42f195a81cd0",
+        "cb0ee62d9c3f5285e10cb7a9d4f22ca97754b72c",
+        "08d08ab380977a8560f6278bd7e855b1ff53abb5",
+        "310026316c447d37f8732a27006ec339dc72f986",
+        "fbb3453e23050e5b9e88d605554d9d4a39a0a52e",
+        "2ae1e0bcec6fe999fd2899f637d9fdcf3e75b22f",
+        "98d78ccd9e6eee20b7e44e1c42226e2c7e48bcf7",
+        "378fd726c257aee2d06331b91e8c6e9abf4bba87",
+        "3900154ca5900c69dbadb4b4b4b294275145a83b",
+        "c60bcd2ab423db9b929b165e84517f9541e44c27",
+        "a2f75d43776d532bdc1087611d1ef7056691327b",
+        "d386e91f0fb549d962aaaf320bf1472d3f8579b8",
+        "f92c54613ff9fedbc29974b98077c0a66e40de60",
+        "5c03dccc170d9765801a4471b54b243240e0f7d9",
+        "f10ece3aa2a2ca60f6628cb228218d07820c75fa",
+        "90e42e2e08b9b527758083c8f2c797584f3be8bb",
+        "0df7c15108bae5703a27d53265ca3fc8cdfdd859",
+        "3811f3c21bfa1a48eaf721c1ff9de76716f93219",
+        "5b8eba49bf1c451c54be656742415f5031d22ed3"
+      ]
+    },
+    {
+      "base": "a983c26f70beb82818206113b63c236c1127f946",
+      "branch": "codex/latch-b32-transfer",
+      "commit": "b31c553371c319a530950eca1de966faca1e890c",
+      "files_at_donor_commit": {
+        "src/megakernel_lab/operation_compiler/accumulation_rules.py": "b9e650cd2b9d43e3fd48a77211f6bc47a0afacf15bc04f8f4a92712a689509a8",
+        "src/megakernel_lab/tinymoe/build.py": "b412cc38c019850ddae63721e07d2ab623842d36e1e93abb5079100a7c46c85f",
+        "tests/operations/test_update_rules.py": "1c6286f69f821fb11c9b7920a0f484371eea3a8ac901c9739c7f64ba633dd2a5"
+      },
+      "lane": "LATCH-B32-TRANSFER",
+      "note": "accumulation_rules preset 'update'; tinymoe.build.prepare(rules='auto')",
+      "paths": [
+        "src",
+        "tests"
+      ],
+      "source_commits": [
+        "19ac61e0bfd68b3e7180440d356de97566e9067f"
+      ]
+    },
+    {
+      "base": "a983c26f70beb82818206113b63c236c1127f946",
+      "branch": "codex/latch-selective-10",
+      "commit": "6fcad414ad863065146ca4bbc271c8a883509146",
+      "files_at_donor_commit": {
+        "src/megakernel_lab/operation_compiler/accumulation_rules.py": "aadf4f0cb03c13b74466ea6b718a3450dc8ff749130cd5e8532f439968db7da1",
+        "src/megakernel_lab/operation_compiler/api.py": "913a0b54e1803677d04d3750942d8b7128eb6b744d26eef9e4e93105dd2d35e1",
+        "src/megakernel_lab/operation_compiler/binding_guard.py": "3aa859a7fa5b095d20e25082d1fb23a7984c4e8c68a0ca2c1050d8089770433a",
+        "src/megakernel_lab/operation_compiler/derived_casts.py": "eae74e6f23fef9530b3a1788825ca7d9fd4d770765673d43d615ad42b328e366",
+        "src/megakernel_lab/operation_compiler/runtime.py": "d73bbac35d366062fc0a60a506f21c111e866ca0c2117593ad80981e774db021",
+        "src/megakernel_lab/operation_compiler/state_placement.py": "ee51e43f47d5320923e5788ebf5b9b73ea85e1e31810e3b0b3d94d8b6bd8e06f",
+        "tests/operations/test_accumulation_rules.py": "d2bdb165020a4f868d7aa5365839b12f8d0fc41fd7a2375c11d117590b7b3d26"
+      },
+      "lane": "LATCH-SELECTIVE-10",
+      "note": "C18 dcast derived casts; native/batched launch validation",
+      "paths": [
+        "src",
+        "tests"
+      ],
+      "source_commits": [
+        "1f484e07482d754ad0d352319a3d6946af869a22",
+        "22d1b9f4d05691c75b1a31ab529f891b1e72dd42",
+        "640e624c568bce4f439332a99ee60387c8c3e498",
+        "f611ec0983c3c3d248e19010058d4f24a8661bf7",
+        "066953f24ddbf038587959e8e8a5bc1af00873a2",
+        "7354687b9d4feb26d5b165bb0327cce3608e1a8a"
+      ]
+    },
+    {
+      "base": "a983c26f70beb82818206113b63c236c1127f946",
+      "branch": "codex/latch-b1-fast",
+      "commit": "145035509b238e9cc94a2ae6ebeb9f8f25fb037d",
+      "files_at_donor_commit": {
+        "src/megakernel_lab/operation_compiler/accumulation_rules.py": "527cf47ea680ef846342c60e858df2bf41d48ae1777520d677a0cadfe5811e02",
+        "src/megakernel_lab/operation_compiler/group_rules.py": "bbbd7f6ed93f853f68ef799ed25936f9b413404a82b9e930f07b4878633f6fd1",
+        "src/megakernel_lab/operation_compiler/lower.py": "f19d63e51e767024d0eeb3c642334a9159227a4c778c833055c159e581047ab1",
+        "src/megakernel_lab/operation_compiler/matrix_rules_p7b.py": "42f256c81c804abe29ec36290d8da760a0d587cfd15e3280ecb6dae096b574a8",
+        "src/megakernel_lab/operation_compiler/matrix_schedule.py": "a23674f8f8cffb13075a5f419c3bf109fe27476a37d09c3e31c1f223543a63a3",
+        "src/megakernel_lab/operation_compiler/matrix_tma_split.py": "fcbd54dda63d07d48a6dbe9eb3484183f10b1fee097e1046162b040654f1225a",
+        "src/megakernel_lab/operation_compiler/ragged_experts_lower.py": "03008042b63d4d7c9ac64ad5fd88fa8fe926281202a5a015d344bd3eb725eebc",
+        "src/megakernel_lab/operation_compiler/square_sum_association.py": "170ee6915ea89a72bc9b44ba68948c880b2d102c5ee5a927a5cb56ac123bc03a"
+      },
+      "lane": "LATCH-B1-FAST",
+      "note": "segmented_products '+narrow'; matrix_schedule 'exact'/'exact_split'; opt-in fsdeepx/vec8/vec4m (not selected)",
+      "paths": [
+        "src",
+        "tests"
+      ],
+      "source_commits": [
+        "fc1dc995467679e2b35d75e38cebe513da0820cc",
+        "c735c4df9d4166a394eba161d6e76d20e2671d2f",
+        "b879d2ffce886774cf624d59f2e6c928a1d5739a",
+        "484dd1d51eb2ec291014521a6ec0632a6447c2a9",
+        "120810fb7c72bee53948ff8b6b6a8cee97016e39",
+        "3d0f896dbca2218602d37d6a1b4c3647585f6604"
+      ]
+    },
+    {
+      "base": "b31c553371c319a530950eca1de966faca1e890c",
+      "branch": "codex/smelt-latch",
+      "commit": "2c9ddb2e3d51964fa849e05ea0dca0bb8af3d77d",
+      "files_at_donor_commit": {
+        "src/megakernel_lab/operation_compiler/norm_fusion.py": "180157ab17b63b0147056062a313eea7a2dd58a4bc5ae2a8674af9a321c290b2"
+      },
+      "lane": "SMELT-LATCH",
+      "note": "norm_fusion 'resid' scalar residual scale (rows preset); opt-in 'pcse'; example ported separately",
+      "paths": [
+        "src",
+        "tests"
+      ],
+      "source_commits": [
+        "80e964ac93304e3f5f8a8a8a9d8b018be739906b",
+        "ea62a98942953e65d8da4249ab391decb06cabf2"
+      ]
+    },
+    {
+      "base": "b31c553371c319a530950eca1de966faca1e890c",
+      "branch": "codex/latch-gradlev",
+      "commit": "df184a5f2579552d6b7afdc4f26d32bc0f7c4e47",
+      "files_at_donor_commit": {
+        "src/megakernel_lab/operation_compiler/lower.py": "97b40ce61d2282d6c38a9160a0e2aecfae07acfad8a946164c71304e2c772d67",
+        "src/megakernel_lab/operation_compiler/vres_codegen.py": "b7a237954f5da731f0e500f528e8b7d25c9473698d2e095ec9573cc50b4c3286",
+        "src/megakernel_lab/operation_compiler/vres_loop.py": "3fc4dda58a72c27823e08b19bdbaac803783a6fba906d70c05e5974408c5a0b0",
+        "tests/gradlev/check_reference.py": "6eb1cf5e388d95b622f9028875ef473a003c1e2a0bf67e35880e98911c1f1762",
+        "tests/gradlev/test_vres.py": "c9660f70be2e2337d827b28cdc79678645d491e5f3efb6ae992f174724262b5f"
+      },
+      "lane": "GRADLEV-LATCH",
+      "note": "loop_schedule 'vector_resident' (vres_loop.py, vres_codegen.py)",
+      "paths": [
+        "src",
+        "tests"
+      ],
+      "source_commits": [
+        "6a17724bbcd6c784d0aab283eaaccddcc86c3149",
+        "81373f2e1d6fb32947f4f14d9371999127bc58ad",
+        "bdb70c179836440a7d685f4ec453f40e76503af9",
+        "9fc895199f75923a75d9038f19aa8e3df81ebeb5",
+        "690a57588cbc89c20cb5dee93c68cfb796ac9d7b",
+        "1da38d35efa07fd144b277f932df78cb4c62f975",
+        "95dacb425e811b571ad514b83c80bfbabd421144",
+        "17c44b764d269dc75172c6ab25eabd3bd5c25f72",
+        "f7a4b7581e9af396bf08d189a9f7b138ec605c13",
+        "08ecd2b3cc29b485228926c83a0f2a34322f7143",
+        "adc47cce2b11e01fb46790aec85fe8fddf08f7f9",
+        "c31c27cc6ad491f786b2c3157d8bbd52da259472",
+        "01d13e3094be44c510ce7126c2493edf8233e1b4",
+        "4b609ada05e4b12c897f9da48c534b22e072c039",
+        "c8db7ba81e2a3ae3da4409e53576dd445c5a6326"
+      ]
+    },
+    {
+      "base": "b31c553371c319a530950eca1de966faca1e890c",
+      "branch": "codex/tinymoe-finer-transfer",
+      "commit": "e1fd2a098e30cb124c76de6c162a7dc7ce65cbd6",
+      "files_at_donor_commit": {
+        "src/megakernel_lab/operation_compiler/lower.py": "30c40c629b5a1d9bfdd3cdbb7df804f532b27454d75b628ce31157551b76a5b6",
+        "src/megakernel_lab/operation_compiler/row_chain.py": "c30fbce645df379aed7289aa1faa37f1c5d9c880ef9cdc8b2df7c27dfe0d73f5",
+        "tests/operations/test_accumulation_rules.py": "7a01577c1b899dff8dff42c976c12389a33b282a183f5ba010f535caa9c1b182"
+      },
+      "lane": "TINYMOE-FINER-TRANSFER (rowchain race fix; byte-identical to the frozen LATCH-ROWCHAIN-REPAIR repair 90faec278)",
+      "note": "row_chain.arena_safe_runs; byte-identical to the LATCH-ROWCHAIN-REPAIR port b220aa480",
+      "paths": [
+        "src",
+        "tests"
+      ],
+      "source_commits": [
+        "e1fd2a098e30cb124c76de6c162a7dc7ce65cbd6"
+      ]
+    },
+    {
+      "base": "e1fd2a098e30cb124c76de6c162a7dc7ce65cbd6",
+      "branch": "codex/latch-rowchain-repair",
+      "commit": "90faec278c4c321ef840557a7f0cf720b7ca5e7c",
+      "files_at_donor_commit": {
+        "tests/operations/test_accumulation_rules.py": "362e84c4cf74ede66b829507a9e3dab16786b7153d874be3be21f437dd5858e8"
+      },
+      "lane": "LATCH-ROWCHAIN-REPAIR (end-to-end rowchain regression test)",
+      "note": "test_rowchain_router_never_reuses_live_arena_storage; the lane source fix equals e1fd2a098",
+      "paths": [
+        "tests/operations/test_accumulation_rules.py"
+      ],
+      "source_commits": [
+        "832ab9516f89897cce70fa8d30a5c71fc8260069",
+        "081f33277dcb4e1a92cbdc6721fb81445319f0fb",
+        "011f495d3641e04577a09ad22f5fca88d20cf62e",
+        "b220aa4805d928eb4800983f9ef27a65ef192ec5"
+      ]
+    },
+    {
+      "base": "df184a5f2579552d6b7afdc4f26d32bc0f7c4e47",
+      "branch": "codex/gradlev-block-60",
+      "commit": "c0aba4afd1fc21d07df965ed97f70dad4f7c73bc",
+      "files_at_donor_commit": {
+        "src/megakernel_lab/operation_compiler/vres_codegen.py": "32c4c2309ddebc34ca412dd24d320722012f1fbf8a02f9b754b6e6c9dc91f0c7",
+        "src/megakernel_lab/operation_compiler/vres_loop.py": "da289f042c15f540d7b18e5a7a13b1a12895ae421ce4de4c2c5bab524405fe3a",
+        "tests/gradlev/test_vres.py": "2093471924802de4f2f3ea44f29d58af91c235aedd919e7ab42ca880de958865"
+      },
+      "lane": "GRADLEV-BLOCK-60",
+      "note": "vector_resident L2 residency/streaming policy, pipelined head and loop-invariant row loops, loop-input prefetch, thread-aligned fusion with register scalars, head-fusion fallback; value-preserving defaults",
+      "paths": [
+        "src",
+        "tests"
+      ],
+      "source_commits": [
+        "492bf9ec18140805df48300039838930f8307783",
+        "6c0318a9b1ca0ad3e0b8a89020433ae86f2bc7ce",
+        "b1b9b49e4f239e1987cda146e9c22b33bdc41c9f",
+        "8d547689c2318e84e1d4bebf31ac57f26b15353b",
+        "4727fded757198b2c016b35bb32a8235798c0bc6",
+        "270255a729f292a734e6b9070f33823c9ab0b7fc",
+        "ddab29f8893e28959c088ae547371ae75d68c5d5",
+        "a7e56b0d5144d4ba988b368526594e7b62d928fd",
+        "047253afcce031d03b63b319d10ce1e8a52cb1f2",
+        "0629c7cf607c4e2372383dd8af3004d4d4513218",
+        "5c1b1f4e3728cb94dda801f94a3f2f595ee5d833",
+        "e9ff294b992d9df222bf3a5b8efacc637032b39f",
+        "b606de85c223b70b3c4f9a6225a7f18af1a2af9e",
+        "10891c695eb77af0e46740e5537b6133deb9a089",
+        "dd7cf33ebc73a4db7b3b0b4c6d23c5664df06f44",
+        "e4b08557dc4ee331fab002a84e753d8b8b81190d",
+        "06be80b23c21f33d6b789be1d16cf8437421b56f",
+        "fbe1fbc646268e6f8f09a3671c1a875a37c258e7",
+        "f325e138e7d35c831136c706af93b5637b76d9c2",
+        "cd84a89c710e4976df714a77006b3d35cf5ce48d",
+        "a7e7bd7b8c2002377c29ce97bc85df9c1fb05df2"
+      ]
+    },
+    {
+      "base": "b31c553371c319a530950eca1de966faca1e890c",
+      "branch": "codex/latch-e2ttt-outer",
+      "commit": "172931a35b71411c8af44b17281ea89bc846ac8d",
+      "files_at_donor_commit": {
+        "src/megakernel_lab/operation_compiler/channels_last.py": "547cd460f04f78899e86ae97b3ac1699e63f935b1e5fe60d23df1b2d69aaa25c",
+        "src/megakernel_lab/operation_compiler/fusion_p6d.py": "93e2800c7e7270611e872f44edcf134de32f7d552d80e51d77bfb79c09352e06",
+        "src/megakernel_lab/operation_compiler/fusion_p6e.py": "89982f1c7b19d289b018bbdb36f23ce39a5be9c010d4dd33f5fc6df6b2f7f382",
+        "src/megakernel_lab/operation_compiler/fusion_p7a.py": "1060554986f1409738e7067af566fc96db39be2dbabd28814769488d654ddcbd",
+        "src/megakernel_lab/operation_compiler/fusion_p7b.py": "13070b243103716e690d3539493ef12d3f254818d9889c0ebf19c1c30851b485",
+        "src/megakernel_lab/operation_compiler/fusion_reference.py": "566213f4ba92df9cc74aa1aee25107977c4979ccca849b72d168a3042ccaef75",
+        "src/megakernel_lab/operation_compiler/group_rules.py": "88e178c3997750cb7769c306ac077cbb025ad0a6caa8a02e37fada6bff68e8fb",
+        "src/megakernel_lab/operation_compiler/layout_canonical.py": "13f98b0875d4be5512fcbeb37ae9281208748c1c21ab71da1dfaedd2daff40ac",
+        "src/megakernel_lab/operation_compiler/lower.py": "cee567c4a28e90421050ff06dbfcd7e4408ad36f6cf6bacc0b46e08b1d30fe71",
+        "src/megakernel_lab/operation_compiler/norm_rules.py": "436dc12cc2ba3da7d932bd9b34ae806d4345a452e4649f882d180b3d183338f9",
+        "src/megakernel_lab/operation_compiler/norm_rules_p7a.py": "3a99b3ea05ce36d7d60c65421b52c0c59f0e3565284065f1bde054d8db70b08d",
+        "src/megakernel_lab/operation_compiler/row_fusion.py": "060d9bf8ef83e7c098a38c664606d66168e8e38c712dbb4c142a1fc14d5aa065",
+        "src/megakernel_lab/operation_compiler/sampling_panels.py": "9d7ccea0a75b47bfbb3612e65e3c7f1a2d23ff642316552ec9024e9d18cbd9d1",
+        "src/megakernel_lab/operation_compiler/step17_intervals.py": "fadd6e7020498cfa708e44e0ce0da79f20a479be62f7e71730b17212d693e9d8"
+      },
+      "lane": "LATCH-E2TTT-OUTER (exact compiler fixes; prerequisite of LATCH-BUILD-600)",
+      "note": "incremental view-chain collapse, exact incremental elementwise merge, row_fusion bookkeeping, step17 ectaq admission, log1p; vendored upstream E2-TTT and the lane tree not imported",
+      "paths": [
+        "src",
+        "tests"
+      ],
+      "source_commits": [
+        "5e13ee279c4881ff57144b5391ac8c4d8de235b1",
+        "8c244bdc76f86db8974499511b2a5087bc80fd22",
+        "6f4d67b94081bdd497a96397885aadffbc9ca68d",
+        "25c4ba4a88e5e92cc81e96da197ae2078693864b",
+        "b94bf575c0e32abfd62ea4c719cbd89ba7a1a909"
+      ]
+    },
+    {
+      "base": "290454e1f318efa525e74134e075c60dbf4709db",
+      "branch": "codex/latch-build-600",
+      "commit": "47061a59444b51eaf396cc04f030377b03443ef0",
+      "files_at_donor_commit": {
+        "src/megakernel_lab/operation_compiler/arena_assign.py": "4da0793c807c4905ead9c5fc73e68735dc29baa61779e06a008e4ea5ef99d9eb",
+        "src/megakernel_lab/operation_compiler/elementwise_codegen.py": "e796d0302b9c015ef9bdfba7a1b72ab5c8ad7702fdac86704c3bce4945eb92dc",
+        "src/megakernel_lab/operation_compiler/fusion_p6d.py": "df63460a7d1be5ae1a219a229d43f7a9229cde7e2dea4f8d1ce967d8445b833d",
+        "src/megakernel_lab/operation_compiler/fusion_p6e.py": "05b55aadeb53dc7c6790537f7953ac0ee3bc50ea80bd33bfd3dba27348d495ba",
+        "src/megakernel_lab/operation_compiler/fusion_p7a.py": "0c105b31002126f620147a67580e74f4ce349d05f6101979ed50102e020ff0e7",
+        "src/megakernel_lab/operation_compiler/fusion_p7b.py": "869ea1287f6d0036645132d3240f714ccde8616251b721c2f37b69553ecb9861",
+        "src/megakernel_lab/operation_compiler/group_rules.py": "5f4c7a1a0adf069447cc15799bebf35e985d246017ab98d90a09a5ca5d6a16ea",
+        "src/megakernel_lab/operation_compiler/lower.py": "454141e686c46ace81d0ac8f70d864e04b378a716a7568752fba1498a8beab93",
+        "src/megakernel_lab/operation_compiler/row_fusion.py": "71b3725c70ebbdd7fc432d311f9eb57e1c2b27eae03872e8b9a1fb6c3529d3be",
+        "src/megakernel_lab/operation_compiler/wgmma_guard.py": "b7a55af4ad8d8ba011a14a876fea43e1191c8f20125873d58898747d14213ab5",
+        "src/megakernel_lab/operation_compiler/widen_cast.py": "7bad317899c9374cacdd881c5a5b94cadf3e5360cd7bc475247cd21ab132da35",
+        "tests/operations/test_build_time_equivalence.py": "d3c9e10d8f1be5d3a995a2711cbc56f8fc381e02825189a2432bc0a3aaa33bd3"
+      },
+      "lane": "LATCH-BUILD-600",
+      "note": "exact build-time passes (stale-set merge, arena_assign, heap row_fusion, indexed widen_cast, canonicalize scan, memoized guards); vendor/plan.py unchanged; report 02b2ee044",
+      "paths": [
+        "src",
+        "tests"
+      ],
+      "source_commits": [
+        "47061a59444b51eaf396cc04f030377b03443ef0",
+        "ce8de6be152e7820df1b8930a45ca0c5d0db3931",
+        "3a24c046278348b5a64af5e4ff9a43e53dfc1074",
+        "16594450c86c488798a0d1fc2ab204e802ce5cfe",
+        "eca502a2a5938dccc24eac0becad7a2a78a04202"
+      ]
+    }
+  ],
+  "integration_branch": "codex/latch-v0-next",
+  "not_integrated": {
+    "MoRE": "kept outside the supported package: learning discrepancy (+0.017 CE) and upstream redistribution rights unresolved",
+    "research_trees": "lane harnesses, receipts and controllers stay in their donor branches",
+    "sink_gather_casts": "TINYMOE-FINER-TRANSFER 15ab5216f: exact but measured neutral; not needed"
+  },
+  "previous_release": {
+    "combined_source": "d3d2edb04df9f98074d8e0d60c8ab5ff6682292d",
+    "runtime_source": "904596e7845b51323ca111e0e5e43c9616121054"
+  },
+  "schema": "latch-v0-next-sources-v1"
+}

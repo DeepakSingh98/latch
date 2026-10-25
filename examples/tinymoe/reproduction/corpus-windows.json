@@ -1,0 +1,66 @@
+{
+  "schema": "latch-tinymoe-reproduction-window-identities-v1",
+  "historical_manifest_sha256": "06c682ac2fd49a4fb00a954c663e28d960087a0baf4f01642b84cc47ee54ecb9",
+  "source_manifest_sha256": "75e67515b176d59a594c4727b0e0e8f7131427d22bec3c56fcd4d3949dba8590",
+  "source_documents_sha256": "1dc5da0cbf63c99ea90fc254395c863bd5795f810ef9dd0fede5c921acbac874",
+  "tokenizer": {
+    "model_id": "FlameF0X/TinyMoE-200m-2x16",
+    "revision": "9b209f7439aadfac282e0bf44f2fda19771aba90",
+    "snapshot_identity_sha256": "90243e2f8b96b4a67052db7f114da14c425e2598991f652406837722ef229b66",
+    "files": {
+      "special_tokens_map.json": {
+        "bytes": 437,
+        "sha256": "4452b845ab9ca2afa863f59f1411a959e8a32bb4334e264b0e71d5d17dd4dcb9"
+      },
+      "tokenizer.json": {
+        "bytes": 3505707,
+        "sha256": "dff5e23a50d4366dc20decf85e1724f458cda56a8d6ca45144c4737df015dad2"
+      },
+      "tokenizer_config.json": {
+        "bytes": 1028,
+        "sha256": "bd2fc42cc8180b5d6e760d8c9d55a6f6e639df421a4db52e92a25fb2ec6eaeee"
+      }
+    },
+    "api": "transformers.AutoTokenizer (fast), add_special_tokens=False"
+  },
+  "token_policy": "BOS + exact original text tokens + EOS per selected source document",
+  "window_policy": "1025 tokens inside one document, stride 1024; 1024 inputs + 1024 supplied next-token targets; tails discarded",
+  "order_policy": "train: PCG64(order_seed) permutation at load; validation/test: source order",
+  "window": 1025,
+  "token_dtype": "<u2",
+  "splits": {
+    "train": {
+      "file": "train.u16",
+      "sha256": "b0c8a7170e3021201ee59819f36f282e0952e32b587e73970bb2bdb09ecb46b5",
+      "targets": 2428827648,
+      "coordinates": "train.coordinates.u64",
+      "coordinates_sha256": "33e37a3f86b15d7c2a710bd9bf131b486c954f77d59ec1bffa98c034e84ac872",
+      "documents": 526196,
+      "windows": 2371902,
+      "tokens_including_bos_eos": 2691984311,
+      "discarded_tail_tokens": 262630467
+    },
+    "validation": {
+      "file": "validation.u16",
+      "sha256": "e824f0ab3f3aa736e29d200dbafee611f2510c15cb3e422236527be2d899dbe9",
+      "targets": 5101568,
+      "coordinates": "validation.coordinates.u64",
+      "coordinates_sha256": "379d9070b7f5673e2f8f9b2cc255301f307c584ad85e1399693a6589638feec1",
+      "documents": 1123,
+      "windows": 4982,
+      "tokens_including_bos_eos": 5677976,
+      "discarded_tail_tokens": 575285
+    },
+    "test": {
+      "file": "test.u16",
+      "sha256": "6e51f56749286f5cf1c2be10d49d25c2cdb7d811c4d4dfafafcdfb780e7678b6",
+      "targets": 20405248,
+      "coordinates": "test.coordinates.u64",
+      "coordinates_sha256": "61c490b3324cdb3e1a65aa3b89b076dcc964b527da096585276f1ff435289ae2",
+      "documents": 4491,
+      "windows": 19927,
+      "tokens_including_bos_eos": 22655879,
+      "discarded_tail_tokens": 2246140
+    }
+  }
+}

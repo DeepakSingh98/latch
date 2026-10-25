@@ -1,0 +1,26 @@
+{
+  "bytes": 2135462,
+  "columns": [
+    "document_index",
+    "scanned_shard_index",
+    "row_group",
+    "row_ordinal",
+    "split_code"
+  ],
+  "index_sha256": "3a31dc9761f2a2a18c59c05d97a3d32306eecf84129f253d09bdfa642914e234",
+  "record_format": "<QIIIB",
+  "records": 531810,
+  "schema": "latch-public-corpus-index-v1",
+  "source_documents_sha256": "1dc5da0cbf63c99ea90fc254395c863bd5795f810ef9dd0fede5c921acbac874",
+  "source_manifest_sha256": "75e67515b176d59a594c4727b0e0e8f7131427d22bec3c56fcd4d3949dba8590",
+  "split_codes": {
+    "test": 2,
+    "train": 0,
+    "validation": 1
+  },
+  "split_counts": {
+    "test": 4491,
+    "train": 526196,
+    "validation": 1123
+  }
+}

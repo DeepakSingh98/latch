@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Latch — Get started</title>
+<meta name="description" content="Install Latch and compile and run a supported training example on H100.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/site.css?v=15">
+<script src="assets/config.js" defer></script>
+<script src="assets/reading.js" defer></script>
+</head>
+<body>
+<div class="draft-banner"><div class="wrap">Research preview · v0</div></div>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="./">Latch <span>research preview</span></a>
+    <nav aria-label="Main">
+      <ul>
+        <li><a href="walkthrough.html">How it works</a></li>
+        <li><a href="capabilities.html">Open problems</a></li>
+        <li><a href="methodology.html">Results</a></li>
+        <li><a href="https://github.com/DeepakSingh98/latch">Get started</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap">
+    <article class="prose">
+      <h1>Get started</h1>
+      <p class="lede">Compile a small training program, run its generated update, then change the model and compile again.</p>
+      <p><a href="https://github.com/DeepakSingh98/latch/releases/download/v0/latch-v0.tar.gz" download>Source archive with examples and docs</a> · <a href="https://github.com/DeepakSingh98/latch/releases/download/v0/megakernel_lab-0.0.0-py3-none-any.whl" download>Installable wheel</a> · <a href="https://github.com/DeepakSingh98/latch/releases/download/v0/SHA256SUMS" download>SHA-256 checksums</a></p>
+
+      <h2>Requirements</h2>
+      <p>The tested environment is Linux, Python 3.12, PyTorch 2.9.1 with CUDA 12.8 and an NVIDIA H100 80 GB. Compilation also needs the CUDA 12.8 development toolkit (<code>nvcc</code>, <code>nvlink</code>, <code>cuobjdump</code>), a host C++ compiler and Python headers. See <a href="../docs/SETUP.md">environment setup</a>.</p>
+      <h2>Install</h2>
+      <p>Download the archive and wheel into the same directory, then:</p>
+      <pre><code>tar -xzf latch-v0.tar.gz
+cd latch-v0
+python3.12 -m venv .venv
+. .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install torch==2.9.1 \
+  --index-url https://download.pytorch.org/whl/cu128
+python -m pip install '../megakernel_lab-0.0.0-py3-none-any.whl[gpu]'</code></pre>
+      <p>The archive supplies the examples and docs. The wheel supplies the compiler; generated GPU programs are built in the next step.</p>
+
+      <h2 id="run-it">Compile and run training code</h2>
+      <p>This small MLP uses synthetic data, so no model or corpus download is needed. From the unpacked archive:</p>
+      <pre><code>export LATCH_ROOT="$PWD/latch-output"
+CUDA_VISIBLE_DEVICES= python examples/quickstart.py prepare \
+  "$LATCH_ROOT/mlp" --cache-dir "$LATCH_ROOT/cache"
+python examples/quickstart.py run "$LATCH_ROOT/mlp" --steps 10</code></pre>
+      <p>The first command captures and compiles the supported training program on CPU. The second runs ten changing updates on H100. Keep the output and cache directories at the same absolute paths if building and running on different hosts.</p>
+
+      <h2 id="what-to-change">Change a model or learning setting</h2>
+      <p>Double the hidden width and change the learning rate, then compile a separate program:</p>
+      <pre><code>CUDA_VISIBLE_DEVICES= python examples/quickstart.py prepare \
+  "$LATCH_ROOT/mlp-wide" --cache-dir "$LATCH_ROOT/cache" \
+  --hidden 128 --lr 0.0005
+python examples/quickstart.py run "$LATCH_ROOT/mlp-wide" --steps 10</code></pre>
+      <p><a href="../examples/quickstart.py">The example source</a> shows the model and compiler API. Supported changes generate a new program; arbitrary PyTorch code is not supported.</p>
+
+      <h2>Try it with a coding agent</h2>
+      <pre><code>Read README.md and examples/quickstart.py. Run the MLP example,
+then double its hidden width and compare both generated programs.
+Compile on CPU, run on H100, and report any unsupported operations.</code></pre>
+
+      <h2 id="included">Included examples</h2>
+      <ul class="plain">
+        <li><a href="../examples/tinymoe/README.md">TinyMoE</a>: prepare public model/data, compile a complete update and run 32 updates.</li>
+        <li><a href="../examples/selective_update/README.md">Selective updates</a>: update shared weights and experts at different rates.</li>
+        <li><a href="../examples/smelt_looped/README.md">SMELT-style looped TinyMoE</a>: repeat layers with shared weights and accumulated gradients.</li>
+        <li><a href="../examples/gradlev/README.md">GradLev</a>: adapt GPT-2’s final MLP token by token.</li>
+        <li><a href="../examples/fast/README.md">Fast examples</a>: smaller supported model and learning families with conventional controls.</li>
+      </ul>
+      <p>Install optional dependencies from the same downloaded wheel:</p>
+      <pre><code>python -m pip install '../megakernel_lab-0.0.0-py3-none-any.whl[tinymoe]'
+python -m pip install '../megakernel_lab-0.0.0-py3-none-any.whl[gradlev]'</code></pre>
+      <p><a href="../README.md">README</a> · <a href="methodology.html">Results</a> · <a href="../THIRD_PARTY_NOTICES.md">Third-party notices</a></p>
+    </article>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>Latch · Research preview</span>
+    <a data-repo-link hidden aria-disabled="true" href="https://github.com/DeepakSingh98/latch">Repository</a>
+  </div>
+</footer>
+</body>
+</html>

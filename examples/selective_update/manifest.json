@@ -1,0 +1,171 @@
+{
+  "schema": "latch-example-manifest-v1",
+  "example": "selective_update",
+  "lane": "LATCH-SELECTIVE-10 / TINYMOE-SELECTIVE-CADENCE arm A4",
+  "donor_commit": "6fcad414ad863065146ca4bbc271c8a883509146",
+  "files": {
+    "README.md": {
+      "bytes": 17042,
+      "sha256": "722758f7bf260d703ff9bdb29cec5566ee70bdc416cd9091a2f0156e7814d050",
+      "donors": [
+        {
+          "repository": "latch",
+          "commit": "6fcad414ad863065146ca4bbc271c8a883509146",
+          "path": "research/latch_selective_10/RESULTS.md",
+          "git_blob": "a2bbc0f42586eea73f7405e0223efa9cf0165c8e",
+          "relation": "numbers quoted"
+        },
+        {
+          "repository": "latch",
+          "commit": "6fcad414ad863065146ca4bbc271c8a883509146",
+          "path": "research/latch_selective_10/INTEGRATION.md",
+          "git_blob": "40ebecfeb90649ce56e39a57041d59fa64ea1f4b",
+          "relation": "dcast contract, build options"
+        },
+        {
+          "repository": "latch",
+          "commit": "6fcad414ad863065146ca4bbc271c8a883509146",
+          "path": "research/latch_selective_cadence/RESULTS.md",
+          "git_blob": "1e90439e0bbb70983186bde5baa9ec9eda790eea",
+          "relation": "numbers quoted"
+        },
+        {
+          "repository": "latch",
+          "commit": "6fcad414ad863065146ca4bbc271c8a883509146",
+          "path": "research/latch_selective_cadence/DESIGN.md",
+          "git_blob": "f7e9895a0f93e52a21daaf749e6ff7f699003cc9",
+          "relation": "semantics"
+        }
+      ],
+      "pre_launch_documentation_sha256": "ca01e68a25919fe9fa39e5b141980989f9abed47f4676eceede6065903cfd2bd"
+    },
+    "quickstart.sh": {
+      "bytes": 3892,
+      "sha256": "52f627dab4b59cc56c89fb5e1673ec4c5d29c2bd407892a4d33846aa829c5aa8"
+    },
+    "selective_build.py": {
+      "bytes": 6548,
+      "sha256": "662888ded47610e9d2ed004e6dbe1762199159704c0d3698f3c5ca5eb626ce71",
+      "donors": [
+        {
+          "repository": "latch",
+          "commit": "6fcad414ad863065146ca4bbc271c8a883509146",
+          "path": "research/latch_selective_10/build10.py",
+          "git_blob": "2de2a63634d16363b862646e49c02d516ef74e4e",
+          "relation": "copied; imports and lane_sources record changed"
+        },
+        {
+          "repository": "latch",
+          "commit": "6fcad414ad863065146ca4bbc271c8a883509146",
+          "path": "research/latch_selective_cadence/build_cadence.py",
+          "git_blob": "acb37de2f624d3b1517c445326b93ff880a35e79",
+          "relation": "ancestor of build10.py"
+        }
+      ]
+    },
+    "selective_cadence_rule.py": {
+      "bytes": 11062,
+      "sha256": "61fb8ceae23da06d7e5a1d4d568f37a830b8a893fd321018922d182c592fa786",
+      "donors": [
+        {
+          "repository": "latch",
+          "commit": "6fcad414ad863065146ca4bbc271c8a883509146",
+          "path": "research/latch_selective_cadence/cadence_rule.py",
+          "git_blob": "5aeb45cebe6f67b9b1f88bb6e42e8a68f0150064",
+          "relation": "copied; body unchanged, provenance header added"
+        }
+      ]
+    },
+    "selective_compare_restart.py": {
+      "bytes": 2391,
+      "sha256": "66314f9256b15a60185755b0b17dbf298c9c04df4521c17f83a1bae1e7099ada",
+      "donors": [
+        {
+          "repository": "latch",
+          "commit": "6fcad414ad863065146ca4bbc271c8a883509146",
+          "path": "research/latch_selective_cadence/compare_restart.py",
+          "git_blob": "23aeba34d9c0d9a3599aea881b4a5c51b10d33ce",
+          "relation": "copied; usage line changed"
+        }
+      ]
+    },
+    "selective_conventional.py": {
+      "bytes": 15300,
+      "sha256": "e3c6695f222767edc1de1f1a84d37f3ccbd16acfa2a432291393574429e41a8b",
+      "donors": [
+        {
+          "repository": "latch",
+          "commit": "6fcad414ad863065146ca4bbc271c8a883509146",
+          "path": "research/latch_selective_cadence/conventional.py",
+          "git_blob": "74c72b8962dfb7de3cea4a255c55b7a039faf128",
+          "relation": "ConventionalCadence copied, imports changed; agree main replaced"
+        }
+      ]
+    },
+    "selective_runners.py": {
+      "bytes": 12691,
+      "sha256": "cfa1dfa04bb4438ea7177148e73a23c4c9d8384662bcb729b995674c36a56f52",
+      "donors": [
+        {
+          "repository": "latch",
+          "commit": "6fcad414ad863065146ca4bbc271c8a883509146",
+          "path": "research/latch_selective_cadence/runners.py",
+          "git_blob": "916ae8a8e98273cbf69a82d0adc6e10f64397ba9",
+          "relation": "copied; imports changed to the installed wheel / local modules"
+        }
+      ]
+    },
+    "selective_start.py": {
+      "bytes": 3101,
+      "sha256": "dec3e605384ff3d1d067017b4209808f91431b0d63f365f01b26bc0590b1985f",
+      "donors": [
+        {
+          "repository": "latch",
+          "commit": "6fcad414ad863065146ca4bbc271c8a883509146",
+          "path": "research/latch_selective_10/cbench.py",
+          "git_blob": "3b0b4ef2bb75e752c2743cccfe3134ee462b4011",
+          "relation": "new code following fresh_state"
+        }
+      ]
+    },
+    "selective_train.py": {
+      "bytes": 18656,
+      "sha256": "ce5e553e900520fc06b91c7685f163fb4918c45e57aa5feacad59e636759b741",
+      "donors": [
+        {
+          "repository": "latch",
+          "commit": "6fcad414ad863065146ca4bbc271c8a883509146",
+          "path": "research/latch_selective_cadence/branch.py",
+          "git_blob": "e28127c994cbe46165b7e271657c3e87fe7c168a",
+          "relation": "adapted; parent-checkpoint contract and A1 replay removed, start state/printing/launch counts added"
+        },
+        {
+          "repository": "latch",
+          "commit": "6fcad414ad863065146ca4bbc271c8a883509146",
+          "path": "research/latch_selective_10/cbench.py",
+          "git_blob": "3b0b4ef2bb75e752c2743cccfe3134ee462b4011",
+          "relation": "kernels() copied"
+        }
+      ]
+    }
+  },
+  "installed_modules": {
+    "megakernel_lab/tinymoe/learning/sb_rule.py": {
+      "relation": "imported from the installed wheel; byte-identical to donor research/latch_tinymoe_smallbatch/sb_rule.py",
+      "donor_git_blob": "e7b978fc35d1aa355c307014ec5d176662951a09",
+      "sha256": "aaa9dee44c6881216604a83078f76aaa56ac06bb56bf4595728e15ff40cf7b33"
+    },
+    "megakernel_lab/tinymoe/learning/protocol.py": {
+      "relation": "imported from the installed wheel; equals donor research/latch_tinymoe_smallbatch/protocol.py minus the appended schedule_spec/schedule_lr (unused here)",
+      "donor_git_blob": "d81979107d8756cdb0008ff52db1a4428a6e96a1",
+      "sha256_in_source_tree": "3e7aa4451840a7e83f0896d85734112f634eb23d65af43de3aae8e8dd2024db4",
+      "donor_sha256": "57d892a821bcc27fc43813073c9e4c26d15887fc710c0cdc5c105a58074d9bd3"
+    }
+  },
+  "external_downloads": [
+    "FlameF0X/TinyMoE-200m-2x16 @ 9b209f7439aadfac282e0bf44f2fda19771aba90 (latch-tinymoe data download)",
+    "Salesforce/wikitext wikitext-103-raw-v1 @ b08601e04326c79dfdd32d625aee71d232d685c3 (latch-tinymoe data prepare)"
+  ],
+  "checks": "syntax only (bash -n, Python AST parse); not executed",
+  "launch_documentation_note": "README updated for release 0.9.0rc2; source code and donor attribution unchanged."
+}

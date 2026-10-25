@@ -1,0 +1,31 @@
+{
+  "version": "NVIDIA (R) Nsight Compute Command Line Profiler\nCopyright (c) 2018-2025 NVIDIA Corporation\nVersion 2025.1.1.0 (build 35528883) (public-release)\n",
+  "version_sha256": "51568705db6a9090604111731ae421e10b2a73658b59489a8b8ed7b0d5a7460b",
+  "catalog_sha256": "9260be40ca78c1db8a3452ad1fb72bd5726dc581ba81104a4665c24092305e0a",
+  "source_job": "ncu-offline-inventory02",
+  "metric_rows": {
+    "dram__bytes_read.sum": "dram__bytes_read.sum                                                        Counter         byte            # of bytes read from DRAM (This counter metric represents the sum     ",
+    "dram__bytes_write.sum": "dram__bytes_write.sum                                                       Counter         byte            # of bytes written to DRAM (This counter metric represents the sum    ",
+    "dram__throughput.avg.pct_of_peak_sustained_elapsed": "dram__throughput.avg.pct_of_peak_sustained_elapsed                          Throughput      %               DRAM throughput (This throughput metric represents the percent of the ",
+    "gpu__time_duration.sum": "gpu__time_duration.sum                                                          Counter         ns              equals to gpu__time_duration_measured_user if collectable, otherwise  ",
+    "l1tex__t_sectors_pipe_lsu_mem_local_op_ld.sum": "l1tex__t_sectors_pipe_lsu_mem_local_op_ld.sum                                   Counter         sector          # of sectors requested for local loads (This counter metric           ",
+    "l1tex__t_sectors_pipe_lsu_mem_local_op_st.sum": "l1tex__t_sectors_pipe_lsu_mem_local_op_st.sum                                   Counter         sector          # of sectors requested for local stores (This counter metric          ",
+    "lts__t_sector_hit_rate.pct": "lts__t_sector_hit_rate.pct                                                      Ratio           %               proportion of L2 sector lookups that hit (This ratio metric           ",
+    "lts__throughput.avg.pct_of_peak_sustained_elapsed": "lts__throughput.avg.pct_of_peak_sustained_elapsed                               Throughput      %               LTS throughput (This throughput metric represents the percent of the  ",
+    "sm__pipe_tensor_cycles_active.avg.pct_of_peak_sustained_elapsed": "sm__pipe_tensor_cycles_active.avg.pct_of_peak_sustained_elapsed                 Counter         %               # of cycles where tensor pipe was active (This counter metric         ",
+    "sm__warps_active.avg.pct_of_peak_sustained_active": "sm__warps_active.avg.pct_of_peak_sustained_active                               Counter         %               cumulative # of warps in flight (This counter metric represents the   ",
+    "smsp__issue_active.avg.pct_of_peak_sustained_active": "smsp__issue_active.avg.pct_of_peak_sustained_active                         Counter         %               # of cycles where 1 instruction was issued (This counter metric       ",
+    "smsp__warps_active.avg.per_cycle_active": "smsp__warps_active.avg.per_cycle_active                                     Counter         warp            cumulative # of active warps (This counter metric represents the avg  ",
+    "smsp__warps_active.sum": "smsp__warps_active.sum                                                      Counter         warp            cumulative # of active warps (This counter metric represents the sum  ",
+    "smsp__warps_eligible.avg.per_cycle_active": "smsp__warps_eligible.avg.per_cycle_active                                   Counter         warp            cumulative # of warps eligible to issue an instruction (This counter  ",
+    "smsp__warps_issue_stalled_barrier.sum": "smsp__warps_issue_stalled_barrier.sum                                       Counter         warp            cumulative # of warps waiting for sibling warps at a CTA barrier      ",
+    "smsp__warps_issue_stalled_lg_throttle.sum": "smsp__warps_issue_stalled_lg_throttle.sum                                          Counter         warp            cumulative # of warps waiting for a free entry in the LSU instruction ",
+    "smsp__warps_issue_stalled_long_scoreboard.sum": "smsp__warps_issue_stalled_long_scoreboard.sum                                      Counter         warp            cumulative # of warps waiting for a scoreboard dependency on L1TEX    ",
+    "smsp__warps_issue_stalled_math_pipe_throttle.sum": "smsp__warps_issue_stalled_math_pipe_throttle.sum                                   Counter         warp            cumulative # of warps waiting for an execution pipe to be available   ",
+    "smsp__warps_issue_stalled_membar.sum": "smsp__warps_issue_stalled_membar.sum                                               Counter         warp            cumulative # of warps waiting on a memory barrier (This counter       ",
+    "smsp__warps_issue_stalled_mio_throttle.sum": "smsp__warps_issue_stalled_mio_throttle.sum                                       Counter         warp            cumulative # of warps waiting for a free entry in the MIO instruction ",
+    "smsp__warps_issue_stalled_not_selected.sum": "smsp__warps_issue_stalled_not_selected.sum                                       Counter         warp            cumulative # of warps waiting for the microscheduler to select the    ",
+    "smsp__warps_issue_stalled_short_scoreboard.sum": "smsp__warps_issue_stalled_short_scoreboard.sum                                   Counter         warp            cumulative # of warps waiting for a scoreboard dependency on MIO      ",
+    "smsp__warps_issue_stalled_wait.sum": "smsp__warps_issue_stalled_wait.sum                                               Counter         warp            cumulative # of warps waiting on a fixed latency execution dependency "
+  }
+}

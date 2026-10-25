@@ -1,0 +1,11 @@
+include .nojekyll index.html robots.txt .gitignore README.md PROVENANCE.md THIRD_PARTY_NOTICES.md LICENSE NOTICE RELEASE_MANIFEST.json SOURCE_SHA256SUMS
+graft src
+graft examples
+graft docs
+graft provenance
+graft tests
+graft integration
+graft site
+graft scripts
+global-exclude *.pyc *.so *.o *.cubin
+prune src/megakernel_lab.egg-info

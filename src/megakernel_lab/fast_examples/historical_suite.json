@@ -1,0 +1,266 @@
+{
+  "schema": "latch-comparisons-suite-v1",
+  "frozen_before_tuning": "Fixtures, sizes, seeds, gates and clocks are fixed in this file before any timing or candidate tuning. Changing any field creates a new suite version; old receipts keep their version.",
+  "frozen_compiler": {
+    "commit": "ab4703ee3cd5a0162b6d76ca509a87456b7dedba",
+    "paths": [
+      "research/latch_ops/ops"
+    ],
+    "identity_note": "research/latch_ops/ops is byte-identical between integrated production checkpoint 96742fdfe and ab4703ee3, so LATCH-P9 measurements of 96742fd apply to this compiler pin."
+  },
+  "optimizer": {
+    "kind": "sgd",
+    "lr": 0.01,
+    "momentum": 0.9,
+    "weight_decay": 0.001,
+    "note": "Same coupled-decay momentum SGD as the legacy regression capture (research/latch_ops/jobs.py cpu_case)."
+  },
+  "mlp_programs": {
+    "source": "research/latch_ops/examples/models.py (Case, parameters, fixture, make_loss); untied=True is the existing oracle form of make_loss, here compiled as a straight chain of distinct matrices",
+    "tune": {
+      "chain-64": {
+        "structure": "chain",
+        "untied": true,
+        "case": {
+          "batch": 64,
+          "inputs": 64,
+          "width": 64,
+          "depth": 3,
+          "auxiliary": 0.0,
+          "activation": "tanh",
+          "residual": 0.4,
+          "skip": false,
+          "seed": 41
+        }
+      },
+      "aux-64": {
+        "structure": "auxiliary",
+        "untied": false,
+        "case": {
+          "batch": 64,
+          "inputs": 64,
+          "width": 64,
+          "depth": 3,
+          "auxiliary": 0.25,
+          "activation": "tanh",
+          "residual": 0.4,
+          "skip": false,
+          "seed": 41
+        }
+      },
+      "shared-64": {
+        "structure": "shared",
+        "untied": false,
+        "case": {
+          "batch": 64,
+          "inputs": 64,
+          "width": 64,
+          "depth": 3,
+          "auxiliary": 0.0,
+          "activation": "tanh",
+          "residual": 0.4,
+          "skip": false,
+          "seed": 41
+        }
+      },
+      "chain-512": {
+        "structure": "chain",
+        "untied": true,
+        "case": {
+          "batch": 512,
+          "inputs": 512,
+          "width": 512,
+          "depth": 4,
+          "auxiliary": 0.0,
+          "activation": "tanh",
+          "residual": 0.4,
+          "skip": false,
+          "seed": 5101
+        }
+      },
+      "aux-512": {
+        "structure": "auxiliary",
+        "untied": false,
+        "case": {
+          "batch": 512,
+          "inputs": 512,
+          "width": 512,
+          "depth": 4,
+          "auxiliary": 0.25,
+          "activation": "tanh",
+          "residual": 0.4,
+          "skip": false,
+          "seed": 5102
+        }
+      },
+      "shared-512": {
+        "structure": "shared",
+        "untied": false,
+        "case": {
+          "batch": 512,
+          "inputs": 512,
+          "width": 512,
+          "depth": 4,
+          "auxiliary": 0.0,
+          "activation": "tanh",
+          "residual": 0.4,
+          "skip": false,
+          "seed": 5103
+        }
+      }
+    },
+    "heldout": {
+      "heldout-128": {
+        "structure": "shared+auxiliary+skip",
+        "untied": false,
+        "case": {
+          "batch": 128,
+          "inputs": 64,
+          "width": 128,
+          "depth": 4,
+          "auxiliary": 0.15,
+          "activation": "sigmoid",
+          "residual": 0.3,
+          "skip": true,
+          "seed": 93
+        },
+        "note": "existing reserved composition CASES['heldout']; native correctness previously checked, never timed"
+      },
+      "chain-aux-skip-320": {
+        "structure": "chain+auxiliary+skip",
+        "untied": true,
+        "case": {
+          "batch": 256,
+          "inputs": 192,
+          "width": 320,
+          "depth": 5,
+          "auxiliary": 0.2,
+          "activation": "sigmoid",
+          "residual": 0.35,
+          "skip": true,
+          "seed": 7101
+        }
+      },
+      "shared-aux-odd-200": {
+        "structure": "shared+auxiliary, non-64-multiple dims",
+        "untied": false,
+        "case": {
+          "batch": 300,
+          "inputs": 100,
+          "width": 200,
+          "depth": 6,
+          "auxiliary": 0.1,
+          "activation": "tanh",
+          "residual": 0.4,
+          "skip": false,
+          "seed": 7102
+        }
+      },
+      "shared-skip-1024": {
+        "structure": "shared+skip, wide",
+        "untied": false,
+        "case": {
+          "batch": 1024,
+          "inputs": 256,
+          "width": 1024,
+          "depth": 3,
+          "auxiliary": 0.0,
+          "activation": "tanh",
+          "residual": 0.4,
+          "skip": true,
+          "seed": 7103
+        }
+      }
+    }
+  },
+  "transformer_programs": {
+    "tune": {
+      "ordinary-101.7m": {
+        "family": "ordinary",
+        "description": "released ~101.7M byte transformer B4/T512/D1024/H16/L8, SGD lr .01 momentum .9 wd 1e-4",
+        "native": "native-practical (precision_policy practical, BF16 operands, FP32 master)",
+        "frozen_build": "megakernel-latch-p9-cpu-ab-01 cases/ordinary-practical",
+        "historical_timing": "megakernel-latch-p9-gpu-ab-ordinary-03 ordinary-primary-performance"
+      },
+      "recurrent-29m": {
+        "family": "recurrent",
+        "description": "shared four-block recurrent transformer B4/T512/D768/H12, runtime count 3, aux 0.25, dropout 0.1",
+        "native": "bf16_attention_operands_fast_activation capture",
+        "historical_timing": "megakernel-latch-p9-gpu-ab-recurrent-primary-01"
+      }
+    },
+    "heldout": {
+      "ordinary-medium": {
+        "family": "ordinary",
+        "description": "B4/T512/D512/H8, 9 blocks",
+        "historical_timing": "megakernel-latch-p9-gpu-ab-ordinary-transfers-01"
+      },
+      "ordinary-int3": {
+        "family": "ordinary",
+        "description": "B2/T384/D640/H10, 3 blocks",
+        "historical_timing": "megakernel-latch-p9-gpu-ab-ordinary-transfers-01"
+      },
+      "recurrent-int3": {
+        "family": "recurrent",
+        "description": "B2/T256/D448/H7, two shared blocks, count 2",
+        "historical_timing": "megakernel-latch-p9-gpu-ab-recurrent-transfers-01"
+      },
+      "recurrent-near100m": {
+        "family": "recurrent",
+        "description": "B4/T512/D1024/H16, eight shared blocks, count 3, fresh states only",
+        "historical_timing": "megakernel-latch-p9-gpu-ab-recurrent-transfers-01"
+      }
+    },
+    "heldout_note": "Untuned LATCH-P9 transfers. Their frozen-compiler timings already exist and are reused, not rerun; only a candidate comparison reruns them (paired with the frozen build)."
+  },
+  "moe_programs": {
+    "status": "deferred until /private/tmp/megakernel-fgm-byte/research/fgm_byte/HANDOFF_NUMERICS.md records a frozen checkpoint",
+    "programs": [
+      "fgm-byte-moe16 (E16/F1024)",
+      "fgm-byte-moe32 (E32/F512)"
+    ],
+    "rule": "Native timings stay diagnostic while the native parameter gate fails; failed verdicts are preserved. No MoE training campaign."
+  },
+  "mlp_numerics": {
+    "states": {
+      "fresh": 0,
+      "trained": 40
+    },
+    "reference": "independent CPU FP32 eager autograd + torch.optim.SGD at the identical saved state (validation.eager_step), computed in the CPU build task",
+    "policy": "research/latch_ops/NUMERICAL_POLICY.json categories loss/gradients/parameters/momentum, unchanged",
+    "scope": "same-state numerical agreement only; it does not imply learning quality or speed"
+  },
+  "mlp_learning": {
+    "updates": 400,
+    "pool_batches": 8,
+    "schedule": "cycle fixture(case, step=s % 8) for s in 0..399; evaluate mean FP32 eager loss over the same 8-batch pool",
+    "gates": {
+      "progress_ratio_max": 0.95,
+      "final_over_fp32_eager_max": 1.01
+    },
+    "scope": "optimization-progress check on fixed synthetic fixtures (labels are random), not generalization or data efficiency; it decides practical eligibility of reduced-precision controls"
+  },
+  "mlp_timing": {
+    "rounds": 3,
+    "samples": 5,
+    "updates_per_sample": 50,
+    "warmup_updates": 5,
+    "clock": "CUDA events around N back-to-back CUDA-graph replays of the complete changing-state update (forward, loss, backward, SGD momentum/decay, parameter/momentum writes); resident inputs; median of samples per round; median of round medians",
+    "order": "arm order rotates each round; each arm is a fresh process",
+    "arms": {
+      "native": "frozen or pinned compiler, FP32 capture, one cooperative generated kernel",
+      "eager_sgd_graph": "PyTorch loss + autograd + torch.optim.SGD(foreach) captured in one CUDA graph, FP32",
+      "fx_graph": "captured derivative FX graph + ATen/cuBLAS + functional SGD captured in one CUDA graph, FP32",
+      "compiled_fp32": "torch.compile(fullgraph, max-autotune-no-cudagraphs) loss/backward + compiled SGD step, captured in one CUDA graph, FP32",
+      "compiled_bf16": "same as compiled_fp32 under torch.autocast(bfloat16); FP32 master parameters and momentum"
+    },
+    "selection": "strongest valid control = fastest arm passing its strict numerical gate, plus separately the fastest arm passing the learning gate (practical); a failed gate makes a timing diagnostic only",
+    "precision": "TF32 disabled; float32 matmul precision highest"
+  },
+  "profile": {
+    "facility": "research/latch_comparisons/phase_profile.py",
+    "method": "existing CTA0 post-barrier %globaltimer stamps (Runtime.profile_step) plus an optional instrumented copy of the generated source that accumulates each CTA's time inside every grid barrier",
+    "validation": "instrumented binary must give bitwise-identical state to the uninstrumented build; overhead = instrumented (profile off/on) vs uninstrumented complete-update time",
+    "scope": "diagnostic attribution; not used for speed claims; suspected bottlenecks are labelled as such unless measured here"
+  }
+}

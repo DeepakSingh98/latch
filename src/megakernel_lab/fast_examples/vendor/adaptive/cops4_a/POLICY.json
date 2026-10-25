@@ -1,0 +1,40 @@
+{
+  "schema": "c-ops4-a-policy-v1",
+  "written": "2026-10-04, before any native GPU execution",
+  "workload": {
+    "model": "S106B arm M (tag s106b-final model.py), ordinary PyTorch in examples/adaptive_memory.py",
+    "recipes": {"tiny": "donor TINY, FP64/finite-difference case", "small": "ctx 256, d 32, 8 writes", "m2k": "4,787,456 params, 8 x 2048, 16 writes/seq",
+                "m8k": "4,787,456 params, 2 x 8192, 64 writes/seq (S106B M8192 declaration)", "m8k_c64": "128 writes/seq", "w2k": "d512 wide variant"},
+    "optimizer": "Muon (NS5 BF16, momentum 0.95, gain 5) + AdamW (0.9, 0.95, 1e-8), wd 0.1, clip 1.0, warmup H/16 + cosine to 10%, lr 3e-3, eta 1",
+    "native_precision": "FP32 model/derivatives (strict, no TF32); BF16 Newton-Schulz inside Muon exactly as the donor"
+  },
+  "native_gates": {
+    "reference": "FP64 eager autograd of the same formulation on the same state (H100 FP64), and the donor's unchanged Engine._update applied to the native gradients",
+    "loss_ratio": 4.0, "loss_floor": 1e-6,
+    "gradient_ratio": 4.0, "gradient_floor": 1e-5,
+    "gradient_rule": "per parameter: native rel_l2 vs FP64 <= max(ratio x FP32-eager rel_l2 vs FP64, floor)",
+    "adamw_delta": 1e-4, "muon_delta": 3e-2, "state_rel": 1e-5,
+    "optimizer_rule": "update delta (new - old) rel_l2 vs donor update on identical gradients; Muon bound reflects BF16 Newton-Schulz accumulation-order rounding; FP32 moments/momentum <= state_rel",
+    "causality": "prefix losses (runtime count k) bitwise unchanged under edits of bytes from chunk j on for k <= j-1; changed for k >= j",
+    "repeat": "same state and data: loss, gradients and new parameters bitwise identical",
+    "counts": "runtime counts 0, 1, chunks/2, chunks use the same binary and the same loss/gradient gates",
+    "fault_sensitivity": "FP64 detach_write / read_after_write / future_label mutants must differ from the correct gradients by rel_l2 > 1e-3 (>= 100x the gradient floor)",
+    "finite_differences": "FP64 central differences of the independent donor model along 6 random unit directions vs FP64 autograd of our formulation: rel <= 1e-6"
+  },
+  "controls": {
+    "conventional": "unchanged S106B Engine (vendored cops4_a/s106b): FlexAttention SWA, torch.compile, one CUDA graph per update",
+    "arms": {"bf16": "donor practical policy C2b-long (BF16 autocast)", "bf16_ma": "same, max-autotune-no-cudagraphs",
+             "fp32": "matched arithmetic, autocast off, TF32 off", "fp32_ma": "matched arithmetic, max-autotune-no-cudagraphs"},
+    "validity": "FP32 controls: update deltas within the native gradient/optimizer bounds of FP64 on the same state; BF16 arms: the donor's qualified practical policy, reported with their FP64 error"
+  },
+  "learning_gate": {
+    "protocol": "S106B stream seed 106140, H updates of the frozen recipe from the same init, held-out E-slice mean CE (nats/byte) evaluated by the donor forward in FP32 for every arm",
+    "rule": "native FP32 E-loss within max(0.03 nats/byte, 1.5 x |conv bf16 - conv fp32|) of conventional FP32; all losses finite"
+  },
+  "timing": {
+    "clock": "complete changing-state update, CUDA events around graph replay / native launch, inputs staged before the start event",
+    "rounds": "each arm in a fresh process; native and controls repeated in two rounds on one H100",
+    "memory": "torch peak allocated bytes in the arm's process (setup + timed updates) and native arena/library bytes",
+    "setup": "native: CPU capture + lowering + nvcc build receipts, plus GPU library/runtime load; conventional: compile + capture (warm caches recorded separately)"
+  }
+}

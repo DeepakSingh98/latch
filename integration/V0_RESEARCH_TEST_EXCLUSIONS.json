@@ -1,0 +1,20 @@
+{
+  "reason": "Historical research harness/controller/profile tests require non-product research modules; retained in immutable donor, excluded from public package suite. Compiler codegen proof helpers were extracted into self-contained test fixtures instead.",
+  "donor": "adde6ca52b556df8585edfb6c7ade3a241964620",
+  "paths": [
+    "tests/operations/test_indexed_source_verify.py",
+    "tests/operations/test_tinymoe_audit_contract_backfill.py",
+    "tests/operations/test_indexed_source_restore.py",
+    "tests/operations/test_installed_wheel_handoff.py",
+    "tests/operations/test_tinymoe_ncu_profile.py",
+    "tests/operations/test_tinymoe_staging_census.py",
+    "tests/operations/test_tinymoe_phase_profile.py",
+    "tests/operations/test_tinymoe_storage_inventory.py",
+    "tests/operations/test_tinymoe_ncu_reduce.py",
+    "tests/operations/test_indexed_saved_compile.py",
+    "tests/operations/test_saved_program_compile.py",
+    "tests/operations/test_tinymoe_prepare_source.py",
+    "tests/operations/test_tinymoe_ncu_inventory.py"
+  ],
+  "partial_exclusion": "tests/operations/test_attention_item_build_policy.py::test_reusable_probe_defaults_to_o0_and_historical_pair_stays_explicit"
+}

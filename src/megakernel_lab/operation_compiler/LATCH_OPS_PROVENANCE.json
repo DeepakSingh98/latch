@@ -1,0 +1,19 @@
+{
+  "source_repository": "private Latch",
+  "runtime_commit": "0987d803f7b8be0d41cc653efd928e6581a97026",
+  "runtime_tag": "latch-v0.6.0",
+  "integrated_examples_commit": "18e612084c28080bf8a99aeb06700fe31286acb2",
+  "runtime_tree_equal_between_pins": true,
+  "vendor_root": "src/megakernel_releases/s108/_current/ordinary/native/",
+  "unchanged_files": {
+    "ops/vendor/core.cuh": {"source": "lib/core.cuh", "git_blob": "9cdf477a42290bdf5d3b85274185191611d7d92c"},
+    "ops/vendor/gemm.cuh": {"source": "lib/gemm.cuh", "git_blob": "28d27313bf4a8aa1a4a0d8edecc493438857d406"},
+    "ops/vendor/epi.cuh": {"source": "lib/epi.cuh", "git_blob": "f83924d66a03ad83549599184a45277f57c4b12d"},
+    "ops/vendor/tgemm.cuh": {"source": "lib/tgemm.cuh", "git_blob": "d331fd5f462bebb6c7bda527dadcc4bbcc75f78c"},
+    "ops/vendor/bgemm.cuh": {"source": "lib/bgemm.cuh", "git_blob": "7399bbe145064763b06a8a50026341a606c261b6"},
+    "ops/vendor/plan.py": {"source": "memory/plan.py", "git_blob": "73498c631e5164385de236f357fd14eb95a0f21d"}
+  },
+  "adapted_patterns": ["cooperative launcher and occupancy admission from ordinary/native/runtime.py", "existing shared ledger controller lifecycle"],
+  "redesigned": ["operation IR", "functional capture and derivative/update graph", "operation dependency scheduling", "IR-derived alias lifetimes", "generic operation emission", "independent conventional validation"],
+  "qualification": "No historical qualification is inherited. New interactions are checked in this lane. No live checkout paths are required by the compiler/runtime."
+}

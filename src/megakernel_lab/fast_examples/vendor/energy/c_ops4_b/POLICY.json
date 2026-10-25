@@ -1,0 +1,63 @@
+{
+  "schema": "c-ops4-b-policy-v1",
+  "frozen": "2026-10-04, before any GPU execution of the native energy-model update",
+  "recipe": {
+    "source": "examples/energy.py (s100l-rmlp-ebm-v1 equations, s100l-p1 BF16 product policy, s100l-rng-v1 counter layout, s100l-cd-v1 sampler, s100l-init-v1, s100l-fmnist-v1 data)",
+    "configs": {
+      "tiny": "crop 8, H32 F64 L2 B8 K3 R40",
+      "small": "crop 16, H64 F128 L2 B32 K4 R256",
+      "wb": "WB anchor: crop 28, H384 F768 L4 B256 K64 R10000 (2,665,728 parameters)",
+      "sd": "second config: crop 28, H384 F768 L8 B256 K32 R10000 (depth 8, chain 32; S108H SD)"
+    },
+    "derivative_boundaries": "chain (init + K steps) uses pre-update parameters and only input gradients; the loss region differentiates parameters with negatives as constants (no derivative through sampling)",
+    "known_differences_from_s100l_programs": [
+      "Langevin and fresh-row arithmetic are x + sigma*xi, y - lambda*G, (hi-lo)*u + lo with two FP32 roundings (generated code uses --fmad=false; PyTorch has no fma op); S100L used single-rounding FMA",
+      "AdamW bias corrections use the compiler's int64 step with -expm1(step*log(beta)); S100L used FP32 step counters and powf",
+      "reduction orders are the compiler's (deterministic) and differ from the S100L engines"
+    ]
+  },
+  "references": {
+    "R": "c_ops4_b/reference.py: FP64, hand-derived input and parameter gradients (ported from S100L reference.py), independent NumPy Philox words, FP64 Box-Muller",
+    "C1": "c_ops4_b/controls.py eager: PyTorch autograd, FP32 with the BF16 product policy, same GPU",
+    "C2": "c_ops4_b/controls.py manual: eager with the S100L hand-written backward, FP32 with the BF16 product policy"
+  },
+  "same_state_rule": {
+    "metric": "e(X) = ||Q_X - Q_R||_2 / max(||Q_R||_2, 1e-30)",
+    "pass": "e(native) <= max(2 * max(e(C1), e(C2)), 1e-6) for every observable",
+    "chain_step_observable": "increment x_k - x_{k-1} from the native's own x_{k-1} (native x_k obtained with runtime count k from the same pre-update state); steps 1..K when K <= 8, else {1,2,3,4,K/4,K/2,3K/4,K-1,K}",
+    "update_observables": "loss, raw gradients (all parameters), updated parameters, exp_avg, exp_avg_sq; R/C1/C2 evaluated from the native's own final negatives x_K and the pre-update state"
+  },
+  "exact_tiers": [
+    "RNG words of philox_field equal the independent NumPy Philox (Random123 KAT included); uniforms exact; CPU normals within 1e-5 abs of the FP64 transform",
+    "native init x0 (runtime count 0) equals the reference replay rows / fresh draws bitwise",
+    "commit: new buffer equals the old buffer with rows (ptr + i) mod R replaced by the native x_K bitwise; ptr, t exact; key unchanged",
+    "repeat: two updates from the same state are bitwise equal (outputs and committed state)",
+    "one CUDA-graph replay of the update equals the raw launch bitwise",
+    "status 0 and executed count K"
+  ],
+  "optimizer_tier": "FP64 clip+AdamW recomputed from the native's own raw gradients: relative L2 error of the parameter change, exp_avg and exp_avg_sq <= 1e-5; every step counter advanced by one",
+  "trained_state": "all gates repeated after the real-data training run (native trained state)",
+  "training": {
+    "run": "400 updates on Fashion-MNIST (s100l-fmnist-v1 order) from the same init, RNG and data order for native, C1 eager and C2 manual",
+    "pass": "all losses finite and d(native, C1) <= max(2 * d(C2, C1), 0.02), where d(a, b) = ||theta_a - theta_b|| / ||theta_C1 - theta_0|| after the run",
+    "report": "loss trajectories, per-update relative loss deviation, held-out test and replay-buffer energies; no sample-quality or data-efficiency claim"
+  },
+  "performance": {
+    "metric": "complete update (init, K-step chain, positives, gradients, clip+AdamW, commit) median ms per update, CUDA events over CUDA-graph replays, paired randomized rounds (20), state restored before each round; ratio native / fastest valid conventional control with bootstrap 95% CI",
+    "controls": "eager, pieces_autotune (compiled chain/grads/optimizer, max-autotune-no-cudagraphs), fused_default and fused_autotune (whole update as one torch.compile(fullgraph) function, default / max-autotune-no-cudagraphs), each captured in one CUDA graph",
+    "control_validity": "a control is valid when its own update (from the same state) passes the same-state rule against R with C1/C2 calibration on loss, gradients, parameters and moments",
+    "memory": "native: arena + mutable bindings + shared data; controls: CUDA allocator peak delta during compile, capture and replay + shared data",
+    "old_implementation": "compared only on matching workloads (WB, SD); historical S103H/S108H timings are labelled historical and are not evidence for this code"
+  },
+  "tolerance_changes": "none except the recorded, versioned amendments below; earlier verdicts are preserved, not relabelled",
+  "amendments": [
+    {
+      "id": "v1.1",
+      "date": "2026-10-04",
+      "after": "gpu-02 (first native gates; v1 verdicts preserved in its receipts)",
+      "scope": "optimizer_tier only; every other gate unchanged",
+      "reason": "v1 bounded the relative error of the FP32 parameter change against FP64 by 1e-5. A parameter stored in FP32 carries rounding ulp(w) ~ 4e-9 against an AdamW step of ~lr = 1e-4, i.e. ~4e-5 relative, for ANY FP32 implementation: the FP32 eager/manual controls measured 5.7e-5 (tiny) and 1.5e-5 (WB), equal to the native. m and v passed v1 (<= 8e-7).",
+      "rule": "FP64 clip+AdamW from the native raw gradients is the reference; the FP32 control optimizer expression applied to the same raw gradients and pre-update state is the calibration. PASS iff steps advanced and, for the parameter change, exp_avg and exp_avg_sq, e(native) <= max(2 * e(FP32 control), 1e-6). Reports state both the v1 and the v1.1 verdicts."
+    }
+  ]
+}

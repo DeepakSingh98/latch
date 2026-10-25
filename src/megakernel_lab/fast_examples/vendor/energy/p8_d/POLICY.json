@@ -1,0 +1,68 @@
+{
+  "schema": "p8d-policy-v1",
+  "frozen": "2026-10-05, before any GPU execution or timing of a P8-D panel-engine program",
+  "lane": "P8-D bounded whole-training-update performance campaign (energy model, operation compiler)",
+  "base": "c794e310c5b3c1876585451885c385be1cdc16a6 (LATCH-OPS compiler integration); energy harness snapshot p8_d/FROZEN_INPUTS.json (bytes equal to C-OPS4-B 22c3231ad)",
+  "learning_problem": "unchanged: examples/energy.py recipe (s100l-rmlp-ebm-v1 equations, s100l-p1 BF16 product policy, s100l-rng-v1, s100l-cd-v1 sampler with stop-gradient negatives and input-gradient Langevin steps, global-norm clip + AdamW beta1=0, FIFO replay commit), Fashion-MNIST s100l-fmnist-v1 order",
+  "primary": "WB: crop 28, H384 F768 L4 B256 K64 R10000, 2,665,728 parameters (integration3/selection.json energy-wb)",
+  "transfer": [
+    "WB at runtime counts 8 and 32 (same native binary; controls compiled per count)",
+    "SD: H384 F768 L8 B256 K32, 5,029,632 parameters, same compiler options as WB (no SD-specific tuning)"
+  ],
+  "score": {
+    "metric": "generated complete-update median ms / fastest valid tested conventional complete-update median ms, fixed primary case",
+    "clock": "CUDA events over CUDA-graph replays of one complete changing-state update (init, K-step chain, positives, loss, gradients, casts, clip+AdamW, replay commit); state restored before each paired round; randomized arm order; same H100 and job; bootstrap 95% CI of the median ratio (c_ops4_b.gpu_tasks.perf)",
+    "target": 0.667,
+    "first_milestone": 1.0,
+    "memory_and_setup": "reported separately (native arena + bindings; controls allocator peak delta; CPU capture/lower/nvcc and GPU load/compile/capture seconds); never folded into the score"
+  },
+  "controls": {
+    "frozen_set": [
+      "eager",
+      "pieces_autotune",
+      "fused_default",
+      "fused_autotune"
+    ],
+    "added_before_measurement": {
+      "fused_autotune_cd": "fused_autotune plus Inductor coordinate_descent_tuning (same equations and BF16 product policy)",
+      "bf16_fused_autotune": "practical BF16: network activations, products and their gradients held in BF16 (x/y sampler state, loss, parameter master copies and AdamW in FP32), whole update torch.compile max-autotune-no-cudagraphs"
+    },
+    "validity": {
+      "same_policy_controls": "valid iff the c_ops4_b same-state rule passes (loss, gradients, parameters, moments vs FP64 with C1/C2 calibration) from the same state",
+      "practical_bf16_controls": "deliberately changed arithmetic, so the same-state rule is reported but not required; valid as a denominator iff a 400-update Fashion-MNIST run from the same init/data/RNG has finite losses and d(control, C1 eager) <= max(2 * d(C2 manual, C1), 0.02) (the native training gate). A control failing that learning run is excluded and its failure retained."
+    },
+    "denominator": "fastest valid control in the same paired job"
+  },
+  "native_gates": {
+    "numerical": "c_ops4_b/POLICY.json v1.1 (unchanged): exact init/commit/counters, repeat bitwise, CUDA-graph replay bitwise, status 0, every selected chain-step increment and every update observable within the same-state rule; the original v1 optimizer-tier verdict is reported alongside and its failure retained",
+    "learning": "400-update Fashion-MNIST training from the shared init: finite losses and d(native, C1) <= max(2 * d(C2, C1), 0.02); all numerical gates repeated at the trained state",
+    "single_kernel": "one generated cooperative kernel launch per complete update; no external kernels, no benchmark-name dispatch",
+    "qualification_scope": "the selected candidate is qualified at fresh and trained WB states, SD fresh, WB counts 8/32 (gates at those counts), tiny/small regression fixtures, and the ops CPU contract tests; failures are retained"
+  },
+  "precision": {
+    "declared": "no new mixed precision: products keep BF16 operands, FP32 accumulation and one BF16 rounding (summation order inside a product may differ: fixed-order k-split partial chains); elementwise work FP32 with ops.lower expressions, --fmad=false",
+    "amendment_rule": "any new storage/compute precision must be declared here as a versioned amendment before its validation runs, checked against its arithmetic reference AND the learning gate"
+  },
+  "compiler_scope": "reusable rules reached through ops.lower(...) for any sampled-training graph whose step is row-separable with loop-invariant BF16 product operands; refusals fall back to the existing schedule with a recorded reason; no model names; default byte-identical when the rule is off",
+  "resources": {
+    "owner": "P8-D",
+    "provider": "modal",
+    "max_h100": 1,
+    "max_cpu_cores": 4,
+    "budget_usd": 100,
+    "closure_reserve_usd": 15
+  },
+  "tolerance_changes": "none",
+  "amendments": [
+    {
+      "id": "p1",
+      "date": "2026-10-05",
+      "before": "any GPU execution of a panel program built with panel_options elementwise='fast'",
+      "scope": "declares one optional arithmetic variant of the panel engine's sampler elementwise segments; gates unchanged",
+      "variant": "elementwise='fast': inside the sampling-loop segments only, sigmoid/silu use __expf (ex2.approx-based, ~2 ulp) and a correctly rounded reciprocal (__frcp_rn) instead of expf and IEEE division; x/(1+e) becomes x * rcp(1+e). Products, BF16 roundings, Philox/Box-Muller, clamps, the training region and the optimizer are unchanged.",
+      "arithmetic_reference": "the unchanged c_ops4_b same-state rule (every sampled chain step and every update observable vs FP64 R, bound 2 x max(C1, C2)) at fresh and trained states",
+      "learning_gate": "the native 400-update training gate (finite losses; d(native, C1) <= max(2 d(C2, C1), 0.02)) plus all gates at the trained state",
+      "selection": "the variant may be selected only if every gate above passes; failures are retained and the exact-expression candidate is reported regardless"
+    }
+  ]
+}

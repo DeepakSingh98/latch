@@ -1,0 +1,81 @@
+{
+  "schema": "latch-tinymoe-schedule-followup-config-v1",
+  "status": "Frozen protocol; running per user update; no final follow-up result receipts in bounded local intake at2026-10-15T02:00:29Z",
+  "source_snapshot": "a0aca8baf49814493c08eb45c61bc8cde0a11c02",
+  "source_protocol_sha256": "61f2fa2b89e589b78105f7ead54970ae5ad5054179f630ab66b88cf8ffa7cb57",
+  "pilot_protocol_sha256": "1bdbb3e21c2e008cd1ee73d48f9d27eb14327d7737787369d1d563165ed89fa3",
+  "longer_study_protocol_sha256": "40b9b40333b59b5be7d178d54badf29896bd375ea6f5ec376711cad802ec2fae",
+  "model": "FlameF0X/TinyMoE-200m-2x16",
+  "revision": "9b209f7439aadfac282e0bf44f2fda19771aba90",
+  "arms": {
+    "A": {
+      "backend": "compiled-grouped",
+      "microbatch": 8,
+      "accumulation": 16,
+      "peak_learning_rate": 0.0024
+    },
+    "B2": {
+      "backend": "Latch",
+      "microbatch": 2,
+      "accumulation": 1,
+      "peak_learning_rate": 0.0003
+    }
+  },
+  "sequence_length": 1024,
+  "schedule": {
+    "kind": "linear warmup then cosine to zero over horizon tokens",
+    "warmup_fraction": 0.05,
+    "evaluated_at": "update token midpoint",
+    "stop_tokens_changes_schedule": false
+  },
+  "direct_replication": {
+    "seeds": [
+      1730,
+      1731,
+      1732
+    ],
+    "horizon_tokens": 131072000,
+    "stop_tokens": 131072000,
+    "warmup_tokens": 6553600,
+    "runs": 6
+  },
+  "schedule_isolation": {
+    "seeds": [
+      1729
+    ],
+    "horizon_tokens": 1048576000,
+    "stop_tokens": 131072000,
+    "warmup_tokens": 52428800,
+    "runs": 2,
+    "controls": "existing selected seed1729 A and B2 short-schedule pilot runs; no rerun or retuning"
+  },
+  "eval_every_tokens": 4194304,
+  "eval_windows": 256,
+  "final_eval_windows": 2048,
+  "checkpoint_every_tokens": 67108864,
+  "pilot_levels": [
+    4.612,
+    4.466,
+    4.34,
+    4.254,
+    4.187,
+    4.141,
+    4.116,
+    4.107
+  ],
+  "additional_longer_study_targets": [
+    4.3,
+    4.1,
+    3.9,
+    3.75,
+    3.6,
+    3.5,
+    3.4,
+    3.3
+  ],
+  "target_policy": "Every frozen level and seed, including unreached levels; first recorded crossing and preceding observation as resolution lower bound; no interpolation, extrapolation or new headline selection.",
+  "execution": "Both arms sequentially on the same otherwise idle single H100 per seed",
+  "initialization_and_order": "Same initial-state file and PCG64(seed) window order within a seed pair; same model/corpus/optimizer/objective as the pilot",
+  "long_schedule_fresh_seed_comparison": "Use existing1730/1731/1732 longer-study prefixes through131072000 tokens at their original8388608-token evaluation cadence",
+  "reducer_limit": "The packaged historical learning confirm reducer is only for the longer study; no automatic direct-replication reducer is included in this frozen runtime."
+}

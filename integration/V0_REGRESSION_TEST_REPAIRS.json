@@ -1,0 +1,50 @@
+{
+  "schema": "latch-v0-regression-test-integration-repair-v1",
+  "trigger": "tests02 on installed904596e7 runtime; six failed files retained in original results",
+  "runtime_source_changes": false,
+  "changes": {
+    "package_fixture_loading": {
+      "files": [
+        "test_mixed_phase_pointer_codegen.py",
+        "test_resource_phase_pointer_codegen.py",
+        "test_pure_interval_codegen.py",
+        "test_pure_run_codegen.py"
+      ],
+      "failure": "runpy executes test_phase_pointer_codegen.py without package context, so its extracted-fixture relative import fails",
+      "repair": "Use package-relative import of the identical fixture function; no path insertion or assertion changes"
+    },
+    "legacy_expectation": {
+      "file": "test_practical_bf16.py",
+      "failure": "source/header/cache equality pass; expected implicit default now has automatic execution_selection metadata",
+      "repair": "Explicit execution=legacy for expected program, matching repaired-release bf16_retention comparisons; all equality/permission gates retained",
+      "base_precedent": "6127a450ce897a83eb7c7237b3c340376c2c1779:tests/operations/test_bf16_retention.py"
+    },
+    "raw_residue_contract": {
+      "file": "test_serial_bf16_residue.py",
+      "failure": "Repaired-release WGMMA test expects197632 but donor RAW_RESIDUE path needs205824",
+      "origin_commit": "4effd0c7",
+      "repair": "Keep historical complete-emission comparison with RAW_RESIDUE=False; add exact raw-on adapter check plus five ineligible layouts/settings that must remain identical",
+      "admitted": "WGMMA+TMA, initial-residue input-VJP, A K-contiguous and B not K-contiguous; exact72x128 unswizzled raw box",
+      "scope": "CPU emission/resource contract only; no new RAW numerical or performance qualification",
+      "runtime_bytes": {
+        "src/megakernel_lab/operation_compiler/matrix_adapters/mma_k8.py": {
+          "sha256": "dd65c23fdbee45a435e8dda22d59b4c41965e31d1cf6a2f57fe5fa2fa276565b",
+          "exact_donor": "adde6ca52b556df8585edfb6c7ade3a241964620"
+        },
+        "src/megakernel_lab/operation_compiler/kernels/wgmma_k8.cuh": {
+          "sha256": "d9dbb835796a1310a863fafaee7c3ae0f01d48f762613c29e400f8b8d0059932",
+          "exact_donor": "adde6ca52b556df8585edfb6c7ade3a241964620"
+        }
+      }
+    }
+  },
+  "changed_tests": {
+    "tests/operations/test_mixed_phase_pointer_codegen.py": "80eb2a848f9fb0a95100f814ecb80ca93ed0bd13ae2e91ed0e0f85736ada450c",
+    "tests/operations/test_resource_phase_pointer_codegen.py": "25234aea9968b0cce155a7cf203d967eff50ad77c3f3db6fb4491fdb9e151093",
+    "tests/operations/test_pure_interval_codegen.py": "1100dc2a8966384e4ee3ea6ba62eac46c7c84b62bd419ec755df49b0a45b9cdf",
+    "tests/operations/test_pure_run_codegen.py": "82f048fbaa27d1087e514b5d674a025f93f8330c03ca029378642d95039b8d78",
+    "tests/operations/test_practical_bf16.py": "e382eec0069638afb1cc357a1e63ec6fca84356e898731ed5284d98319635988",
+    "tests/operations/test_serial_bf16_residue.py": "64acd2511bbfbeb8458d83579f4070084291480005c2035a233b03b918f0598c"
+  },
+  "validation": "AST and git diff --check pass locally; cloud rerun required. No numeric tolerance changes or skipped assertions."
+}

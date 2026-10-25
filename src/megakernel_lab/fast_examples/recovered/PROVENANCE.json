@@ -1,0 +1,26 @@
+[
+  {
+    "source": "/private/tmp/megakernel-latch-compose/research/latch_compose/baseline.tar.gz:research/latch_ops/examples/models.py",
+    "source_sha256": "f439daefc05807a811fa63c9445bae14dc9e2cff7263f2486362c38d042dcc37",
+    "recovered_sha256": "f439daefc05807a811fa63c9445bae14dc9e2cff7263f2486362c38d042dcc37",
+    "edit": "only ops import namespace mapped to installed public package"
+  },
+  {
+    "source": "/private/tmp/megakernel-latch-compose/research/latch_compose/baseline.tar.gz:research/latch_ops/examples/transformer.py",
+    "source_sha256": "ef4763a321456b72b9a54ef1eeb283b105b7b0d13f7fc1bdfa4b51ef77c9e3e3",
+    "recovered_sha256": "7cea5669aebda10b368d17589d1b4c57193314842f9aea0cdccad0b4155a9d43",
+    "edit": "only ops import namespace mapped to installed public package"
+  },
+  {
+    "source": "/private/tmp/megakernel-latch-compose/research/latch_compose/baseline.tar.gz:research/latch_ops/examples/adaptive_memory.py",
+    "source_sha256": "2e1a8291c333fc389eedd5f36a182a8d7ef5db71550fa0dd4d45a07b94ba62cc",
+    "recovered_sha256": "3315f9796688779a03f26f04d8b4a3c72bfe96196e640e2119ee0a57f4e5d754",
+    "edit": "only ops import namespace mapped to installed public package"
+  },
+  {
+    "source": "/private/tmp/megakernel-latch-compose/research/latch_compose/baseline.tar.gz:research/latch_ops/examples/energy.py",
+    "source_sha256": "5928dcf00386dda2949ef70910630a86d3e61adfb76305018e22a99b5a2c82b0",
+    "recovered_sha256": "0ed2f50e5f198c9be9c3d39240beb408566738753c038119e18e0f02e60227a6",
+    "edit": "only ops import namespace mapped to installed public package"
+  }
+]

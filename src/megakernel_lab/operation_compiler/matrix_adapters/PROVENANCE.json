@@ -1,0 +1,42 @@
+{
+  "source_commit": "0b581adbf9ae6db4fc3884dd60824faa3a676b52",
+  "source_checkout_read_only": "/private/tmp/megakernel-latch-matrix",
+  "files": {
+    "__init__.py": {
+      "source_path": "research/latch_matrix/__init__.py",
+      "sha256": "c98a9e45882bb98a0074ea7a3ce567a0bcb13f944960f1f10a33e41d29f06f75",
+      "bytes": 1187
+    },
+    "problem.py": {
+      "source_path": "research/latch_matrix/problem.py",
+      "sha256": "48f0b58e26d942b9974ed5fcbf89bdd3c4703fd755b04865abf563a7409a7f60",
+      "bytes": 6948
+    },
+    "requirements.py": {
+      "source_path": "research/latch_matrix/requirements.py",
+      "sha256": "da6af60987f36028946ec6287f620d63168532be4a878b8b435bf833a0c901ae",
+      "bytes": 5907
+    },
+    "bodies.py": {
+      "source_path": "research/latch_matrix/bodies.py",
+      "sha256": "86966e2c0da481bbf5ec281fc6d123bccfefa66954e0189f973fd07e99cc7eb0",
+      "bytes": 28123
+    },
+    "candidates.py": {
+      "source_path": "research/latch_matrix/candidates.py",
+      "sha256": "43f12ad49d2dad3e61ad52cebd6619235851c143e095a8d64592eb094eea883e",
+      "bytes": 6487
+    },
+    "provider.py": {
+      "source_path": "research/latch_matrix/provider.py",
+      "sha256": "db69ab9a8c53bafb285518c205aa4041102febd8b2cac30218af9da82450e0b8",
+      "bytes": 9112
+    },
+    "compose_adapter.py": {
+      "source_path": "research/latch_matrix/compose_adapter.py",
+      "sha256": "dd71fc65a02420f85374e97a75a9aa27812a8db7eb425a0ad9ba47632d2f30c0",
+      "bytes": 2258
+    }
+  },
+  "adaptation": "Private research package import; remove global installed(provider) context. Compiler owns a per-lowering provider under its existing lock; no runtime path to the donor checkout."
+}

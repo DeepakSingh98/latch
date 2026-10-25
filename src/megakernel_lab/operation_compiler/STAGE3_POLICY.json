@@ -1,0 +1,21 @@
+{
+  "stage": 3,
+  "declared_before_first_stage3_device_run": true,
+  "fp32": "Retain NUMERICAL_POLICY.json unchanged for losses, intermediates, gradients, updates, parameters and momentum at identical input state. Check finite values before ratios.",
+  "mixed_precision": {
+    "scope": "If implemented: FP32 master parameters/optimizer and residual/normalization/loss; explicit BF16 matrix operands/results with FP32 matrix accumulation; compare to the same explicit-cast conventional recipe, not to an unchanged FP32 algorithm.",
+    "loss": {"atol": 0.002, "rtol": 0.002},
+    "intermediates": {"atol": 0.02, "rtol": 0.02},
+    "gradients": {"atol": 0.001, "rtol": 0.05},
+    "updates": {"atol": 0.00005, "rtol": 0.05},
+    "parameters": {"atol": 0.00005, "rtol": 0.002},
+    "momentum": {"atol": 0.002, "rtol": 0.05},
+    "additional_checks": "Report RMS and max absolute errors, keep FP32 small-case independent derivative checks, and reject missing shared-iteration or intermediate-loss contributions with explicit negative controls. These tolerances are a ceiling, not a claim of observed error. Preserve failures."
+  },
+  "loop": "One runtime int64 count clamped into [0,max_steps], with executed_count and status returned; counts 0,1,several and maximum checked without recompilation or graph recapture. PyTorch-derived per-body reverse derivative accumulates every shared parameter contribution; compare saved history and explicit recomputation modes.",
+  "randomness": "Stage 2 Philox contract unchanged; exact integer state and masks, including replay from old iteration state. Only the final RNG state commits.",
+  "training": "Public real-text documents; official held-out documents, exclude duplicate hashes across splits; CPU preprocessing and immutable cloud-only tensors. Same data order, initial state, model/loss and arithmetic policy for native/reference checks and paired training. Predeclared learning gates: terminal training NLL decreases at least 10%, held-out validation terminal NLL decreases at least 1%; numerical gates remain independent.",
+  "performance": "Complete resident-input changing-state updates; strongest practical eager/compiled conventional controls, matched submission where applicable. Compilation/setup separate, allocated model/activation state separated from actual workspace. Profile major slowdown then one bounded reusable improvement; retain before/after evidence.",
+  "budget": "Original $200 cumulative, including $14.6114 already accounted and retained storage. Two concurrent H100s and four CPU cores maximum. Preserve at least $40 uncommitted headroom until final validation/closure begins.",
+  "regressions": "Existing four compositions and relevant Stage 2 inner-gradient, conditional and dropout checks remain required. No fallback counts as complete native generation."
+}

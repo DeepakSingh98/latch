@@ -1,0 +1,339 @@
+{
+  "schema": "latch-v0-tinymoe-source-intake-v1",
+  "product_commit": "adde6ca52b556df8585edfb6c7ade3a241964620",
+  "learning_snapshot_commit": "742ba9113e0c38c05527fcd433b08499edec7275",
+  "records": [
+    {
+      "source_commit": "adde6ca52b556df8585edfb6c7ade3a241964620",
+      "source_path": "src/megakernel_lab/tinymoe/__init__.py",
+      "target_path": "src/megakernel_lab/tinymoe/__init__.py",
+      "source_sha256": "2d965f23de538b1b1eb3293751117f0729f71904e4f60dac603477ee6a71824c"
+    },
+    {
+      "source_commit": "adde6ca52b556df8585edfb6c7ade3a241964620",
+      "source_path": "src/megakernel_lab/tinymoe/__main__.py",
+      "target_path": "src/megakernel_lab/tinymoe/__main__.py",
+      "source_sha256": "5be28371a1e255a74adf01528d3a041779bd89ab12555084b0b058982cdf9d22"
+    },
+    {
+      "source_commit": "adde6ca52b556df8585edfb6c7ade3a241964620",
+      "source_path": "src/megakernel_lab/tinymoe/benchmark.py",
+      "target_path": "src/megakernel_lab/tinymoe/benchmark.py",
+      "source_sha256": "b5a22e3bc65b21144f9b1a26e96550a16bf4720c9f6db39cd458ad3e1c4990dd"
+    },
+    {
+      "source_commit": "adde6ca52b556df8585edfb6c7ade3a241964620",
+      "source_path": "src/megakernel_lab/tinymoe/build.py",
+      "target_path": "src/megakernel_lab/tinymoe/build.py",
+      "source_sha256": "8f307843b4220d508ebde240b49f48b3d62b2e3f92097363c1c575781abffabc"
+    },
+    {
+      "source_commit": "adde6ca52b556df8585edfb6c7ade3a241964620",
+      "source_path": "src/megakernel_lab/tinymoe/check_determinism.py",
+      "target_path": "src/megakernel_lab/tinymoe/check_determinism.py",
+      "source_sha256": "81c2381653ae2bae5443d50c1fa20e8564f40864966c02cb2071f9b83151e820"
+    },
+    {
+      "source_commit": "adde6ca52b556df8585edfb6c7ade3a241964620",
+      "source_path": "src/megakernel_lab/tinymoe/check_grouped.py",
+      "target_path": "src/megakernel_lab/tinymoe/check_grouped.py",
+      "source_sha256": "528e1822ca05860af1871ad1d6cf4464a811d91a83a85b78e667288793b419d1"
+    },
+    {
+      "source_commit": "adde6ca52b556df8585edfb6c7ade3a241964620",
+      "source_path": "src/megakernel_lab/tinymoe/check_readout.py",
+      "target_path": "src/megakernel_lab/tinymoe/check_readout.py",
+      "source_sha256": "1ea0419cfa2a580f1075bc64e3554ae3c65183003a00e69b229f1444f3fb9a14"
+    },
+    {
+      "source_commit": "adde6ca52b556df8585edfb6c7ade3a241964620",
+      "source_path": "src/megakernel_lab/tinymoe/check_reference.py",
+      "target_path": "src/megakernel_lab/tinymoe/check_reference.py",
+      "source_sha256": "57098d3c8dc96bd8f9c4344bb2ac29d7897764e6584a2edff9acde63ad482cd8"
+    },
+    {
+      "source_commit": "adde6ca52b556df8585edfb6c7ade3a241964620",
+      "source_path": "src/megakernel_lab/tinymoe/compare_checkpoints.py",
+      "target_path": "src/megakernel_lab/tinymoe/compare_checkpoints.py",
+      "source_sha256": "7d00ea5c4c5a27b2aae46f5a6be05b3202934f38250f48393508e14c0f1b91c6"
+    },
+    {
+      "source_commit": "adde6ca52b556df8585edfb6c7ade3a241964620",
+      "source_path": "src/megakernel_lab/tinymoe/compiled_model.py",
+      "target_path": "src/megakernel_lab/tinymoe/compiled_model.py",
+      "source_sha256": "8046246a1c0514827ab59d2fb02315d086893e0794eeda981ec860df257e71ef"
+    },
+    {
+      "source_commit": "adde6ca52b556df8585edfb6c7ade3a241964620",
+      "source_path": "src/megakernel_lab/tinymoe/conventional.py",
+      "target_path": "src/megakernel_lab/tinymoe/conventional.py",
+      "source_sha256": "b87f0a38c21124c5c344399322f278bd1f6897d41b4e6b4a1eaf3db9511e9dd0"
+    },
+    {
+      "source_commit": "adde6ca52b556df8585edfb6c7ade3a241964620",
+      "source_path": "src/megakernel_lab/tinymoe/data.py",
+      "target_path": "src/megakernel_lab/tinymoe/data.py",
+      "source_sha256": "297e5a34ebe25041217bc54edaab4f95fb815b97f7f0912a80fbc4a1b1255b28"
+    },
+    {
+      "source_commit": "adde6ca52b556df8585edfb6c7ade3a241964620",
+      "source_path": "src/megakernel_lab/tinymoe/evaluate.py",
+      "target_path": "src/megakernel_lab/tinymoe/evaluate.py",
+      "source_sha256": "53f641f76d88edbff119445476032ac03e069218e3a3d5976189aa1cb486c897"
+    },
+    {
+      "source_commit": "adde6ca52b556df8585edfb6c7ade3a241964620",
+      "source_path": "src/megakernel_lab/tinymoe/model.py",
+      "target_path": "src/megakernel_lab/tinymoe/model.py",
+      "source_sha256": "d91eef2272226e06204cb4d91303ab3fbd538ea7dc9dc1ddcfc6776d71dff15e"
+    },
+    {
+      "source_commit": "adde6ca52b556df8585edfb6c7ade3a241964620",
+      "source_path": "src/megakernel_lab/tinymoe/native.py",
+      "target_path": "src/megakernel_lab/tinymoe/native.py",
+      "source_sha256": "46a4fae2f58b0db421b32bbc30b55077a7f8a75803b8ed219b424059864ae972"
+    },
+    {
+      "source_commit": "adde6ca52b556df8585edfb6c7ade3a241964620",
+      "source_path": "src/megakernel_lab/tinymoe/observation.py",
+      "target_path": "src/megakernel_lab/tinymoe/observation.py",
+      "source_sha256": "fc5858e3414786f5b1a53878fed126a4af4952d547fcb22670dcbd40a769689d"
+    },
+    {
+      "source_commit": "adde6ca52b556df8585edfb6c7ade3a241964620",
+      "source_path": "src/megakernel_lab/tinymoe/optimizer.py",
+      "target_path": "src/megakernel_lab/tinymoe/optimizer.py",
+      "source_sha256": "0899f6da84d4d7a8168d1ee79c19703c4211dacc10ecbc084eacf872a88bc0f7"
+    },
+    {
+      "source_commit": "adde6ca52b556df8585edfb6c7ade3a241964620",
+      "source_path": "src/megakernel_lab/tinymoe/pins.py",
+      "target_path": "src/megakernel_lab/tinymoe/pins.py",
+      "source_sha256": "be34e113f2e74d9379e2a94011a4b56a8b404fd323b5266091472655f1640529"
+    },
+    {
+      "source_commit": "adde6ca52b556df8585edfb6c7ade3a241964620",
+      "source_path": "src/megakernel_lab/tinymoe/runtime_probe.py",
+      "target_path": "src/megakernel_lab/tinymoe/runtime_probe.py",
+      "source_sha256": "e06e2927d77b2a75a9857fac1d22ee7c8d83b8adadbd329b1ee1e06363299a8f"
+    },
+    {
+      "source_commit": "adde6ca52b556df8585edfb6c7ade3a241964620",
+      "source_path": "src/megakernel_lab/tinymoe/train.py",
+      "target_path": "src/megakernel_lab/tinymoe/train.py",
+      "source_sha256": "32ca6a96808af5d5f5e17e67d801d01200467ae8571d07790ead266b0e5564f0"
+    },
+    {
+      "source_commit": "adde6ca52b556df8585edfb6c7ade3a241964620",
+      "source_path": "tests/operations/test_tinymoe_adapter.py",
+      "target_path": "tests/operations/test_tinymoe_adapter.py",
+      "source_sha256": "d202840f05baf96f8e0b9eb329095cb6cce2b39b4d447b7df21e7eb303b24d87"
+    },
+    {
+      "source_commit": "adde6ca52b556df8585edfb6c7ade3a241964620",
+      "source_path": "tests/operations/test_tinymoe_checkpoint.py",
+      "target_path": "tests/operations/test_tinymoe_checkpoint.py",
+      "source_sha256": "afcd009a86c233ebdf9e243082e0d8e1005f727464cdf0c612baec4f6d8bbccd"
+    },
+    {
+      "source_commit": "adde6ca52b556df8585edfb6c7ade3a241964620",
+      "source_path": "tests/operations/test_tinymoe_evaluate.py",
+      "target_path": "tests/operations/test_tinymoe_evaluate.py",
+      "source_sha256": "95f3edcdb2285caa191dabe938c8c42fa0d7826bac07441b268e169f355fb89f"
+    },
+    {
+      "source_commit": "adde6ca52b556df8585edfb6c7ade3a241964620",
+      "source_path": "tests/operations/test_tinymoe_native_contract.py",
+      "target_path": "tests/operations/test_tinymoe_native_contract.py",
+      "source_sha256": "e411488806ba78ad763f51dd424c440023e4fd958e091d77d38cec5e823161d2"
+    },
+    {
+      "source_commit": "adde6ca52b556df8585edfb6c7ade3a241964620",
+      "source_path": "tests/operations/test_tinymoe_native_observation.py",
+      "target_path": "tests/operations/test_tinymoe_native_observation.py",
+      "source_sha256": "169a5fa9da695a068fa7a2feb7e787f8ece05a6c95fda615afd7dcaaf9d65a6d"
+    },
+    {
+      "source_commit": "adde6ca52b556df8585edfb6c7ade3a241964620",
+      "source_path": "tests/operations/test_tinymoe_optimizer.py",
+      "target_path": "tests/operations/test_tinymoe_optimizer.py",
+      "source_sha256": "13c7cbbb8da82abf76ba20a2a905fae8d99ad14a1f2da4028f2bb9b0596e70ff"
+    },
+    {
+      "source_commit": "adde6ca52b556df8585edfb6c7ade3a241964620",
+      "source_path": "tests/operations/test_tinymoe_paired_clock.py",
+      "target_path": "tests/operations/test_tinymoe_paired_clock.py",
+      "source_sha256": "13a5e58f4d5de6266392424556e13133300cea7356f42e320b9d6ff5ec024aee"
+    },
+    {
+      "source_commit": "adde6ca52b556df8585edfb6c7ade3a241964620",
+      "source_path": "tests/operations/test_tinymoe_audit.py",
+      "target_path": "tests/operations/test_tinymoe_audit.py",
+      "source_sha256": "8d566ed7e6a80d7f8820570b3f8d6a7a3f1f954ecc53f3c2fec02cbdcfd2e7e7"
+    },
+    {
+      "source_commit": "adde6ca52b556df8585edfb6c7ade3a241964620",
+      "source_path": "research/latch_tinymoe/audit.py",
+      "target_path": "src/megakernel_lab/tinymoe/audit.py",
+      "source_sha256": "596ef4fc06684778cc3aa99fa5d9d81dfb759496428f61e554a606493f99f199"
+    },
+    {
+      "source_commit": "adde6ca52b556df8585edfb6c7ade3a241964620",
+      "source_path": "research/latch_tinymoe/POLICY.json",
+      "target_path": "src/megakernel_lab/tinymoe/POLICY.json",
+      "source_sha256": "5bf7eb5deaeb9216c173cd08d98506102484d9188e4ca4ce963709d5926c4f6d"
+    },
+    {
+      "source_commit": "742ba9113e0c38c05527fcd433b08499edec7275",
+      "source_path": "research/latch_tinymoe_smallbatch/protocol.py",
+      "target_path": "src/megakernel_lab/tinymoe/learning/protocol.py",
+      "source_sha256": "3e7aa4451840a7e83f0896d85734112f634eb23d65af43de3aae8e8dd2024db4"
+    },
+    {
+      "source_commit": "742ba9113e0c38c05527fcd433b08499edec7275",
+      "source_path": "research/latch_tinymoe_smallbatch/sb_rule.py",
+      "target_path": "src/megakernel_lab/tinymoe/learning/sb_rule.py",
+      "source_sha256": "aaa9dee44c6881216604a83078f76aaa56ac06bb56bf4595728e15ff40cf7b33"
+    },
+    {
+      "source_commit": "742ba9113e0c38c05527fcd433b08499edec7275",
+      "source_path": "research/latch_tinymoe_smallbatch/build_sb.py",
+      "target_path": "src/megakernel_lab/tinymoe/learning/build.py",
+      "source_sha256": "de0ce3aed9209cbb137875ad4ce74ab9f57c0c9e83b51f8a4db03db928512207"
+    },
+    {
+      "source_commit": "742ba9113e0c38c05527fcd433b08499edec7275",
+      "source_path": "research/latch_tinymoe_smallbatch/train.py",
+      "target_path": "src/megakernel_lab/tinymoe/learning/train.py",
+      "source_sha256": "54cae72cc535b9bb5d91fb193815e61bacd2bec120a73a0a930bf4bf6f49987d"
+    },
+    {
+      "source_commit": "742ba9113e0c38c05527fcd433b08499edec7275",
+      "source_path": "research/latch_tinymoe_smallbatch/init_state.py",
+      "target_path": "src/megakernel_lab/tinymoe/learning/init_state.py",
+      "source_sha256": "e23d00fef1acf37ce4df2c610d86acccb87d821b9d07c4c1372692fca4d77c68"
+    },
+    {
+      "source_commit": "742ba9113e0c38c05527fcd433b08499edec7275",
+      "source_path": "research/latch_tinymoe_smallbatch/corpus.py",
+      "target_path": "src/megakernel_lab/tinymoe/learning/corpus.py",
+      "source_sha256": "9abb32356c6fa7dc964745c0087ad010e9324af15ad8351ab4671b0f341e5cfa"
+    },
+    {
+      "source_commit": "742ba9113e0c38c05527fcd433b08499edec7275",
+      "source_path": "research/latch_tinymoe_smallbatch/paired.py",
+      "target_path": "src/megakernel_lab/tinymoe/learning/paired.py",
+      "source_sha256": "5d3432bdb8e3eff94da02f742139c90e52f910caaabb4203c0ceeb3cca02fb06"
+    },
+    {
+      "source_commit": "742ba9113e0c38c05527fcd433b08499edec7275",
+      "source_path": "research/latch_tinymoe_smallbatch/observe.py",
+      "target_path": "src/megakernel_lab/tinymoe/learning/observe.py",
+      "source_sha256": "732ee8434ce56426091df6fa8ab640ce129401695b31a2adc510d40332dd3502"
+    },
+    {
+      "source_commit": "742ba9113e0c38c05527fcd433b08499edec7275",
+      "source_path": "research/latch_tinymoe_smallbatch/audit_sb.py",
+      "target_path": "src/megakernel_lab/tinymoe/learning/audit.py",
+      "source_sha256": "d58263544ddfe2b853de7c16e84f318bce986ecc7e78e8f476decb259b726cf5"
+    },
+    {
+      "source_commit": "742ba9113e0c38c05527fcd433b08499edec7275",
+      "source_path": "research/latch_tinymoe_smallbatch/analyze.py",
+      "target_path": "src/megakernel_lab/tinymoe/learning/analyze.py",
+      "source_sha256": "aa3be72a0b3f3dc69d01da16c21c1ec08b235df16cec0e147e335f2ec835ea9a"
+    },
+    {
+      "source_commit": "742ba9113e0c38c05527fcd433b08499edec7275",
+      "source_path": "research/latch_tinymoe_smallbatch/evaluate_final.py",
+      "target_path": "src/megakernel_lab/tinymoe/learning/evaluate_final.py",
+      "source_sha256": "5645964a4ce2761287f9e28e21184bbd9e42d5785bdee5becb661108b07ca2b3"
+    },
+    {
+      "source_commit": "742ba9113e0c38c05527fcd433b08499edec7275",
+      "source_path": "research/latch_tinymoe_smallbatch/tests/test_sb_rule.py",
+      "target_path": "tests/operations/test_tinymoe_learning.py",
+      "source_sha256": "8f96ab8f34313ac60795017c2429faa1dfa825b0689382c5d7a750a7bd1e4338"
+    },
+    {
+      "source_commit": "742ba9113e0c38c05527fcd433b08499edec7275",
+      "source_path": "research/latch_tinymoe_ga/common.py",
+      "target_path": "src/megakernel_lab/tinymoe/learning/ga_common.py",
+      "source_sha256": "5e7054904c41cfc63ee58525e8923e94221d69773b44f4adc26f4f7c97a1dfc8"
+    },
+    {
+      "source_commit": "742ba9113e0c38c05527fcd433b08499edec7275",
+      "source_path": "research/latch_tinymoe_ga/ga_rule.py",
+      "target_path": "src/megakernel_lab/tinymoe/learning/ga_rule.py",
+      "source_sha256": "0c62c658ef145d70297bc36929a49558d39a89bff906c880aed8ad87b97803ce"
+    },
+    {
+      "source_commit": "742ba9113e0c38c05527fcd433b08499edec7275",
+      "source_path": "research/latch_tinymoe_ga/build_ga.py",
+      "target_path": "src/megakernel_lab/tinymoe/learning/build_ga.py",
+      "source_sha256": "14d9846ed52dc3c92122cb863b59341fef4fc27b56ff03bb266f9c004b2848c7"
+    },
+    {
+      "source_commit": "742ba9113e0c38c05527fcd433b08499edec7275",
+      "source_path": "research/latch_tinymoe_ga/tests/test_ga_rule.py",
+      "target_path": "tests/operations/test_tinymoe_accumulation.py",
+      "source_sha256": "60706e02cab6b1f5db1f55575cdd9071f4c344163d1afb2736b1a96689319365"
+    },
+    {
+      "source_commit": "742ba9113e0c38c05527fcd433b08499edec7275",
+      "source_path": "research/latch_tinymoe_smallbatch/PLAN.md",
+      "target_path": "examples/tinymoe/reproduction/PLAN.md",
+      "source_sha256": "1bdbb3e21c2e008cd1ee73d48f9d27eb14327d7737787369d1d563165ed89fa3"
+    },
+    {
+      "source_commit": "742ba9113e0c38c05527fcd433b08499edec7275",
+      "source_path": "research/latch_tinymoe_smallbatch/CONFIRMATION.md",
+      "target_path": "examples/tinymoe/reproduction/CONFIRMATION.md",
+      "source_sha256": "40b9b40333b59b5be7d178d54badf29896bd375ea6f5ec376711cad802ec2fae"
+    }
+  ],
+  "integration_files": {
+    "src/megakernel_lab/tinymoe/POLICY.json": "5bf7eb5deaeb9216c173cd08d98506102484d9188e4ca4ce963709d5926c4f6d",
+    "src/megakernel_lab/tinymoe/__init__.py": "2d965f23de538b1b1eb3293751117f0729f71904e4f60dac603477ee6a71824c",
+    "src/megakernel_lab/tinymoe/__main__.py": "5be28371a1e255a74adf01528d3a041779bd89ab12555084b0b058982cdf9d22",
+    "src/megakernel_lab/tinymoe/audit.py": "596ef4fc06684778cc3aa99fa5d9d81dfb759496428f61e554a606493f99f199",
+    "src/megakernel_lab/tinymoe/benchmark.py": "a7155a1df429910eee1511628d583a5eccdfb3484ab396c9f37a63c5891fdc24",
+    "src/megakernel_lab/tinymoe/build.py": "2153f17f4b88c1fefed6cb63acc221b5ce0f281c841d0cb95d9e20ac98e4bcd2",
+    "src/megakernel_lab/tinymoe/check_determinism.py": "81c2381653ae2bae5443d50c1fa20e8564f40864966c02cb2071f9b83151e820",
+    "src/megakernel_lab/tinymoe/check_grouped.py": "528e1822ca05860af1871ad1d6cf4464a811d91a83a85b78e667288793b419d1",
+    "src/megakernel_lab/tinymoe/check_readout.py": "1ea0419cfa2a580f1075bc64e3554ae3c65183003a00e69b229f1444f3fb9a14",
+    "src/megakernel_lab/tinymoe/check_reference.py": "57098d3c8dc96bd8f9c4344bb2ac29d7897764e6584a2edff9acde63ad482cd8",
+    "src/megakernel_lab/tinymoe/compare_checkpoints.py": "7d00ea5c4c5a27b2aae46f5a6be05b3202934f38250f48393508e14c0f1b91c6",
+    "src/megakernel_lab/tinymoe/compiled_model.py": "8046246a1c0514827ab59d2fb02315d086893e0794eeda981ec860df257e71ef",
+    "src/megakernel_lab/tinymoe/conventional.py": "907631fe82445b1a86e26bea6a4ddf0b78519229d79f85e6be7704e5180ea827",
+    "src/megakernel_lab/tinymoe/data.py": "297e5a34ebe25041217bc54edaab4f95fb815b97f7f0912a80fbc4a1b1255b28",
+    "src/megakernel_lab/tinymoe/evaluate.py": "53f641f76d88edbff119445476032ac03e069218e3a3d5976189aa1cb486c897",
+    "src/megakernel_lab/tinymoe/learning/__init__.py": "56bd28a4b4c311120c1ed0725114072c03ec9a0a159b41aee58e87363e0ad52f",
+    "src/megakernel_lab/tinymoe/learning/__main__.py": "6403f4ea2b6d1de0232c859206a633def166f0393ca44d537537b78f710d66fc",
+    "src/megakernel_lab/tinymoe/learning/analyze.py": "aa3be72a0b3f3dc69d01da16c21c1ec08b235df16cec0e147e335f2ec835ea9a",
+    "src/megakernel_lab/tinymoe/learning/audit.py": "f0ee2add351f7b692c3459e33ba5cfc441abdf89a80ad4049bc528fa371af553",
+    "src/megakernel_lab/tinymoe/learning/build.py": "31af584429415706690eed06cc02738a55e6a4825926c0d34e66eebca1736bc2",
+    "src/megakernel_lab/tinymoe/learning/build_ga.py": "eabab2af69079e29dbcdbe1e291805efecb12a27e7cc86651c7a33f4c63604f7",
+    "src/megakernel_lab/tinymoe/learning/confirm.py": "070e9aa1258dd89c73ff337cef0f6f2fc255b562d0daabb328a6fbaf2253a92b",
+    "src/megakernel_lab/tinymoe/learning/corpus.py": "b2b07c54e36ac541ffc40574e2a79bd44a56eaaa0acd123cea60f5a354ba585d",
+    "src/megakernel_lab/tinymoe/learning/evaluate_final.py": "eeb2fd03e295db56a71ecf9bb8c200bd0eacc19d175cc14120775d3f1b4958b9",
+    "src/megakernel_lab/tinymoe/learning/ga_common.py": "4f0ec7b015ffece376d10dd875e28cfa1f88bd599338a556b74e367f35e3a8d0",
+    "src/megakernel_lab/tinymoe/learning/ga_rule.py": "a605c2a4bddefdfb88c783c655a81fdc5de14af36b522809685eef014b1586f9",
+    "src/megakernel_lab/tinymoe/learning/init_state.py": "e23d00fef1acf37ce4df2c610d86acccb87d821b9d07c4c1372692fca4d77c68",
+    "src/megakernel_lab/tinymoe/learning/observe.py": "732ee8434ce56426091df6fa8ab640ce129401695b31a2adc510d40332dd3502",
+    "src/megakernel_lab/tinymoe/learning/paired.py": "70d9c6325ca93c4605156d10c3f6442619a41048e5f79bccd5ac6804753fe6a0",
+    "src/megakernel_lab/tinymoe/learning/protocol.py": "3e7aa4451840a7e83f0896d85734112f634eb23d65af43de3aae8e8dd2024db4",
+    "src/megakernel_lab/tinymoe/learning/quick_windows.py": "f0a13d8008f425367ba97d8e11e7796ccb1b0d03c78b3c5a5acf9a6374397dbf",
+    "src/megakernel_lab/tinymoe/learning/sb_rule.py": "aaa9dee44c6881216604a83078f76aaa56ac06bb56bf4595728e15ff40cf7b33",
+    "src/megakernel_lab/tinymoe/learning/train.py": "bb5f1230965247b62feb57e11bea6e802bd263b00562de8571af9fece27c2a4e",
+    "src/megakernel_lab/tinymoe/model.py": "d91eef2272226e06204cb4d91303ab3fbd538ea7dc9dc1ddcfc6776d71dff15e",
+    "src/megakernel_lab/tinymoe/native.py": "46a4fae2f58b0db421b32bbc30b55077a7f8a75803b8ed219b424059864ae972",
+    "src/megakernel_lab/tinymoe/observation.py": "fc5858e3414786f5b1a53878fed126a4af4952d547fcb22670dcbd40a769689d",
+    "src/megakernel_lab/tinymoe/optimizer.py": "0899f6da84d4d7a8168d1ee79c19703c4211dacc10ecbc084eacf872a88bc0f7",
+    "src/megakernel_lab/tinymoe/pins.py": "be34e113f2e74d9379e2a94011a4b56a8b404fd323b5266091472655f1640529",
+    "src/megakernel_lab/tinymoe/runtime_probe.py": "e06e2927d77b2a75a9857fac1d22ee7c8d83b8adadbd329b1ee1e06363299a8f",
+    "src/megakernel_lab/tinymoe/train.py": "32ca6a96808af5d5f5e17e67d801d01200467ae8571d07790ead266b0e5564f0",
+    "src/megakernel_lab/tinymoe/weight_ema.py": "4227c46559029bea407f717dd7e0a67400ddedcdd0040610be421e6c86dff476"
+  },
+  "integration_note": "Packaged helper imports/local-file paths and explicit optimizer factory are new release bytes; historical binary qualification is not inherited."
+}

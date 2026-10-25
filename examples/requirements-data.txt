@@ -1,0 +1,5 @@
+# Data preparation for the examples (CPU only). Needed only for `prepare_data.py text` from FineWeb-edu;
+# CIFAR-10, Fashion-MNIST, --text-files/--jsonl and corpus.py use only numpy and the standard library.
+# Versions are the ones the examples were verified with.
+pyarrow==21.0.0
+huggingface_hub==0.35.3

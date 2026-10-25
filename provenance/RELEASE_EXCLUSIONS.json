@@ -1,0 +1,21 @@
+{
+  "reason": "Experimental distributed-training implementation is outside this single-GPU release. Entire dependent test files are omitted; original tests and gates remain in the source commit.",
+  "paths": [
+    "src/megakernel_lab/operation_compiler/distributed.py",
+    "src/megakernel_lab/operation_compiler/peer_transport.py",
+    "src/megakernel_lab/operation_compiler/gradient_buckets.py",
+    "src/megakernel_lab/operation_compiler/kernels/peer_transport.cu",
+    "tests/operations/test_exact_vocab_emit.py",
+    "tests/operations/test_serial_weight_accumulation.py",
+    "tests/operations/test_practical_bf16.py",
+    "tests/operations/test_serial_bf16_residue.py",
+    "tests/operations/test_k8_serial_sum.py",
+    "tests/operations/test_serial_bf16.py",
+    "tests/operations/test_backward_autocast.py",
+    "tests/operations/test_gradient_buckets.py",
+    "tests/operations/test_embedding_backward_contract.py",
+    "tests/operations/test_distributed.py",
+    "tests/operations/test_bf16_sdpa.py",
+    "tests/operations/test_indexed_numerical_metadata.py"
+  ]
+}

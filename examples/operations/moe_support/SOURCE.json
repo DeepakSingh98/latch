@@ -1,0 +1,78 @@
+{
+  "donor_commit": "8292d176b9dbe224bd9f73804f368d68d81e22e5",
+  "files": {
+    "UPSTREAM.md": {
+      "adaptation": "Exact preserved upstream attribution/license; historical original FGM scope, not a new product qualification.",
+      "commit": "8292d176b9dbe224bd9f73804f368d68d81e22e5",
+      "sha256": "35f4196e17fa54556a3b6b1da857dd21f2ceafa9ccfdaf88f5fc74a77da86218",
+      "source": "research/fgm_a/UPSTREAM.md",
+      "source_sha256": "35f4196e17fa54556a3b6b1da857dd21f2ceafa9ccfdaf88f5fc74a77da86218"
+    },
+    "UPSTREAM_LICENSE.txt": {
+      "adaptation": "Exact preserved upstream attribution/license; historical original FGM scope, not a new product qualification.",
+      "commit": "8292d176b9dbe224bd9f73804f368d68d81e22e5",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "source": "research/fgm_a/UPSTREAM_LICENSE.txt",
+      "source_sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    "auxiliary.py": {
+      "adaptation": "Exact selected supervision functions; unrelated learning arms omitted.",
+      "commit": "8292d176b9dbe224bd9f73804f368d68d81e22e5",
+      "sha256": "240ff0c22fc2cf7a54dadc0c4f23c1a3a9bc971f1968efb151e4b339de4c7153",
+      "source": "research/learning_scaling/auxiliary.py",
+      "source_sha256": "fc97b7343fc6660a79e0b34f254a102a7dbadc856fd0a0ee761d72aa8715bcea"
+    },
+    "backbone.py": {
+      "adaptation": "Retain ModelConfig, RMSNorm, Block and LanguageModel constructor; restrict to MoE-supervision arm and single rank. Exact supported parameter construction and initialization retained; unrelated arm methods omitted. Unreachable other-arm construction branches removed.",
+      "commit": "8292d176b9dbe224bd9f73804f368d68d81e22e5",
+      "sha256": "6a067b85437f85bd15ef02f83115eba14b1cde1cccaba45e743be6120f7dc7dd",
+      "source": "research/learning_scaling/model.py",
+      "source_sha256": "5837a25f58e26051b708b80385086d4e2e0f0648afaa1786ac74fbf40866621a"
+    },
+    "fgm_model.py": {
+      "adaptation": "Exact self-contained donor model, used only for parameter constructors and initialization.",
+      "commit": "8292d176b9dbe224bd9f73804f368d68d81e22e5",
+      "sha256": "4b623837e13d3ccb9a5a7fd4fd383ce1c58fb0c51e21f9624a8d809285a4680c",
+      "source": "research/fgm_a/model.py",
+      "source_sha256": "4b623837e13d3ccb9a5a7fd4fd383ce1c58fb0c51e21f9624a8d809285a4680c"
+    },
+    "model.py": {
+      "adaptation": "Namespace-only imports; fixed accepted argmax selection, blocks attention spelling, separate heads; single-rank context replaces distributed helper. Documentation identifies the local narrowed constructor adaptation.",
+      "commit": "8292d176b9dbe224bd9f73804f368d68d81e22e5",
+      "sha256": "3a8847d3d9d2e7a20beeac4d8959c2aec0d4f23d816f8e32c453828afc90bd23",
+      "source": "research/latch_moesup/model.py",
+      "source_sha256": "8cbad297f7a4f01d439cab0e2e93c885c8153c94d7f88dc83240a262ef5809ae"
+    },
+    "moe.py": {
+      "adaptation": "Namespace-only adaptation",
+      "commit": "8292d176b9dbe224bd9f73804f368d68d81e22e5",
+      "sha256": "82cbd0972e4fc281d182078de8cc69e2a75ad5d79a831dc974be5cb21d54dd9c",
+      "source": "research/learning_scaling/moe.py",
+      "source_sha256": "0fc531b1a8328e6fb430541f1d45493bcb14a6be04636609972c1cd1b0663fc7"
+    },
+    "optimizer.py": {
+      "adaptation": "Exact tensor rule and schedule vector; unused research-checkpoint translation functions omitted.",
+      "commit": "8292d176b9dbe224bd9f73804f368d68d81e22e5",
+      "sha256": "7412c0a1e2afc83b0dc4bbfa6fb8c7ff3a856ff05dc4607a18e0170aa833f796",
+      "source": "research/latch_moesup/optimizer.py",
+      "source_sha256": "e7aed98264381afdd8f401e58663581a49364f46f0b12f85acef141dd842d6d6"
+    },
+    "recipe.py": {
+      "adaptation": "Pinned recipe constants + exact learning_rate function; only 25m/tiny admitted; no training/data/cloud imports.",
+      "commit": "8292d176b9dbe224bd9f73804f368d68d81e22e5",
+      "sha256": "28a044bc90e1e792b361f52f4c401aea4ff9c16b44d70653524676766009b62f",
+      "sources": [
+        {
+          "source": "research/latch_moesup/recipe.py",
+          "source_sha256": "42908a2fbea00dd6b7a9642365485fc91dbf316da19479e04390d18254b7fb19"
+        },
+        {
+          "source": "research/fgm_a/train.py",
+          "source_sha256": "3f94c71670d09fffe5f327e4321485a6d669b0129d94b12cff606d146aa8cd8f"
+        }
+      ]
+    }
+  },
+  "schema": "latch-integration4-moe-example-source-v1",
+  "scope": "Example support only. No research import paths or cloud access. Runtime compiler is installed megakernel_lab.operation_compiler."
+}

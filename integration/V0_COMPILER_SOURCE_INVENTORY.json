@@ -1,0 +1,2376 @@
+{
+  "schema": "latch-v0-compiler-intake-v1",
+  "release_base": "6127a450ce897a83eb7c7237b3c340376c2c1779",
+  "tinymoe_product": "adde6ca52b556df8585edfb6c7ade3a241964620",
+  "validation": "Static only; fresh cloud validation pending",
+  "files": [
+    {
+      "path": "src/megakernel_lab/operation_compiler/LATCH_OPS_PROVENANCE.json",
+      "sha256": "cf0b160d1f4e7434979305d031e3b8dc17ffa29505a5e5daf698238209bb4f20",
+      "bytes": 1567,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/NUMERICAL_POLICY.json",
+      "sha256": "05e198353251c8d4848f75f329bc1a54a1adc5ddbeb9aadc1d242b846faf592e",
+      "bytes": 934,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/PERFORMANCE_DONORS.json",
+      "sha256": "391f711787247367786bb6b5db3d32e48eb00a636c7201ea53f811e1036a3076",
+      "bytes": 62822,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/PRECISION_PROVENANCE.json",
+      "sha256": "1d95be741349a67e6301072664f8f022c4c00504e74b172891bae44fc0d5db3e",
+      "bytes": 353,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/SOURCE_ATTRIBUTION.json",
+      "sha256": "3288fd3bb84915d3606d689f7bd73f0201a70894d8c91e70758f02862588bda2",
+      "bytes": 19598,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/SOURCE_ATTRIBUTION_PRE_P9.json",
+      "sha256": "6c77805447aad1c78d1a072e0c16570b2db97ad510bb44f8200570606a8787cd",
+      "bytes": 12585,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/STAGE3_POLICY.json",
+      "sha256": "f1dfa23d9bd9862f22cd27f9634dfcb6584f5e6a38b3ebe11865a5aad9c96c38",
+      "bytes": 2835,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/STAGE4_POLICY.json",
+      "sha256": "a8522bc568f65406a93afc430fbb8b2bb3315f3551bb3667fb4bce880222127e",
+      "bytes": 6661,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/__init__.py",
+      "sha256": "c3b40f52f6610b1c91fb073246bed58c73d98176d97fac4ecea01753e6f40d5c",
+      "bytes": 2212,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/api.py",
+      "sha256": "30bfd3e60d7d81d9aae5dcea25cbe69c0ab038da61bb07dd844732117ee6b20f",
+      "bytes": 43059,
+      "equals": []
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/attention_adapters.py",
+      "sha256": "c5d15bdbb966ac2e01311c9bf6583a83621272db9ae8f2b609271dade718ca2f",
+      "bytes": 28722,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/attention_canonical.py",
+      "sha256": "cfad819f3fe4953b0cbd09b0ea51dce5c352cb50a7cf57e761cfc3178c894dba",
+      "bytes": 19382,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/attention_item_codegen.py",
+      "sha256": "0e5b398bec3d7375c91ae395162dd7b80315c431ad257275a227f783060694a1",
+      "bytes": 8012,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/attention_lower.py",
+      "sha256": "1ba1b6733481a2e9231973aeed914267f93ddf61c40caa1aa85424bfc74da5c1",
+      "bytes": 55865,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/bf16_exact.py",
+      "sha256": "9cb931e70b7022df737e700bf000e74a7db9e3445e5f495fb14410087a50bb22",
+      "bytes": 5542,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/bf16_retention.py",
+      "sha256": "724e151d3f68a11a9cb5f58896a86e475c72caea2f0fb778097d7f8bcd4f977b",
+      "bytes": 12954,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/bf16_sdpa.py",
+      "sha256": "cb48a417fbd74fda4dfd848b4e5efa043d898346e9afda9fccf1ae9d1551442a",
+      "bytes": 13622,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/capture.py",
+      "sha256": "8030e2ad3c0f9cf3051047a9c14c173e3225dfe14e1ccaa3031465d6e0bdd58d",
+      "bytes": 69206,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/channels_last.py",
+      "sha256": "e706a83d6a65fad30c2745b78a0bcf4444e7256bbe80fbc45d28b26ef621cf89",
+      "bytes": 14951,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/codegen_rules.py",
+      "sha256": "349be2aedbdcfdfcc4aac85bcfaac64b8b02328f4c94df62449393046936d6b9",
+      "bytes": 8475,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/compose.py",
+      "sha256": "a0a88264688961227d32e568b270a3764d835d8b4390f9e5b14d588c2be529b1",
+      "bytes": 55252,
+      "equals": []
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/compose_attention.py",
+      "sha256": "0d03d103aa28cfc53d9b3aab1a6163f675eb408ffa26998d7279a3c49261e985",
+      "bytes": 27054,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/conv_ops.py",
+      "sha256": "04ca2f13167f87cc2dcc48b540a467e566f08de0bf85593bc0b0bb70b97ef199",
+      "bytes": 56174,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/distributed.py",
+      "sha256": "780b055e7161187237fe18a557f463942ac6b86720148891716760a9ee38451c",
+      "bytes": 58397,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/dynamic_batch.py",
+      "sha256": "5f7faa74677007ded6024c5bf4eded29adb7548136fee6a91b3f605680537d03",
+      "bytes": 17718,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/dynamic_codegen.py",
+      "sha256": "290abf6d0438370b94a8a22d0d1d989ad9a7e02bdb17af297ca8c61ddafed223",
+      "bytes": 15181,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/dynamic_flat.py",
+      "sha256": "3bb8f88f82d03c6f47bb655eb517c04b947dc66cecc8cdaedcbe78c94acd492b",
+      "bytes": 29202,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/elementwise_codegen.py",
+      "sha256": "7ade06c4b5c8f9f936acf9170218570f1ad5499bbe105f8974fbfeec9617e586",
+      "bytes": 17242,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/embedding_backward_contract.py",
+      "sha256": "140a3ea259a5515a58e945a2aba77c7c9b906553e5e65c1b8943d051af404ed2",
+      "bytes": 14060,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/epilogue_fusion.py",
+      "sha256": "27f62076f7e164446ac115338110c5b94a0de987a6ab08ca192786981cfc14d6",
+      "bytes": 7397,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/exact_vocab.py",
+      "sha256": "f51835c22a61f4adfbf7b641b7005678fcbb179f7d2ca0ea92ce491d3f96441e",
+      "bytes": 16349,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/exact_vocab_cache.py",
+      "sha256": "099e0bc22542c2bf826e36a723ae482963438673569e0c261a9f016ac902acde",
+      "bytes": 1549,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/exact_vocab_emit.py",
+      "sha256": "6e835da72744db35fa88601320a37f5b41f29d664ee166d0de1df6e3a1eae31f",
+      "bytes": 9928,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/execution_plan.py",
+      "sha256": "cc1cbd686d5f4567cf4780fac908889dd70058698a8afbb20ea7413016921b67",
+      "bytes": 11511,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/execution_policy.py",
+      "sha256": "2864b84d2053fec3875eb32c8383a60c7614cc750975fdf12bc2db8c238dfc5c",
+      "bytes": 2815,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/explain/__init__.py",
+      "sha256": "36ff89960f17b1d77373b40d0866e2f4f34d67700d4b0ac6538612d1d29927c0",
+      "bytes": 1601,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/explain/__main__.py",
+      "sha256": "379b57731ad02b72fdd7af8084edb546cd88f3893631934f820651beeebd65eb",
+      "bytes": 3711,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/explain/collect.py",
+      "sha256": "c63fcbb7f4ee011d886e56fda5d4699f20867c8de43734054e958cd4b05152d1",
+      "bytes": 1605,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/explain/moe4.py",
+      "sha256": "289573ca7fd49cbe8ab89cd48cb2b2619618301c0e4cf2d8f5395dcb5ce600ec",
+      "bytes": 19072,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/explain/profile.py",
+      "sha256": "9593bb087477666b5198c998646d408e29f43e644f41a499fc14ba4ab8b03fe5",
+      "bytes": 8805,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/explain/render.py",
+      "sha256": "e1b3a5fc02d9ca878bb300fbfb7aec2d60205567062a982a59ca4b8093b41e56",
+      "bytes": 17430,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/explain/report.py",
+      "sha256": "26be7c73b874de6324ebd7fd2659a66573a671fb22fe791b417a8f7c7fe368de",
+      "bytes": 42780,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/expression_rules.py",
+      "sha256": "db41b04ce903e085881c1c59d6b9055a3f8b31f216d91d33924cb2cd51de970c",
+      "bytes": 1606,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/extra_ops.py",
+      "sha256": "42b53be6beae63e39586c5b9fe77d004a8029e9fa973447f71091b6f09fba35b",
+      "bytes": 34109,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/flat_elementwise.py",
+      "sha256": "4c2b7e11acbd202591397dfa2f88a58efc46c21e037e72918f2cbe831b73ec0a",
+      "bytes": 2040,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/flat_long_attention.py",
+      "sha256": "3317e557d33ee75c1fabc16614f5fae5c937c01c500c4e2b7f7ea0fbfbf1200c",
+      "bytes": 26979,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/frozen.py",
+      "sha256": "acc8f807919c10c363b65015fb3115127cb6b490662857115a2026b34a2a8b6f",
+      "bytes": 7265,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/full_sum_codegen.py",
+      "sha256": "4ea84e2ce8e6aadac27052c389e26fe8ce3d81468c415329d2d9da0fb3643589",
+      "bytes": 11394,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/full_sum_inline.py",
+      "sha256": "014898b7d00bbc96711cda94abcb4ec005092204fe7df635fafa4fb2288997d7",
+      "bytes": 3388,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/fusion.py",
+      "sha256": "79f4d0441a67010b2070e40243927337f517110d9efdce24a03dd0bd62f6d942",
+      "bytes": 832,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/fusion_p6d.py",
+      "sha256": "2192fac2d21e1f9a4c5d38d754f2dcda68d8dbc8dcd410fcdd82bdf070ca4dc8",
+      "bytes": 162636,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/fusion_p6e.py",
+      "sha256": "fd44017d21c1ae6fd8fbd947a4b036bcdf382b7768a88683a0fb5302d401dd3c",
+      "bytes": 213720,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/fusion_p7a.py",
+      "sha256": "eb120f90d16325f5a825ee6edf7d2dccc6ab0a74681d8e26da6cb8733e709678",
+      "bytes": 307946,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/fusion_p7b.py",
+      "sha256": "a2f27c092fca5b71016aa1cb80b27e39a1dc7bc10491e0e1ab3308ba01190ad8",
+      "bytes": 389076,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/fusion_reference.py",
+      "sha256": "203cc2996b45086e304f61024c083e7d8254079da88257bacc336af26b1a6289",
+      "bytes": 192420,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/gather_cast.py",
+      "sha256": "70817187736083b79d05ef0079e9d50f6344a4515cf62118d8eeb5b3eaf4679a",
+      "bytes": 7114,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/gathered_row_sum.py",
+      "sha256": "0d8059fee46d5067ef94159428b84e59bf65ec27537ae0ca7a82ff15e6805b42",
+      "bytes": 17913,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/gradient_audits.py",
+      "sha256": "66400c4cf0dcf2d944bf7f509e45831b690d61fec802ae38953707503572c63d",
+      "bytes": 2752,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/gradient_buckets.py",
+      "sha256": "e448107920431759a375751d55b22be13acf1532ad3f117ae7398a240e1cf513",
+      "bytes": 10511,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/gradient_consumption.py",
+      "sha256": "b4ea701a647ba6769afa725262a179760d6f108362ede3c5cfe78a97ae098718",
+      "bytes": 4868,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/group_rules.py",
+      "sha256": "ecbf506f1bdbe249560e629e6c9ba224d8ba55c5716eac06d4273b353e3c6ce1",
+      "bytes": 170344,
+      "equals": []
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/indexed_atomic.py",
+      "sha256": "595899e720afcba980418cec20915299f9a0b69cee3d32929f49d05cd167fd5a",
+      "bytes": 8500,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/indexed_compose.py",
+      "sha256": "484f3983b374fcfd2d7fbb8999b44644f52a0c59f226611e01cbaae4833e60e3",
+      "bytes": 11875,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/indexed_owner.py",
+      "sha256": "153c9d0fd58329d5b29ea8b3385f0cf78efc8c4b5b34027549dfd603eba2c396",
+      "bytes": 18240,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/indexed_reduction.py",
+      "sha256": "f02f5c0caf2b421b8d7e255b579ba091a87bb28af48ebe663f8a974b5f718272",
+      "bytes": 25263,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/indexed_rowscan.py",
+      "sha256": "501ab915d8fd63ea156c5571bcc6688ebae36ae56d07a7c4eb4e8821d1c88576",
+      "bytes": 15515,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/indexed_segmented.py",
+      "sha256": "c95226aab19b2698cb8f78762966e978efcd394f302a791d50d8e871d54f411b",
+      "bytes": 37214,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/indexed_segmented_outline.py",
+      "sha256": "d33947371d84a48919385b9ffc4c15ee1a5cae9a0ae62073b094a4d55995bef3",
+      "bytes": 6683,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/indexed_source_inline.py",
+      "sha256": "a6ee462c4934e676cb7f63e00581fac1b5c4dd053e997b2a3648eccffebbc780",
+      "bytes": 11340,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/inference.py",
+      "sha256": "62662159dd38baeb639678ac150bdbb89dbd22ffdaae675a618018c4bede51bc",
+      "bytes": 37420,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/inference_lower.py",
+      "sha256": "dc8268c2cc97cddf8e83be0c212a3ab4b4fdd3cb0a2361a7d970a7cd482272b4",
+      "bytes": 10974,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/ir.py",
+      "sha256": "e76d95053cb5b1783e3a3d09638e86b9a6b2f6bd4392d2dda6019ff69e414726",
+      "bytes": 9345,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/k8_serial_sum.py",
+      "sha256": "5ad73ecdb1e7ded1a0ba0cd64b73e5b489c9a3bd425e97760bde63adf923cd6d",
+      "bytes": 23221,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/k8_widen.py",
+      "sha256": "a55d74a090bbd9475f45727284077cc516c20153c648af26063b04ceba003637",
+      "bytes": 5372,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/attention_item_wrappers.cuh",
+      "sha256": "6235e237b0dcac34a77b4917d27b5a511dc9fcf0ca1589a345b6be5bf74c099b",
+      "bytes": 767,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/attention_long.cuh",
+      "sha256": "e21363f72877abd4dc4bf713b0d19fca5bd77e957bf33bec2b4d10c3987e26da",
+      "bytes": 71008,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/attention_long_flat.cuh",
+      "sha256": "c9ea55fdf04212e2176e713a479247da8fc1a50e5e4504a34a87d0bf50ca21c5",
+      "bytes": 275161,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/attention_mixed.cuh",
+      "sha256": "8f9d5f3d08cbbe29f9beedb5fd4ff63ea2ba501c02eee6df8e8c279b7a7e0936",
+      "bytes": 133668,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/attention_p9.cuh",
+      "sha256": "dcee6fe2d8c3c91890e9172b0c0d9f9ef7b72dbeebf7a128dcfd02b53365543a",
+      "bytes": 85193,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/attention_short.cuh",
+      "sha256": "f794dc203d347524ae41bdb8e1bfd3763104cc226adb25f7d402ecfea983b021",
+      "bytes": 38760,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/attention_window.cuh",
+      "sha256": "4956893fccaf040b3e6c125c62cbd652707b0404e8e17071becc79bfbc456a63",
+      "bytes": 62506,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/attention_window_v4.cuh",
+      "sha256": "088e9a22ebe3172df94533659b74128e4d8877972f564356735b7afc3a47254e",
+      "bytes": 41397,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/dynamic_batch.cuh",
+      "sha256": "19ad272c3dfe9b977ee507732ceb251627083f1060d4bf66b3af7dca2ca9a548",
+      "bytes": 5283,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/dynamic_flat.cuh",
+      "sha256": "84dbcba560dbc2d1209da1c5cb7e71a168684527b7c8db47c954eadb10c9490e",
+      "bytes": 18309,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/exact_vocab.cuh",
+      "sha256": "97fd6d410854d47f6cf3458164615297b33c480d98a5fd1a1289a7086aa513fc",
+      "bytes": 7799,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/exact_vocab_cached.cuh",
+      "sha256": "c13d000418dea4a48e768ac68151f7bbf689a8b4a82c16444f8979a8fa3160fe",
+      "bytes": 3237,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/exact_vocab_fused.cuh",
+      "sha256": "9af54a8f1eb73edadca6ed5929a99c5c55f1bc804d4cd0602cfd25a05f825b4d",
+      "bytes": 9305,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/fp32_matrix.cuh",
+      "sha256": "3c9d7b4675f1ac7e16d1af4dde40d1070a959d8afed0ad9445408879ce3a05c4",
+      "bytes": 13939,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/fp32_simt.cuh",
+      "sha256": "8b2035f2228ecf6bda0d672ac35bd9a60e335ff1b7fef5a1d59e81080c2e31a6",
+      "bytes": 13848,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/fp32_slice.cuh",
+      "sha256": "a6f08546683a3529f8551fa3511e6c085b7c7c68f16b4ab084007a90b76b6946",
+      "bytes": 12349,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/k8_serial_sum.cuh",
+      "sha256": "fa8fe750d622e03338f976cd5a14b824b08b31362ed2622cdd8b7bd911724329",
+      "bytes": 3304,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/latch_smm_split.cuh",
+      "sha256": "31f32fb7854a13fe59065f171036106ab2f3ea16fffddc8f980658ed5ef13c64",
+      "bytes": 9646,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/latch_tma_epi.cuh",
+      "sha256": "1ca4aae48d8f9d98a0bf060a167f5b49646f68c795bcd379557d085e973b52e2",
+      "bytes": 5150,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/latch_xdiv.cuh",
+      "sha256": "e59b0c21988e2dddfc011a69070767ee28a25377917aed2fadd6037038b04b15",
+      "bytes": 1463,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/matrix_splitk.cuh",
+      "sha256": "cadddb49403415d01d8fa8648d6ef92275d302fcd897328d65ef7e1db848f3a4",
+      "bytes": 6518,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/mma_k8.cuh",
+      "sha256": "b37848e4539cfa25c840cbdf05534a281381167e1f0c805c29a7cd8309c82ccf",
+      "bytes": 13835,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/p5c_accbatch.cuh",
+      "sha256": "299e969e72711db97181ccfee9bdbc3a1bf75c797dc7367a291fc5fe75768801",
+      "bytes": 152,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/p5c_accpf.cuh",
+      "sha256": "5178b06002e731fe452c3189611e84ee3f788a71bcd1d0f849b8cae9d88b84b3",
+      "bytes": 137,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/p5c_bulk.cuh",
+      "sha256": "ffb8d61d854bb68eaf38f7fdbed025b5401f6bcdf0040127ca26b5a1c73ea794",
+      "bytes": 142,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/p5c_decoupled.cuh",
+      "sha256": "1c358fdbef453d2db808e6a5f8434c356d3a9c9f205cec34dc80ab9e27ead3e7",
+      "bytes": 140,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/p5c_epipf.cuh",
+      "sha256": "bba1362f9b88a34929185b66f9a555d4bc941b3c3447fb13dbf4858672e4af31",
+      "bytes": 133,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/p5c_parpre.cuh",
+      "sha256": "a9d11a6dd7f4e26b9ee7a8139db66fde4e861e93c82971c54ec4944e91c5cc20",
+      "bytes": 121,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/p5c_staged.cuh",
+      "sha256": "559e4a7f74350a5fe89453d57efb040cd7e7427d2172e7fc12e4efd2bb143bc7",
+      "bytes": 145,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/p5c_sync2.cuh",
+      "sha256": "c76fe49f2b236f40588ad2308655e7265122aa3e5e1e83345a1f3b9797a295c1",
+      "bytes": 142,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/p5c_trace.cuh",
+      "sha256": "6967858f5855bc79750161608b6169d64eff7bea26886650d5c2739bceeaf302",
+      "bytes": 132,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/p5c_wg.cuh",
+      "sha256": "a0c323b14e24b56c2e7f99d33c8c6b6e9bd6a97db3a75092faf63cf66b76547d",
+      "bytes": 107502,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/p6e_tma.cuh",
+      "sha256": "e1faa362e19acd0aa307c422c50374eca6f34db4cd1232fc4b84f6f144a03dd5",
+      "bytes": 43932,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/p8ws.cuh",
+      "sha256": "85c49a38b8e18804b934d8839d157bc99f3dc291c6a43b7dc2adbce00e9a3e5e",
+      "bytes": 41772,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/p8ws_region.cuh",
+      "sha256": "27653936b51c14731987a2aefbcca1470b383bbadbb373c9964cbdcebd379780",
+      "bytes": 23588,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/p9_bulk.cuh",
+      "sha256": "d9b3bf6ff699a8f7978050fb892019132652e813a3dcaef4a46babcc59896f33",
+      "bytes": 2661,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/p9ws.cuh",
+      "sha256": "d291d3e6d3a1c65f56ebcf5ba2bfbe65214511cbe69b217d360e12e959481057",
+      "bytes": 25575,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/padded_access.cuh",
+      "sha256": "3610541bf5dbe6e9909f25e6727b0fc9fe67a0239964b0790957d9ea82eebfcc",
+      "bytes": 4088,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/panel_engine.cuh",
+      "sha256": "c60262eeb288974c0a886b4a8a3729af04b0f9ae3c1abc1edfaff023f0bc9d8d",
+      "bytes": 32943,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/peer_transport.cu",
+      "sha256": "eb344a3088211ebdc01771ce19682ba661f560b9ab29bcea1d4bf645524ab8a0",
+      "bytes": 10523,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/pops2b_mm.cuh",
+      "sha256": "4a583f98ecc531c5f97eedaa2bcc3d95cfb7b435c16fef96b50ae0f1c96313ca",
+      "bytes": 13243,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/pops4b_tma.cuh",
+      "sha256": "8c25098e2e68f27ae3f4fad613ae32665183808b3d2e139d6a4a8e11ca4f677a",
+      "bytes": 38508,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/pops4b_tma_p7a.cuh",
+      "sha256": "ff8c01db53bc6649b2bd96a1781eff65894dff306f132812c313fe6cc8b0f1e9",
+      "bytes": 67860,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/pops4b_wg.cuh",
+      "sha256": "1d5f8f630ca1236c3941d160d10d4696a459b54709186a6069cd09a6b5f097d7",
+      "bytes": 15573,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/pops4b_wg_p7a.cuh",
+      "sha256": "610b7181bf4e140fe5b38209bca9addc829cdaba0bb69d20478342011e98e204",
+      "bytes": 15530,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/popsc_mm.cuh",
+      "sha256": "8b4627628a3353778b22387d03eb6b0e0c8e9a591e2d822918262c7444635c8a",
+      "bytes": 71313,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/ragged_experts.cuh",
+      "sha256": "4f9fbb6eeb0daef1a580b2c05363ac791e87001f428dcc7a441fa5f09b5842e7",
+      "bytes": 5966,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/step06_dgrad.cuh",
+      "sha256": "4ed92364fb6cd776d66cd8580bf9403bee324e606785c8485d06e4a1f339687f",
+      "bytes": 20653,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/torch_column_sum.cuh",
+      "sha256": "61c076e8789ba5a07800786a4859f1a7dbcb10538507ce995ff52a4969e33b33",
+      "bytes": 2722,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/torch_layer_norm.cuh",
+      "sha256": "10a6384e77bddb3279bc83a972b5a9d1edd08f61cb62bbba0348c27f1f4c5fc6",
+      "bytes": 12733,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/torch_layer_norm_affine.cuh",
+      "sha256": "d0c32adbbed92314d1509b03de8e942089ff539750a5e20ab188d8cb8741707f",
+      "bytes": 4702,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/torch_layer_norm_backward.cuh",
+      "sha256": "eafe9e52a0c50abbc69190eaaaa9587ceced28ea56e9fb675712625e425b1432",
+      "bytes": 10273,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/torch_logsoftmax.cuh",
+      "sha256": "2be531e06604e5bfb58ed7c1c3db4f480da8f1abeab5659bffb0900ff5c2a32c",
+      "bytes": 4014,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/kernels/wgmma_k8.cuh",
+      "sha256": "d9dbb835796a1310a863fafaee7c3ae0f01d48f762613c29e400f8b8d0059932",
+      "bytes": 60026,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/launch_cache.py",
+      "sha256": "abc81bb9545131835052f0ad978b07fb3cc93c2e298b1e845beafdbd9c6e4e7d",
+      "bytes": 3339,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/layout_canonical.py",
+      "sha256": "3bf76846308aafd5224bfd363e77411c1b3e614dc8ebf9a443b1f2766caffa32",
+      "bytes": 18409,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/layout_normalize.py",
+      "sha256": "993d19fef73ab070c58179813bb43c7dbdb8bf5ad41cd63577c70a1187ff7466",
+      "bytes": 5883,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/long_attention.py",
+      "sha256": "135251f19a4fbed4542d1850a8d70725129b564a5929b185bb0bac816b60373b",
+      "bytes": 18221,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/loop.py",
+      "sha256": "5a3ad4f714a262dc2ee10e6e249ef61d36b4d4b6d57a7f340715104b946d8a70",
+      "bytes": 99032,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/loop_attention.py",
+      "sha256": "83fbce7a5958034bb341f24b249523bd9f9ae2fcecdcb719eab76331b9330101",
+      "bytes": 20725,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/loop_defer_grads.py",
+      "sha256": "20fa3fbb3b58f3e29e10a1633671d45c9ad870dc2246fcea2387ffbfb7734c93",
+      "bytes": 13210,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/loop_dgrad.py",
+      "sha256": "9c965a3db6407a3eef465856121d553014701b52f8b6acf8606b50bc29be99ba",
+      "bytes": 8617,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/loop_lower.py",
+      "sha256": "442ab96edb211f8ace232e90253d30c4b6ffbebc62591b34f64d2d9f01ffdb44",
+      "bytes": 37010,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/loop_pipeline.py",
+      "sha256": "d7f8f63f585424d07ddd228baa195a2ce85c2802b4c2ced082affff64f234506",
+      "bytes": 93953,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/loop_region_executor.py",
+      "sha256": "4629e58cc5da1bddc930d1a347a4f7fa186d0cd6f4ad0d1f8fa46420ade910ad",
+      "bytes": 10556,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/loop_slack.py",
+      "sha256": "69b51827607ee525af9292a7997ae44163167a874b0fe3240bfd5b9afaa7a597",
+      "bytes": 6929,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/lower.py",
+      "sha256": "5b1db9f838735b5f84af5e02a6fa556997ab0ddd3a6968c958f9dd4ace107ecb",
+      "bytes": 425448,
+      "equals": []
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/matrix_accumulation.py",
+      "sha256": "2f2cc2802f8eee2aaa45eaf3aa73054d5bf64c15e65dba6059d5cf06acca0120",
+      "bytes": 2281,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/matrix_adapters/PROVENANCE.json",
+      "sha256": "a54ef084d8fe646ce5a3abb3d1e46f459369e01fca647ddc2cc23f44812e14a5",
+      "bytes": 1702,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/matrix_adapters/__init__.py",
+      "sha256": "c8c1faebc5d035ce2be03c773ac2be5014201873f94f6dc1004261aeb6e5e4f7",
+      "bytes": 1150,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/matrix_adapters/bodies.py",
+      "sha256": "0d76aa36714727c4a3099f3bfda2442b2c98c3250ca4b06e23cf6c83794ad88c",
+      "bytes": 36631,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/matrix_adapters/candidates.py",
+      "sha256": "d83ba19ee61cb67ffadcf09ec70340933b4c8cb8e7811768ec573d790187311a",
+      "bytes": 9236,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/matrix_adapters/compose_adapter.py",
+      "sha256": "dd71fc65a02420f85374e97a75a9aa27812a8db7eb425a0ad9ba47632d2f30c0",
+      "bytes": 2258,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/matrix_adapters/mma_k8.py",
+      "sha256": "dd65c23fdbee45a435e8dda22d59b4c41965e31d1cf6a2f57fe5fa2fa276565b",
+      "bytes": 10670,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/matrix_adapters/padding.py",
+      "sha256": "4049570f31fde4f08d2c1b210a5fc1de08b921aa33f4ab1171012e7447e6deb8",
+      "bytes": 8732,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/matrix_adapters/problem.py",
+      "sha256": "5ac747280ffe83fc7dbeb76c3daece502e9d862cc50e88d0f5cb40112bcd3c31",
+      "bytes": 7085,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/matrix_adapters/provider.py",
+      "sha256": "faaa43326b5f20af0c88777df1d5d8ee714d48192091cf673493fb0bc8fc092e",
+      "bytes": 25125,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/matrix_adapters/requirements.py",
+      "sha256": "da6af60987f36028946ec6287f620d63168532be4a878b8b435bf833a0c901ae",
+      "bytes": 5907,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/matrix_adapters/splitk.py",
+      "sha256": "7362e8011165c67e5b0100c198636c85c0004d7c23eb25587b1e684677983623",
+      "bytes": 4210,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/matrix_codegen.py",
+      "sha256": "ba13c529afbab32ef7239227f871ac75270471c8bc7b9408ac7a7eb13c88636d",
+      "bytes": 18508,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/matrix_codegen_p6d.py",
+      "sha256": "0a1cf81f0a197ffd6eeae8644b96920cc7c7e107687cf02d49253bc34946f75f",
+      "bytes": 8800,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/matrix_codegen_p6e.py",
+      "sha256": "9b5091ea4777486c77a9fb7ffb9eea242a1e6c3426f1f485512f5d75b5ebd02f",
+      "bytes": 16160,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/matrix_codegen_p7a.py",
+      "sha256": "33ebb65aaddbf844497ed9302e90d64f0dbb8bbdf6f9037abfd68bb13d95c9d9",
+      "bytes": 16156,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/matrix_codegen_p7b.py",
+      "sha256": "621b924d69c57ef0f84441d808f597ecc496ea8a6051155aa2159d66b686e0be",
+      "bytes": 16160,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/matrix_rules.py",
+      "sha256": "2014d9e5133d1620cc1df7be31825771e14603497c6325f77d8e393133d36bde",
+      "bytes": 28512,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/matrix_rules_p6d.py",
+      "sha256": "b1b9cebd0a591dac0f2d56d3a952e376173afb2484d39e17fc316570bd7987a3",
+      "bytes": 18562,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/matrix_rules_p6e.py",
+      "sha256": "31e58f7b6b2892aa965e68c47b29703be2446f462267509722cea942822655d1",
+      "bytes": 30748,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/matrix_rules_p7a.py",
+      "sha256": "36adbbce1b5be78f3066bb6a8cd1622aa4372262944c2404436b20759f5047cb",
+      "bytes": 31511,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/matrix_rules_p7b.py",
+      "sha256": "8aab2c65a514ce97dcb56e7f700411676e93af3cf3731843d845df35b85d723e",
+      "bytes": 51718,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/matrix_select.py",
+      "sha256": "d77971092b72efbb5e9414d3408c9a54865c6d5a83ab6d4c324ab7511994adef",
+      "bytes": 12795,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/matrix_selection.py",
+      "sha256": "1b64b5247f0aa491bb3dec2b66d8eb2c7ea391bbc389a927c968ec0b6d0a8d89",
+      "bytes": 13196,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/matrix_splitk.py",
+      "sha256": "49a8c625a59d018ff4349ff47a69f16f007bdc622ed3a49a45b03b91400d7f36",
+      "bytes": 1654,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/matrix_tuning.py",
+      "sha256": "1700ab6da473b8d2452864582e4b65b229d89599b3835db29592fb138df33e84",
+      "bytes": 26835,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/matrix_widen.py",
+      "sha256": "09939143449707a7b791d6fb0ca90281aed11a112e0f1ee7b936fb0635f630e1",
+      "bytes": 4966,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/mixed_attention.py",
+      "sha256": "e33067f545559044944a106dcde2dfa46351177930cc020f0a36759e3ea4e5b9",
+      "bytes": 45306,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/mixed_fma.py",
+      "sha256": "84f449316a6fcc651d4ace8d867daa2f851d3ad6ed3832d08a76d9f09f79b798",
+      "bytes": 3557,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/mixed_gemm.py",
+      "sha256": "2dae1cb835bcae4948a70fd7ccc20e266e178d49284eb3b797c5ca80dbed7943",
+      "bytes": 16750,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/mixed_phase_pointer_codegen.py",
+      "sha256": "26cb31b4fe145363a819835fb43fa19aff064b06f7182b95c7f2712df12a7058",
+      "bytes": 10097,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/module_dropout.py",
+      "sha256": "6ff9d072c30acd4db38416f8e127d0012777cc33e0faf7cf55981116ba26084c",
+      "bytes": 7936,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/muon.py",
+      "sha256": "e757305139c4644d42dbe974d68eaf808839b5478d01867862cf3ca73794a31b",
+      "bytes": 10073,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/nested_loop.py",
+      "sha256": "042bbf63d44e4b4b4fa005c1020ab83fcbcd839dd4d47947c9f35b888c2dc933",
+      "bytes": 24003,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/nested_loop_lower.py",
+      "sha256": "5259e83866b4dd2cd60c351e41b3b5b924c698f753c4eb3b7359a6d753732591",
+      "bytes": 19633,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/norm_rules.py",
+      "sha256": "27a04397288bb05113201ef0e2c0ffddb8e14b7a68650b9db9b1a07f7c396573",
+      "bytes": 17103,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/norm_rules_p7a.py",
+      "sha256": "7066dc9c1c328805ac64d36a71520f447e1723fff0672c76c87bc07982e3e952",
+      "bytes": 22191,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/norms.py",
+      "sha256": "f05f141689929aa196d581c4d1b24659d5f431c450c0653aad6fa9a756ebf57c",
+      "bytes": 3280,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/numerical_reference.py",
+      "sha256": "ea646d81e33430b93cbf0d05e8ba9a95b3488b7bcf365c0420358cc6c9165e92",
+      "bytes": 2308,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/optim.py",
+      "sha256": "1a85684541f49abb33b34e6fcdf1f4c36316c5b7a3f5e03ea689d047fc337532",
+      "bytes": 19526,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/optimizer_reference.py",
+      "sha256": "591677c3a218a75ee5abc1254ae9d131761b8dfec68e9b7029b3d59468e5d312",
+      "bytes": 9090,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/ordered_index_radix.py",
+      "sha256": "0cda371e3a839e175e024019b4f1c2575d06687e047eb2036f43c356c470338c",
+      "bytes": 3253,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/p5c_epilogue.py",
+      "sha256": "1f59334571cedffbd4e0483a8190acc866ae41d0905adf5b153eb72d61e29c12",
+      "bytes": 12580,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/p5c_matrix.py",
+      "sha256": "23ab385d42772344554b503f6a4ee38a2ef207b6dae93b5e3f7035eb1a8700e8",
+      "bytes": 85753,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/p6d_retention.py",
+      "sha256": "4a9f38f30a95fc8283b8b1c7ec8e8fa7545785b12bf765a11042d58fedf5ec32",
+      "bytes": 42931,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/p6d_rules.py",
+      "sha256": "08c34e48b66c71f3c357e3de240dc711e0c05b6f46999cda290da3f7d7cd0585",
+      "bytes": 25053,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/p6e_rules.py",
+      "sha256": "73182a4953b08b8ffab41d6f54aaf388fe30ae2a6afb98035a8f9f0ae92dd008",
+      "bytes": 17299,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/p7_rows.py",
+      "sha256": "b65a6273b6c93fee41acb4f3d32b383b6c60d896004336bbacf73187b4a8eb43",
+      "bytes": 20488,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/p7e_codegen.py",
+      "sha256": "afe0a0a216c752c6c426ea535e8e25feea22ac01af58118f12334d495029e1b5",
+      "bytes": 29638,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/p9_rowblock.py",
+      "sha256": "bd51603fc7dab1ee778cc7346f8896552562c53673647c439b0712d766be22be",
+      "bytes": 142734,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/padding_masks.py",
+      "sha256": "640b06fea1c6ade7819b6308d1b9aa67abcda8c8f0889f6bbd002471a15a908e",
+      "bytes": 10257,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/peer_transport.py",
+      "sha256": "d755a23f23c44bbdf38084217f03e0503ff4edb8c5cff7ac2e2c7508663c54fa",
+      "bytes": 23995,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/performance_defaults.py",
+      "sha256": "ec3d926700eb961178cabb9ae6732deeafd443986bad70cbf993552491b970bf",
+      "bytes": 6859,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/performance_schedule.py",
+      "sha256": "493dd065871c9b214df028eb044f23bf0f65ef8f5e27c31a31fe5bb613e7703b",
+      "bytes": 20509,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/phase_pointer_codegen.py",
+      "sha256": "5f42dbdf907495a49532c184202ce144c188c838cf7bbb84de48a137d5e9adb4",
+      "bytes": 12637,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/pops2b_rules.py",
+      "sha256": "702349718d13d49afba39e69df75ae9e179bf226ea544a58d1ff1549483fe5fd",
+      "bytes": 35676,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/pops2b_rules_p6e.py",
+      "sha256": "53f4bea2ff7bbf98e6b3454a07f7558d1c77dcef69c0303e6816c3830d6e98d2",
+      "bytes": 33724,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/pops2b_rules_p7a.py",
+      "sha256": "a5d9e0b0ee7d139fe68ade6130d75366f99842930df324761b8965ca226fe4bd",
+      "bytes": 35346,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/pops2b_rules_p7b.py",
+      "sha256": "cc7cb5f8c986067e49f371ddef57890aea4d8e957183d188d0b9eb9be1b31ee7",
+      "bytes": 36587,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/pops4a_rules.py",
+      "sha256": "1025bfb39e367714d019a5ecc21bc5a66d958310bc083fce78287c505ab20e24",
+      "bytes": 33278,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/pops4a_rules_p7a.py",
+      "sha256": "e705947f775f677272162d30e9b89b869e2b331c9c1efdbdbece4e2cccf339a2",
+      "bytes": 33692,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/pops5e_rules.py",
+      "sha256": "6654e2b9912243eb3b4dd8ed08544d405c258a1bfe4be1a78af1c4375f1b7233",
+      "bytes": 27832,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/pops_b_policy.py",
+      "sha256": "331e6ade4898a203bfb73555cb5ecd0219e7e07acc8c22d2e057233550d45149",
+      "bytes": 22104,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/practical_bf16.py",
+      "sha256": "8369da1d9b940a2ac4f6d7d4aec6bb603d67f22b99e36034b0654ba280b7e4ee",
+      "bytes": 16770,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/precision.py",
+      "sha256": "7c08c44d9b88fb9c19e4e54f8f754e7c9245f289a2a663a023c0b14cffb34fb2",
+      "bytes": 30554,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/pure_interval_codegen.py",
+      "sha256": "0a7267734f3d6ab3eabdebe70039b9e7acee8f50072b0adc74c3660b6a6fcc12",
+      "bytes": 9675,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/pure_run_codegen.py",
+      "sha256": "81122cde3282a5e1df72b0df572d3fcb32546fdc95a8219afd0457b0393edd0c",
+      "bytes": 11138,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/ragged_experts.py",
+      "sha256": "7a6f5f70e12d38f199a83df860ae583fe77eba09962721d7e10e096fa894d1e4",
+      "bytes": 8489,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/ragged_experts_lower.py",
+      "sha256": "51248117c46dba21b3395db07503fefcc835c22ffef7cf7eeccea99350f60c05",
+      "bytes": 6455,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/random.py",
+      "sha256": "c50ba39775613f29d5ec7ba6f852b313d14f47738a721853f403f66f420c662b",
+      "bytes": 11332,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/random_cuda.py",
+      "sha256": "8c1dd0e16e2e04a4ac984f61915fa52bd0e13d8ffafd9c996f24a02c42536951",
+      "bytes": 4101,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/random_triton.py",
+      "sha256": "b0e465bf6c2d82ab90262468dfab9b6a6f614316b6693ca4691abb1a2dd102c6",
+      "bytes": 2582,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/remat.py",
+      "sha256": "c428f413f4bf5c2079d6c3ba3c951569f96c209a9ba3e1156629062becd06f90",
+      "bytes": 11821,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/resource_phase_pointer_codegen.py",
+      "sha256": "2148e52ff7a03594f2d97aaad19280026e9e56303d6252fd8cff07c60b13cfb9",
+      "bytes": 13519,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/resources.py",
+      "sha256": "432cfa62aa4897008c2ae1b4310d3cbff55569fd688e6e06b9a208b91586a354",
+      "bytes": 3438,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/rng_remat.py",
+      "sha256": "6c120e298d8e8a467e5599af7526838b6a46486d50db03a10cf39772b8af2362",
+      "bytes": 6909,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/row_fusion.py",
+      "sha256": "8ba5e3658bcbfc1ed909aa84416db8be252a5cc24a4e3018f2fa7bf7b571808b",
+      "bytes": 62640,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/row_permutation.py",
+      "sha256": "f89811b2cf926ed27b8b466136a207f85ac4438647b0c9390edb2dadea4e4ba3",
+      "bytes": 4601,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/row_scatter_mm.py",
+      "sha256": "5f511800dccbc9c27f735d0c4a2b1d7851116a9495fe04d84234f0e92a020fa9",
+      "bytes": 12173,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/runtime.py",
+      "sha256": "5b599617774174caba01a278d5a6ad8aab21ebf09138f9f85531201dead80632",
+      "bytes": 47086,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/sampling.py",
+      "sha256": "294f1255e4b041024b7b78a3889aad9496afccf87f601c3bfde02c431d77b31d",
+      "bytes": 25839,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/sampling_lower.py",
+      "sha256": "39c35e6c077b8b441f662093c2bce94116220b3234595bfbce040f716730b7ab",
+      "bytes": 29984,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/sampling_panels.py",
+      "sha256": "e138d718a26cc68916164172a0e27ccd3fb1ce1c15908c092bd8938ead535cf5",
+      "bytes": 81261,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/sampling_rows.py",
+      "sha256": "2ddbcf2b200867e6655c1ca5ac188db407d7c202de5ef44d5b6105945b61e3c6",
+      "bytes": 21218,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/scaled_add.py",
+      "sha256": "773a415aaa1ffd4c97676a2b751bda8ac58eb0926401171b4827ae09785c9d91",
+      "bytes": 2870,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/scaled_merge.py",
+      "sha256": "dfca3defb6b02965bd383cff61d8a766de424e84c289663cb9db26cf83f211c8",
+      "bytes": 7999,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/scan.py",
+      "sha256": "3ea343da04d97a9a81f61282152739323b919064c1304dc73e5002dd4e338dcd",
+      "bytes": 14117,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/scan_lower.py",
+      "sha256": "97ba327b9764e2e6dec375ddbabf950d6248840dbe22e092c9bc6cc0bb92f5b5",
+      "bytes": 21497,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/serial_add.py",
+      "sha256": "078559b03febbef7bb59ac926e9ed180332181c4db30e7f5943637093c1c03e3",
+      "bytes": 3576,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/serial_bf16.py",
+      "sha256": "1d7224a597349bfd6b7e25e1e423abb54f0f7908fe63dd90ee76a22df042c5af",
+      "bytes": 20916,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/short_attention.py",
+      "sha256": "5abf1d18e17e6c7406e7aee10cb0ee68c22649730d71b75e204dc90d8585f80c",
+      "bytes": 29869,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/square_sum_association.py",
+      "sha256": "b4412fa0b5ba5673132af74c7d7e97418baa3a978b162655d684aac284854dd5",
+      "bytes": 15880,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/standard_ops.py",
+      "sha256": "1e0ab2493b1468561753c91cf63a74b0a05e370f1196988268b2ca7ecdd56063",
+      "bytes": 22653,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/state_placement.py",
+      "sha256": "54d18dd59fcec5efd97612ff83e398af8c5f6bc08e8363b608218f545dc7ecfa",
+      "bytes": 5948,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/step17_build.py",
+      "sha256": "e725a617da9e861f32700e732e9cd63c6ff8bbee9c7d8c19e029065241b8bd4d",
+      "bytes": 39630,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/step17_intervals.py",
+      "sha256": "59343b01623610df42d6dd3f8fc0a97efa7a396d59c51062562b8bb9e65658d2",
+      "bytes": 25716,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/step17_outline.py",
+      "sha256": "fcd009a6538a3eea03284f70213fd3c24270ea7613d1c3ce3c02bcb28a3d663f",
+      "bytes": 25281,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/tape_cse.py",
+      "sha256": "56fe9d3c8c9004d1911c384c73eea492e3dad307567f789092f66a35d002ff12",
+      "bytes": 6837,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/tape_remat.py",
+      "sha256": "267db9b33d4e47118aa6f0548626f9a2861e1ee739d4af6ce3b57edf6e373884",
+      "bytes": 7039,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/temporary_memory.py",
+      "sha256": "830e8ea0dc6f329671efa4596679f6dcedc76dc6a86570e51c9a1c7f48ed708c",
+      "bytes": 1884,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/topk_rounds.py",
+      "sha256": "f0fb2949f9650a5346562443d84fd32f173ce15c1e828277a5d4f2e7a532f96b",
+      "bytes": 18657,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/torch_column_sum.py",
+      "sha256": "50781351bb96b79d640777fe3bad2b8b4b98e1a4ee878f7294dd33498b7b9790",
+      "bytes": 6802,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/torch_layer_norm.py",
+      "sha256": "6c88e51912caee7a4c0bafeaca3f7c2e1dd524d36cb3e250eda4a43b191aaad4",
+      "bytes": 12946,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/torch_layer_norm_backward.py",
+      "sha256": "49815a210be2acfc7fad9dfa63572633ee5146be25552c0b8e462de399ebdb6c",
+      "bytes": 16481,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/torch_logsoftmax.py",
+      "sha256": "0d25643a9b3191d4970692101c667d1ea4daf34cb7ecb111fe81d4b90320dd1b",
+      "bytes": 3078,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/torch_row_reduction.py",
+      "sha256": "d548ecd25f8687bf60d28d744e136de5b1403aaee6771c4972f185730b3b13cc",
+      "bytes": 2985,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/torch_scalar_div.py",
+      "sha256": "2d9f962f2d611a12456f3a598b3d76291731161e4eef873178c99232b5e0babb",
+      "bytes": 5291,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/torch_softmax_backward.py",
+      "sha256": "4ed03ceb49bb368b33e75c54ea341236cf79e37e620a4f1408c067b047c4e90d",
+      "bytes": 3504,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/torch_topk32.py",
+      "sha256": "2c395ae12b3a04436f2735bf1adaba231a9d67303e68c981fdce2f3509561501",
+      "bytes": 4144,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/transformer_lower.py",
+      "sha256": "d08f2db6767d88a3595611d4c441c0df003d239dbd2a44a3d8382d03f7900554",
+      "bytes": 43490,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/transposed_casts.py",
+      "sha256": "26dae07039d762c1e147e9e39a271ecd923a571b52f31a6f3f4da18bafe6abc3",
+      "bytes": 6970,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/user_optimizer.py",
+      "sha256": "9230b3b44b485353d0116ffdd631450a21212d6de41d7189a12a46bfd327ec6a",
+      "bytes": 14274,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/variants.py",
+      "sha256": "37189bcff2adf12b897a2615f2aeba032dbf6321779018b51216d957be6225e0",
+      "bytes": 34030,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/vendor/attention_fp32.cuh",
+      "sha256": "34f606262bdb877ab1bd2715a25aca6dfc66a505509859ee36c7f03bbb91c2c9",
+      "bytes": 24858,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/vendor/attention_fp32_v2.cuh",
+      "sha256": "d744d3656a4c9df77d8c3cf3a76e3456bb0cc8d6eb334a76d5b1c0aef21e8dc5",
+      "bytes": 49702,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/vendor/bgemm.cuh",
+      "sha256": "73341254af31a4f8d6721d748cdfd0e8c69da37e2f05b887406597abd4bc09ab",
+      "bytes": 13059,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/vendor/core.cuh",
+      "sha256": "ce2746b43750b38ac5318961a518c73693953cb41fe738d48d6e1f8761850143",
+      "bytes": 5301,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/vendor/epi.cuh",
+      "sha256": "2c02a887cf696d9b6aaa6756b8c364558fa17f19f40bb71d7bafb5d2c52b4b45",
+      "bytes": 12076,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/vendor/gemm.cuh",
+      "sha256": "1d1f8ec479f92928175105b2db0b420d733d7309e53384a96fc2470014cf9571",
+      "bytes": 15170,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/vendor/plan.py",
+      "sha256": "954fcafda0a5f90401685ed63c6458ba57ec2296e576856e791157f21e971bfb",
+      "bytes": 3550,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/vendor/s107a_wgmma.cuh",
+      "sha256": "55a84eb46996f7b9ec3722eba20cd22b4ff69b8aa503f968e4d60036ee9a178d",
+      "bytes": 10172,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/vendor/scan_generic.cuh",
+      "sha256": "56b46d268a6ddcd0f8fcdee960f9247170390e81281ed5e92fb6b54e1511cfb3",
+      "bytes": 8307,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/vendor/scan_p1a.cuh",
+      "sha256": "838a5efd9fc262e7f70cae17b50bb812c0add4a1b180ccbfe330317decaf3e9e",
+      "bytes": 35242,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/vendor/scan_p1a_cops2c.cuh",
+      "sha256": "e0e0d8fb42b0955d914b8abf660d3b0feb73468385618ab2a0eb8571a1d9bd94",
+      "bytes": 28569,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/vendor/tgemm.cuh",
+      "sha256": "69886610febd537e907992f0769f09bb2e83ff4fa7e062c85783cdbdfe0faf0a",
+      "bytes": 27887,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/vocab_head.py",
+      "sha256": "dcc5b6b4131b0758dd025a80658fe9a29bac54779447c6cbe58b4e8382d2ce81",
+      "bytes": 57381,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/wgmma_guard.py",
+      "sha256": "324aed564c97979580f47ced38d0c0cb5f5c4618cbc73a46ce5c6fbd71daecf9",
+      "bytes": 6409,
+      "equals": [
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/widen_cast.py",
+      "sha256": "1d6d27b67be023801200fc905735beaeee81844864c8cde0c30b85e3123de3f8",
+      "bytes": 6496,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/window_attention.py",
+      "sha256": "856bbdccec10674981b3d0805c8909c01f4163c42efe4faba7be6bba4287c9b4",
+      "bytes": 31092,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    },
+    {
+      "path": "src/megakernel_lab/operation_compiler/window_fusion.py",
+      "sha256": "1c947e663acd49460b3a66d7e425e91178416a66d933d29df5ec4017dcdedd9b",
+      "bytes": 30846,
+      "equals": [
+        "6127a450ce897a83eb7c7237b3c340376c2c1779",
+        "adde6ca52b556df8585edfb6c7ade3a241964620"
+      ]
+    }
+  ]
+}

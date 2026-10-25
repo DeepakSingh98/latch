@@ -1,0 +1,16 @@
+{
+  "schema": "latch-ops-numerical-policy-v1",
+  "declared_before_first_device_run": true,
+  "arithmetic": "FP32 tensors; fixed-order SIMT FP32 GEMM; no TF32; no fast-math",
+  "intermediates": {"atol": 0.00003, "rtol": 0.0005},
+  "loss": {"atol": 0.00002, "rtol": 0.0001},
+  "gradients": {"atol": 0.00001, "rtol": 0.0005},
+  "parameters": {"atol": 0.00001, "rtol": 0.0002},
+  "updates": {"atol": 0.0000002, "rtol": 0.001},
+  "momentum": {"atol": 0.00002, "rtol": 0.0005},
+  "shared_contributions_fp64": {"atol": 1e-11, "rtol": 1e-10},
+  "trajectory_25": {"atol": 0.0001, "rtol": 0.001},
+  "rule": "Every compared finite element must satisfy abs(candidate-reference) <= atol + rtol*abs(reference); report maximum ratio, absolute and RMS errors. No passing by loss trend. Same-current-state FP64 checks distinguish accumulation error from trajectory drift.",
+  "fresh_and_trained_check_steps": [0, 8, 40],
+  "preserve_failures": true
+}

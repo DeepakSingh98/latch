@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Latch — a compiler for training megakernels</title>
+<meta name="description" content="Latch is a compiler for generating training megakernels on NVIDIA H100 GPUs. Generate complete training updates and accelerate fine-grained learning.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/site.css?v=15">
+<script src="assets/config.js" defer></script>
+<script src="assets/reading.js" defer></script>
+</head>
+<body>
+<div class="draft-banner"><div class="wrap">Research preview · v0</div></div>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="./">Latch <span>research preview</span></a>
+    <nav aria-label="Main">
+      <ul>
+        <li><a href="walkthrough.html">How it works</a></li>
+        <li><a href="capabilities.html">Open problems</a></li>
+        <li><a href="methodology.html">Results</a></li>
+        <li><a href="https://github.com/DeepakSingh98/latch">Get started</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <article class="wrap">
+    <div class="article">
+      <p class="meta"><span>October 2026</span></p>
+      <h1>A compiler for training megakernels</h1>
+
+      <p class="lede">Suppose you’ve got an idea for a new learning algorithm.</p>
+
+      <p>The further it strays from familiar methods, the more of its implementation you’ll have to build yourself. Conventional methods have earned their place, and an entire ecosystem of kernels, libraries, and compilers has co-evolved with them through a decade of optimization. If your idea is radical enough, you have a systems project to finish before you can test it, let alone iterate on it.</p>
+
+      <p>Systems work holding research back, then enabling it, is nothing new:</p>
+
+      <ul class="plain">
+        <li><a href="https://papers.nips.cc/paper_files/paper/2012/hash/c399862d3b9d6b76c8436e924a68c45b-Abstract.html">AlexNet</a> relied on an efficient GPU implementation to make training practical.</li>
+        <li><a href="https://arxiv.org/abs/1706.03762">The Transformer</a> removed recurrence and made sequence training much more parallel.</li>
+        <li><a href="https://arxiv.org/abs/2205.14135">FlashAttention</a> made longer contexts practical by reducing how much data attention moves through GPU memory.</li>
+      </ul>
+
+      <p>One exciting new primitive is the megakernel: fusing long sequences of GPU operations into a single kernel. This can reduce launch overhead and memory traffic while keeping the GPU busy between operations.</p>
+
+      <p><a href="https://hazyresearch.stanford.edu/blog/2025-05-27-no-bubbles">Hazy Research</a> demonstrated this approach for whole-model inference. Cursor’s <a href="https://github.com/cursor/mixture-of-kittens">Mixture-of-Kittens</a> applied it to mixture-of-experts training. <a href="https://www.indexventures.com/perspectives/toward-more-efficient-ai-leading-flapping-airplanes-1b-series-a/">Flapping Airplanes</a> is pursuing megakernels as a route to more data-efficient learning, with early results earning them a $1B Series A.</p>
+
+      <p>Like most people reading this, I don’t have a billion dollars in venture funding. I’m also lazy. A training megakernel has to fit the forward pass, backward pass and optimizer into one program, and every change to the model means reworking it. In order to explore radically different ideas without rewriting a kernel each time, I built Latch.</p>
+
+      <p>Latch is a compiler for training megakernels on H100s. Give it supported PyTorch training code and it generates one GPU program for the forward pass, loss, backward pass and optimizer update, handling the dependencies, memory reuse, and synchronization between them. When your experiment changes, you regenerate the kernel instead of rewriting it.</p>
+
+      <p>To demonstrate its capabilities, I used Latch to train TinyMoE-200M. With the latest compiler, the generated megakernel reached validation loss 3.30 in 857 seconds of training-update time, versus 1,432 seconds for the fastest measured conventional control using the same batch-32 recipe: about 40% less time in one confirmation run. At a small batch of 2 × 1024 tokens, complete updates ran about 2.75× faster. These measure execution, not a change in data efficiency. The conventional control misses one trained-state numerical check; <a href="methodology.html#learning">the results explain that limit and the earlier three-seed runs</a>.</p>
+
+      <p>What I’m most interested in are learning procedures that are impractical with today’s tools. In <a href="https://arxiv.org/abs/2609.34174">GradLev</a>, a model updates its weights as it reads, one token at a time. Latch runs all 1,024 adaptation steps for GPT-2 small’s final MLP in a single kernel, keeping the changing weights in shared memory throughout. In the earlier 0.9.0rc1 measurements, the complete block ran 3.5× faster than compiled PyTorch replaying a CUDA graph; both use ordinary PyTorch for the rest of GPT-2. The GradLev example is included in this release.</p>
+
+      <p>This release includes runnable TinyMoE training, selective weight updates, repeated layers, GradLev token-by-token adaptation and smaller fast examples. Earlier compiler work also explored state-space, diffusion and energy-based models; <a href="https://github.com/DeepakSingh98/latch">see the included examples</a>.</p>
+
+      <p>Latch is a research preview and a first step toward an open-source megakernel framework that enables weird new ways to learn. The <a href="https://github.com/DeepakSingh98/latch">source archive, wheel and instructions</a> are available together. The <a href="capabilities.html">open problems</a> are a good place to start, and I’m curious to see what people explore with it.</p>
+    </div>
+  </article>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>Latch · Research preview</span>
+    <a href="methodology.html">Results</a>
+    <a data-repo-link hidden aria-disabled="true" href="https://github.com/DeepakSingh98/latch">Repository</a>
+  </div>
+</footer>
+</body>
+</html>

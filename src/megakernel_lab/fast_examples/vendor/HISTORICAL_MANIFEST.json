@@ -1,0 +1,467 @@
+{
+  "schema": "latch-p9-cd-frozen-harness-v1",
+  "files": [
+    {
+      "family": "adaptive",
+      "path": "adaptive/p9c.py",
+      "source_path": "research/latch_ops/p9c.py",
+      "commit": "25a0db79d9296eccb09f118fb57b6b200d7e9461",
+      "sha256": "11d52f7a95f03c6838bcfc2dc0548cf3e0a3d4466c6f982f2e0bc5d4c6903b54",
+      "bytes": 11663
+    },
+    {
+      "family": "adaptive",
+      "path": "adaptive/p8c.py",
+      "source_path": "research/latch_ops/p8c.py",
+      "commit": "25a0db79d9296eccb09f118fb57b6b200d7e9461",
+      "sha256": "01fe888d6f14034a2d20133e557ce8f723a9f91b5228d4216f9826b7c1952ae6",
+      "bytes": 20544
+    },
+    {
+      "family": "adaptive",
+      "path": "adaptive/c4a.py",
+      "source_path": "research/latch_ops/c4a.py",
+      "commit": "25a0db79d9296eccb09f118fb57b6b200d7e9461",
+      "sha256": "29d95aac320f916c9613717abec8634e2114c2e4b77f9ddd1beb198cb80a6dda",
+      "bytes": 34521
+    },
+    {
+      "family": "adaptive",
+      "path": "adaptive/c4a_gpu.py",
+      "source_path": "research/latch_ops/c4a_gpu.py",
+      "commit": "25a0db79d9296eccb09f118fb57b6b200d7e9461",
+      "sha256": "ad9d5f68d66594eee36410c98c1cbb17412df59492238d357a29fb43e6c7e739",
+      "bytes": 9871
+    },
+    {
+      "family": "adaptive",
+      "path": "adaptive/c4a_conv.py",
+      "source_path": "research/latch_ops/c4a_conv.py",
+      "commit": "25a0db79d9296eccb09f118fb57b6b200d7e9461",
+      "sha256": "574a10e899258788a38379f1d2e24c90eed2391dc193c0ac9be67584c0678fd8",
+      "bytes": 3182
+    },
+    {
+      "family": "adaptive",
+      "path": "adaptive/examples/adaptive_memory.py",
+      "source_path": "research/latch_ops/examples/adaptive_memory.py",
+      "commit": "25a0db79d9296eccb09f118fb57b6b200d7e9461",
+      "sha256": "2e1a8291c333fc389eedd5f36a182a8d7ef5db71550fa0dd4d45a07b94ba62cc",
+      "bytes": 13576
+    },
+    {
+      "family": "adaptive",
+      "path": "adaptive/cops4_a/__init__.py",
+      "source_path": "research/latch_ops/cops4_a/__init__.py",
+      "commit": "25a0db79d9296eccb09f118fb57b6b200d7e9461",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "family": "adaptive",
+      "path": "adaptive/cops4_a/POLICY.json",
+      "source_path": "research/latch_ops/cops4_a/POLICY.json",
+      "commit": "25a0db79d9296eccb09f118fb57b6b200d7e9461",
+      "sha256": "7152d9d44bd7688917225df1bffe92a644a8a7b9d9989ca9dfde640c2a091ee8",
+      "bytes": 3618
+    },
+    {
+      "family": "adaptive",
+      "path": "adaptive/cops4_a/s106b/__init__.py",
+      "source_path": "research/latch_ops/cops4_a/s106b/__init__.py",
+      "commit": "25a0db79d9296eccb09f118fb57b6b200d7e9461",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "family": "adaptive",
+      "path": "adaptive/cops4_a/s106b/corpus.py",
+      "source_path": "research/latch_ops/cops4_a/s106b/corpus.py",
+      "commit": "25a0db79d9296eccb09f118fb57b6b200d7e9461",
+      "sha256": "01631d4561b661ed944a14de60ef9b004f7ab7c0547a22407eeac27f3924def7",
+      "bytes": 9154
+    },
+    {
+      "family": "adaptive",
+      "path": "adaptive/cops4_a/s106b/evalsets.py",
+      "source_path": "research/latch_ops/cops4_a/s106b/evalsets.py",
+      "commit": "25a0db79d9296eccb09f118fb57b6b200d7e9461",
+      "sha256": "2d075c7ca55a39ef069fe931f5fe68e2b5d47c298c871204800251aa62991369",
+      "bytes": 3722
+    },
+    {
+      "family": "adaptive",
+      "path": "adaptive/cops4_a/s106b/model.py",
+      "source_path": "research/latch_ops/cops4_a/s106b/model.py",
+      "commit": "25a0db79d9296eccb09f118fb57b6b200d7e9461",
+      "sha256": "c188cb0355b2f5938495f309c891a23f6303eaef6cbcac0539b1bba2bcce5c35",
+      "bytes": 14991
+    },
+    {
+      "family": "adaptive",
+      "path": "adaptive/cops4_a/s106b/train.py",
+      "source_path": "research/latch_ops/cops4_a/s106b/train.py",
+      "commit": "25a0db79d9296eccb09f118fb57b6b200d7e9461",
+      "sha256": "ce66253c3bd9c65b4f874c359bc6d3741d99ad2bfc6ad55707d5f1a573aff000",
+      "bytes": 17466
+    },
+    {
+      "family": "adaptive",
+      "path": "adaptive/p8_c/POLICY.json",
+      "source_path": "research/latch_ops/p8_c/POLICY.json",
+      "commit": "25a0db79d9296eccb09f118fb57b6b200d7e9461",
+      "sha256": "ed849bcddeaa106e71b98efa3236d07b01597b0510c74f8f72d814af12cf845b",
+      "bytes": 8003
+    },
+    {
+      "family": "adaptive",
+      "path": "adaptive/p9_c/POLICY.json",
+      "source_path": "research/latch_ops/p9_c/POLICY.json",
+      "commit": "25a0db79d9296eccb09f118fb57b6b200d7e9461",
+      "sha256": "53bdf24463aad88cb3cd8ebfba849866502b4b53e46a592710f1efab772a0f42",
+      "bytes": 2518
+    },
+    {
+      "family": "energy",
+      "path": "energy/p9d.py",
+      "source_path": "research/latch_ops/p9d.py",
+      "commit": "9db5b5a785060495b8e389fc437c7aa129f4eaac",
+      "sha256": "63e547b9c81b9474d6ec0f15df6c47c7b77bc5cb52465cbd7151ae48371804b8",
+      "bytes": 9940
+    },
+    {
+      "family": "energy",
+      "path": "energy/cops4b.py",
+      "source_path": "research/latch_ops/cops4b.py",
+      "commit": "9db5b5a785060495b8e389fc437c7aa129f4eaac",
+      "sha256": "7ef6f2a945323f7270b523a19f12c0ef1ed739e9d366a4e4b730d4d6e42354e4",
+      "bytes": 15183
+    },
+    {
+      "family": "energy",
+      "path": "energy/c_ops4_b/__init__.py",
+      "source_path": "research/latch_ops/c_ops4_b/__init__.py",
+      "commit": "9db5b5a785060495b8e389fc437c7aa129f4eaac",
+      "sha256": "1d8f4913280ca1867e9cd1d3c541e38b6264cde5038d10fc0ce2f52f22003765",
+      "bytes": 94
+    },
+    {
+      "family": "energy",
+      "path": "energy/c_ops4_b/POLICY.json",
+      "source_path": "research/latch_ops/c_ops4_b/POLICY.json",
+      "commit": "9db5b5a785060495b8e389fc437c7aa129f4eaac",
+      "sha256": "42e60d4323e27b479ac666efa230f1c122e07b1346ca85a864871ae9e79f546a",
+      "bytes": 5886
+    },
+    {
+      "family": "energy",
+      "path": "energy/c_ops4_b/checks.py",
+      "source_path": "research/latch_ops/c_ops4_b/checks.py",
+      "commit": "9db5b5a785060495b8e389fc437c7aa129f4eaac",
+      "sha256": "70329bb159b662090e7ab6a6c342c485827b8d9c19e192ca7e1fab580c1427b9",
+      "bytes": 8117
+    },
+    {
+      "family": "energy",
+      "path": "energy/c_ops4_b/reference.py",
+      "source_path": "research/latch_ops/c_ops4_b/reference.py",
+      "commit": "9db5b5a785060495b8e389fc437c7aa129f4eaac",
+      "sha256": "b6246d3f46dd8da577eef03874d9e670647dba7634b87b592c6725c093492c10",
+      "bytes": 7690
+    },
+    {
+      "family": "energy",
+      "path": "energy/c_ops4_b/controls.py",
+      "source_path": "research/latch_ops/c_ops4_b/controls.py",
+      "commit": "9db5b5a785060495b8e389fc437c7aa129f4eaac",
+      "sha256": "a70f72e5b785b0646f5ae6cdeae6856ef80b31bfdbe7be5745292370825bf52f",
+      "bytes": 12204
+    },
+    {
+      "family": "energy",
+      "path": "energy/c_ops4_b/gpu_tasks.py",
+      "source_path": "research/latch_ops/c_ops4_b/gpu_tasks.py",
+      "commit": "9db5b5a785060495b8e389fc437c7aa129f4eaac",
+      "sha256": "5665461c235495268751eeb482bbf2be47cbaae2ab0af029944fd1ea7f0e9bd6",
+      "bytes": 31388
+    },
+    {
+      "family": "energy",
+      "path": "energy/examples/energy.py",
+      "source_path": "research/latch_ops/examples/energy.py",
+      "commit": "9db5b5a785060495b8e389fc437c7aa129f4eaac",
+      "sha256": "5928dcf00386dda2949ef70910630a86d3e61adfb76305018e22a99b5a2c82b0",
+      "bytes": 7885
+    },
+    {
+      "family": "energy",
+      "path": "energy/examples/energy_training.py",
+      "source_path": "research/latch_ops/examples/energy_training.py",
+      "commit": "9db5b5a785060495b8e389fc437c7aa129f4eaac",
+      "sha256": "2634e3e07eb2c947a9785e66c3902f3bb515d6ff4c97f68c4d8fdf3f7b0c1115",
+      "bytes": 5064
+    },
+    {
+      "family": "energy",
+      "path": "energy/p8_d/__init__.py",
+      "source_path": "research/latch_ops/p8_d/__init__.py",
+      "commit": "9db5b5a785060495b8e389fc437c7aa129f4eaac",
+      "sha256": "cb225a1cfdfb2355506ac1b8e0a598a97f83e3da48495d9bbd191740ade470d4",
+      "bytes": 25
+    },
+    {
+      "family": "energy",
+      "path": "energy/p8_d/POLICY.json",
+      "source_path": "research/latch_ops/p8_d/POLICY.json",
+      "commit": "9db5b5a785060495b8e389fc437c7aa129f4eaac",
+      "sha256": "8b337aff2aa0a58b2da5681d7aa1cfbb84aac571d4def4b481cf023e583f0647",
+      "bytes": 5970
+    },
+    {
+      "family": "energy",
+      "path": "energy/p8_d/gpu_extra.py",
+      "source_path": "research/latch_ops/p8_d/gpu_extra.py",
+      "commit": "9db5b5a785060495b8e389fc437c7aa129f4eaac",
+      "sha256": "9b54e90b2fbd42a54ff8d38742e49c63ecc31c182b270232add4612f23b8c860",
+      "bytes": 10220
+    },
+    {
+      "family": "energy",
+      "path": "energy/p8_d/controls_extra.py",
+      "source_path": "research/latch_ops/p8_d/controls_extra.py",
+      "commit": "9db5b5a785060495b8e389fc437c7aa129f4eaac",
+      "sha256": "044de87218f28edfaf97e62e8d553c799cff513890458765c289c8b8726836a3",
+      "bytes": 3697
+    },
+    {
+      "family": "energy",
+      "path": "energy/p9_d/__init__.py",
+      "source_path": "research/latch_ops/p9_d/__init__.py",
+      "commit": "9db5b5a785060495b8e389fc437c7aa129f4eaac",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "family": "energy",
+      "path": "energy/p9_d/POLICY.json",
+      "source_path": "research/latch_ops/p9_d/POLICY.json",
+      "commit": "9db5b5a785060495b8e389fc437c7aa129f4eaac",
+      "sha256": "bbfba75ac8c610eb89236996046f4ccbfd7ab61da7781ff3a6e8badfab6ff9e4",
+      "bytes": 4718
+    },
+    {
+      "family": "energy",
+      "path": "energy/p9_d/gpu_extra.py",
+      "source_path": "research/latch_ops/p9_d/gpu_extra.py",
+      "commit": "9db5b5a785060495b8e389fc437c7aa129f4eaac",
+      "sha256": "5311ce251d7955d054b79bc4c6630d76a638350e8b60c2de1cd74d45fcc9ef99",
+      "bytes": 9930
+    }
+  ],
+  "compiler": "No ops/ source is vendored; every ops import resolves to the combined compiler.",
+  "adapter_files": [
+    "adaptive/examples/__init__.py",
+    "adaptive/sitecustomize.py",
+    "energy/examples/__init__.py",
+    "energy/sitecustomize.py"
+  ],
+  "excluded": "cloud controllers, ledgers, model evidence/tensors, diagnostic-only bench/NCU source and historical archives; their task names are not admitted by family_cd.",
+  "migration": "Package-qualified imports and explicit artifact roots; GPU observation hooks defer independent FP64/reference audits to CPU without changing the original model equations or numerical policies.",
+  "packaged_files": [
+    {
+      "path": "__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "adaptive/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "adaptive/c4a.py",
+      "sha256": "5df17146a9ed5d2560a3c6e2cd763bc3d7d5529dcdb963467ccf3ef2f5248e23",
+      "bytes": 32293
+    },
+    {
+      "path": "adaptive/c4a_conv.py",
+      "sha256": "886db8b24e071eb1a0a08938e6b520826a496676c3694139949cb131ffe339cb",
+      "bytes": 3227
+    },
+    {
+      "path": "adaptive/c4a_gpu.py",
+      "sha256": "579d54e2961e1093f61e673c85495ca6e72caa22918b3fcf8209b216d64bdb53",
+      "bytes": 10751
+    },
+    {
+      "path": "adaptive/cops4_a/POLICY.json",
+      "sha256": "7152d9d44bd7688917225df1bffe92a644a8a7b9d9989ca9dfde640c2a091ee8",
+      "bytes": 3618
+    },
+    {
+      "path": "adaptive/cops4_a/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "adaptive/cops4_a/s106b/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "adaptive/cops4_a/s106b/corpus.py",
+      "sha256": "01631d4561b661ed944a14de60ef9b004f7ab7c0547a22407eeac27f3924def7",
+      "bytes": 9154
+    },
+    {
+      "path": "adaptive/cops4_a/s106b/evalsets.py",
+      "sha256": "2d075c7ca55a39ef069fe931f5fe68e2b5d47c298c871204800251aa62991369",
+      "bytes": 3722
+    },
+    {
+      "path": "adaptive/cops4_a/s106b/model.py",
+      "sha256": "c188cb0355b2f5938495f309c891a23f6303eaef6cbcac0539b1bba2bcce5c35",
+      "bytes": 14991
+    },
+    {
+      "path": "adaptive/cops4_a/s106b/train.py",
+      "sha256": "ce66253c3bd9c65b4f874c359bc6d3741d99ad2bfc6ad55707d5f1a573aff000",
+      "bytes": 17466
+    },
+    {
+      "path": "adaptive/examples/__init__.py",
+      "sha256": "0ad13a50c38fa00e5dc7bd7aa06e4a24a3e2454d5941fb2d4fc98a7d16bbcef3",
+      "bytes": 71
+    },
+    {
+      "path": "adaptive/examples/adaptive_memory.py",
+      "sha256": "962d6253cb564e36c9449db0896f6f711df00a8220ca6e1d3b6220ae4892128b",
+      "bytes": 13681
+    },
+    {
+      "path": "adaptive/p8_c/POLICY.json",
+      "sha256": "ed849bcddeaa106e71b98efa3236d07b01597b0510c74f8f72d814af12cf845b",
+      "bytes": 8003
+    },
+    {
+      "path": "adaptive/p8_c/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "adaptive/p8c.py",
+      "sha256": "e3facee9c40a4cb78ae0c61d36f2e45ce5a944d846981a84dfe9f13b58958d44",
+      "bytes": 18864
+    },
+    {
+      "path": "adaptive/p9_c/POLICY.json",
+      "sha256": "53bdf24463aad88cb3cd8ebfba849866502b4b53e46a592710f1efab772a0f42",
+      "bytes": 2518
+    },
+    {
+      "path": "adaptive/p9_c/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "adaptive/p9c.py",
+      "sha256": "13a6db73afbec4c6607b9e2437c8c7e25621271ea44bebd4c1c2bb01dfac9bab",
+      "bytes": 2827
+    },
+    {
+      "path": "energy/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "energy/c_ops4_b/POLICY.json",
+      "sha256": "42e60d4323e27b479ac666efa230f1c122e07b1346ca85a864871ae9e79f546a",
+      "bytes": 5886
+    },
+    {
+      "path": "energy/c_ops4_b/__init__.py",
+      "sha256": "1d8f4913280ca1867e9cd1d3c541e38b6264cde5038d10fc0ce2f52f22003765",
+      "bytes": 94
+    },
+    {
+      "path": "energy/c_ops4_b/checks.py",
+      "sha256": "0dba666d7ba2b44a73ae74dfed744018745cb85fcc03ca2c5db5df926fe1cea7",
+      "bytes": 8392
+    },
+    {
+      "path": "energy/c_ops4_b/controls.py",
+      "sha256": "c9175dd23c455bd80f8e53d030358440223b3d92c5796a47ecbf8fd80cdb282a",
+      "bytes": 12307
+    },
+    {
+      "path": "energy/c_ops4_b/gpu_tasks.py",
+      "sha256": "1a736b6e0c46efb46efef312b3712feeea3164a43b7aa7d294dccdde14e16205",
+      "bytes": 27074
+    },
+    {
+      "path": "energy/c_ops4_b/reference.py",
+      "sha256": "b6246d3f46dd8da577eef03874d9e670647dba7634b87b592c6725c093492c10",
+      "bytes": 7690
+    },
+    {
+      "path": "energy/cops4b.py",
+      "sha256": "ff9efa0dac24ffb3ad8ed4e39ceef8d155c33aad7b2bf09b3fba29c79dd43974",
+      "bytes": 12966
+    },
+    {
+      "path": "energy/examples/__init__.py",
+      "sha256": "0ad13a50c38fa00e5dc7bd7aa06e4a24a3e2454d5941fb2d4fc98a7d16bbcef3",
+      "bytes": 71
+    },
+    {
+      "path": "energy/examples/energy.py",
+      "sha256": "0ed2f50e5f198c9be9c3d39240beb408566738753c038119e18e0f02e60227a6",
+      "bytes": 7945
+    },
+    {
+      "path": "energy/examples/energy_training.py",
+      "sha256": "b775d1a69280631cdccf6e4584371663be1be58a513d7e1b6a13b13ec16e8976",
+      "bytes": 5380
+    },
+    {
+      "path": "energy/p8_d/POLICY.json",
+      "sha256": "8b337aff2aa0a58b2da5681d7aa1cfbb84aac571d4def4b481cf023e583f0647",
+      "bytes": 5970
+    },
+    {
+      "path": "energy/p8_d/__init__.py",
+      "sha256": "cb225a1cfdfb2355506ac1b8e0a598a97f83e3da48495d9bbd191740ade470d4",
+      "bytes": 25
+    },
+    {
+      "path": "energy/p8_d/controls_extra.py",
+      "sha256": "aa3c976e6b5ff5e1c9945c5c4e7860b741fe18e9ec9213954622fb8a8e647ad4",
+      "bytes": 3740
+    },
+    {
+      "path": "energy/p8_d/gpu_extra.py",
+      "sha256": "415a7d11fe2e62494b21301c68d00a9419231c18414e19c4ffcbd8f62fcfdbc7",
+      "bytes": 9968
+    },
+    {
+      "path": "energy/p9_d/POLICY.json",
+      "sha256": "bbfba75ac8c610eb89236996046f4ccbfd7ab61da7781ff3a6e8badfab6ff9e4",
+      "bytes": 4718
+    },
+    {
+      "path": "energy/p9_d/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "energy/p9_d/gpu_extra.py",
+      "sha256": "de299957d32bbf4e0c61a5787963399d4f349c8a50cf307114ac06a869725e3c",
+      "bytes": 10612
+    },
+    {
+      "path": "energy/p9d.py",
+      "sha256": "f2d1526ff41eb592ad873a6c0df93199b017af7fc263bf5b605ee5987ef32a4e",
+      "bytes": 254
+    }
+  ]
+}

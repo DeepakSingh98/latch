@@ -1,0 +1,62 @@
+{
+ "schema": "p8-c-policy-v1",
+ "written": "2026-10-04, before any P8-C native GPU execution or validation",
+ "owner": "P8-C (Opus)",
+ "workload": {
+  "primary": "adaptive-memory m8k (examples/adaptive_memory.py RECIPES['m8k'], frozen C-OPS4-A 2f04ba284 / integration3 selection): 4,787,456 parameters, 2 x 8192 bytes per update, 64 score-before-write writes per sequence, exact second-order outer derivatives through every write, Muon (NS5 BF16, gain 5, momentum 0.95) + AdamW, clip 1.0, warmup/cosine schedule as a runtime data input",
+  "unchanged": "model, learning problem, data/schedule, optimizer, score-before-write ordering and outer differentiation are fixed; no ordinary-model replacement and no truncated inner gradients",
+  "transfer": "donor small fixtures (tiny, small) plus runtime/recapture write counts 16 (m2k) and 128 (m8k_c64) where supported; limits reported"
+ },
+ "declared_precision": {
+  "name": "mixed_bf16 (ops/precision.py MIXED_BF16, applied before AD to init, sequence, body and terminal functions)",
+  "products": "every linear/matmul/addmm and every batched product (window-attention scores and values, inner-learning chain products) takes BF16 operands, accumulates in FP32 and rounds its result once to BF16, then widens exactly",
+  "fp32": "master parameters, optimizer state, gradient accumulation (per-use VJPs), normalization, RoPE, softmax, activations, residual stream, loop carry (fast weights U, Dn and the loss accumulator), losses; Muon Newton-Schulz in BF16 exactly as the donor",
+  "fused_attention": "an installed fused attention body must reproduce the captured mixed rounding points (s = bf16(q k^T), x = fl(s op c) + mask, FP32 softmax, P rounded to BF16 only as the value-product operand, O/dQ/dK/dV rounded once to BF16); FP32 summation order and online-softmax rescaling may differ (FP32 association); masked tiles may be skipped only under an exact-zero guard",
+  "reference": "arithmetic reference = eager PyTorch evaluation of the same formulation under ops.precision.precision_policy('mixed_bf16') in FP32 on the same H100 and state; FP64 reference = eager FP64 autograd of the unpolicied formulation"
+ },
+ "native_gates_mixed": {
+  "loss": "|native - FP64| / |FP64| <= max(4 x eager-mixed rel error, 1e-6)",
+  "gradients": "per parameter rel_l2(native - FP64) <= max(4 x rel_l2(eager mixed - FP64), 1e-5)",
+  "optimizer": "unchanged donor Engine._update on the native gradients: AdamW delta rel_l2 <= 1e-4, Muon delta <= 3e-2, FP32 moments/momentum <= 1e-5 (cops4_a/POLICY.json bounds)",
+  "causality": "prefix losses bitwise unchanged under byte edits from chunk j for counts <= j-1 and changed for counts >= j (unchanged C-OPS4-A rule)",
+  "repeat": "same state and data: loss, gradients, new parameters bitwise identical",
+  "counts": "runtime counts 0, 1, chunks/2, chunks with the same binary",
+  "states": "fresh init and after trained updates"
+ },
+ "native_gates_fp32": "unchanged cops4_a/POLICY.json native_gates for any FP32 native program",
+ "learning_gates": {
+  "practical": "integration3/ADAPTIVE_PRACTICAL_QUALITY_POLICY.json unchanged: m8k, 1024 updates, seed 106140, frozen S106B stream/schedule, common donor FP32 E-slice64 evaluation; finite 1024 updates, improves over the common initial E loss, and E loss <= reference + 0.03 nats/byte where the reference is the arithmetic-passing fp32_ma_strict_casts endpoint (1.13536174461251, integration3 closed evidence)",
+  "original": "reported separately: native E loss within max(0.03, 1.5 x |conv bf16 - conv fp32|) of conventional FP32 (cops4_a/POLICY.json learning_gate); the original FP32 comparator's failed arithmetic screen is retained and not converted into a pass"
+ },
+ "controls": {
+  "practical_bf16": "unchanged S106B engine bf16 (C2b-long, BF16 autocast, torch.compile default, FlexAttention SWA, one CUDA graph); learning-eligible per integration3 ADAPTIVE_QUALIFIED_SCOPE",
+  "excluded": "bf16_ma (max-autotune) FAILED the practical learning gate in integration3 and is timed only as a labelled diagnostic, never the denominator",
+  "reported": "fp32, fp32_ma diagnostics; original FP32 comparator status retained"
+ },
+ "score": {
+  "metric": "native generated complete-update ms / fastest learning-valid conventional complete-update ms on the fixed primary case",
+  "clock": "complete changing-state update with CUDA events around one native launch or one CUDA-graph replay; staged batches (4 synthetic batches cycled) and schedule row outside the events; forward, loss, backward, casts, optimizer and state included",
+  "pairing": "native and controls each in a fresh process on the same H100 in the same job, at least two rounds with reversed order; median of round medians",
+  "target": "<= 0.667; first milestone parity <= 1.0",
+  "memory_setup": "reported separately: torch peaks, native arena, CPU capture/lower/nvcc, GPU load; conventional compile/capture"
+ },
+ "prohibitions": "no benchmark-name dispatch, donor monkeypatches, whole-model handwritten replacement or external-kernel graph counted as the megakernel; one generated cooperative kernel per complete update; rejected V4 group rules are not enabled unless their race is diagnosed, fixed and qualified explicitly; failures preserved, gates never loosened",
+ "declared_precision_online": {
+  "declared_utc": "2026-10-05T09:40:00+00:00",
+  "declared_before": "any build, gate or learning run that uses it (first use: cpu-25)",
+  "name": "mixed_bf16_online (ops/precision.py MIXED_BF16_ONLINE, attention=\"bfloat16_online\")",
+  "function_level": "identical casts/products to mixed_bf16 (same capture-level graph)",
+  "changed_arithmetic": "only inside a fused window attention (ops/window_attention.py, kernels/attention_window.cuh online phases): x = fl(bf16(q k^T) * c') + mask with c' = RN(1/c) for x/c; per 16-row block, computed 64-key blocks in the exact kernel order (unmasked ascending, then masked candidates ascending); running max m; p = __expf(x - m) (hardware ex2); l and O = sum bf16(p) v rescaled by __expf(m_old - m_new) per block; O = bf16(O * RN(1/l)); backward P = __expf(x - m) * RN(1/l), delta_i = sum_d dO_id O_id (FP32), dS = bf16(fl(P * fl(bf16(dP) - delta)) * c'); dQ/dK/dV rounded once to BF16. This is the arithmetic family of the conventional control's FlexAttention (online softmax, unnormalized BF16 probabilities).",
+  "arithmetic_reference": "eager definition of the fused operations (window_attention._online_forward/_online_backward, torch.exp instead of ex2) used by CPU replay of the rewritten graph",
+  "gates": "unchanged: native_gates_mixed (vs eager mixed_bf16 reference and FP64) and learning_gates; no gate is loosened; the exact-arithmetic builds remain the reported fallback",
+  "v1_result": "FAILED (P8-C gpu-27, preserved): w32 after 20 updates, count 8: native loss error 2.19e-6 > bound 1.45e-6 (eager mixed error 3.62e-7); all m8k checks and all other w32 checks passed. v1 = __expf exponentials.",
+  "v2": {
+   "declared_utc": "2026-10-05T10:35:00+00:00",
+   "declared_before": "any build or gate using it (first: cpu-26)",
+   "change": "exponentials use the accurate expf instead of __expf; everything else as v1",
+   "eager_reference_fix": "the eager online reference accumulates each block product in FP32 (it rounded per-block partial outputs to BF16, which the kernel never did)",
+   "gates": "the same pre-registered checks as v1 (m8k fresh 0/1/32/64 + after 10; w32 fresh 0/1/4/8 + after 20), unchanged bounds"
+  },
+  "v2_result": "FAILED (P8-C gpu-28, preserved): m8k after 10 updates, count 64: native loss error 1.611e-6 > bound 1.0e-6 (floor; eager mixed error below 2.5e-7); all w32 checks (incl. after 20) and all fresh m8k checks passed. Speed: 21.61 ms vs exact 23.59 ms (gpu-27/28). Interpretation: the online rounding points decorrelate native from the eager mixed graph, so trained-state loss errors are compared against occasionally tiny eager errors. Not qualified; no further online variants are pursued for this campaign."
+ }
+}

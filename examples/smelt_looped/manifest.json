@@ -1,0 +1,155 @@
+{
+  "schema": "latch-v0-next-example-manifest-v1",
+  "example": "smelt_looped",
+  "note": "Self-contained: runs with the installed megakernel-lab[tinymoe] package and these files only. Donor batch-frontier blobs are identical at their original lane commit f9268c21b4dc.",
+  "package_modules_used": [
+    "megakernel_lab.operation_compiler",
+    "megakernel_lab.operation_compiler.bf16_sdpa",
+    "megakernel_lab.tinymoe.build",
+    "megakernel_lab.tinymoe.compiled_model",
+    "megakernel_lab.tinymoe.conventional",
+    "megakernel_lab.tinymoe.data",
+    "megakernel_lab.tinymoe.learning.sb_rule",
+    "megakernel_lab.tinymoe.learning.protocol",
+    "megakernel_lab.tinymoe.model",
+    "megakernel_lab.tinymoe.native",
+    "megakernel_lab.tinymoe.optimizer",
+    "megakernel_lab.tinymoe.pins"
+  ],
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 13885,
+      "sha256": "9f64e5efb49594c0fe399726c141301146a682d605457a1eda60984b76f80443",
+      "donors": [
+        {
+          "repository": "private Latch repository",
+          "commit": "2c9ddb2e3d51964fa849e05ea0dca0bb8af3d77d",
+          "path": "research/smelt_latch/RESULTS.md",
+          "git_blob": "2a46e98d24b7328d3a5799a4a4e978d94e274888",
+          "sha256": "35da1b2190fd4fc2c55156ba57726b9ef552158c62bf34114f0655b63a2c218f",
+          "last_changed_at": "2c9ddb2e3",
+          "relation": "new text; measurements quoted from this donor file"
+        },
+        {
+          "repository": "private Latch repository",
+          "commit": "2c9ddb2e3d51964fa849e05ea0dca0bb8af3d77d",
+          "path": "research/smelt_latch/PLAN.md",
+          "git_blob": "171d9890bec37e223352c2a161f3d07ad9a7a17c",
+          "sha256": "ce48f2dabe7493de09ac89672cb7adfc7e599f3c2e9af5df39a8e3bf07b4c1c4",
+          "last_changed_at": "4c73b8296",
+          "relation": "new text; workload/deviations summarized from this donor file"
+        }
+      ],
+      "pre_launch_documentation_sha256": "1301cd65302318b373f83f7b8fb2747a25d20c8ebfb3c41502164b144a872181"
+    },
+    {
+      "path": "example.py",
+      "bytes": 7877,
+      "sha256": "894b4495dc47043a63245716fca992b7b37c59f0a78e43eeec48834ba822c10a",
+      "donors": [
+        {
+          "repository": "private Latch repository",
+          "commit": "2c9ddb2e3d51964fa849e05ea0dca0bb8af3d77d",
+          "path": "examples/smelt_looped/example.py",
+          "git_blob": "48ade3bdfd1f18382ab0b3d46d103261a2502c6c",
+          "sha256": "65444ab8ae2b9bd6ad28beacbea6884ceb266493f3ff80abf7f537edd6549312",
+          "last_changed_at": "13f223d4c",
+          "relation": "copy; imports and sys.path setup changed"
+        }
+      ]
+    },
+    {
+      "path": "quickstart.sh",
+      "bytes": 3653,
+      "sha256": "b69dc7d0f933a64e058822889f5ce38930f6896dbed28d2554601d4191b0f32d",
+      "donors": [
+        {
+          "repository": "private Latch repository",
+          "commit": "2c9ddb2e3d51964fa849e05ea0dca0bb8af3d77d",
+          "path": "examples/smelt_looped/quickstart.sh",
+          "git_blob": "554e896bfd23e5b5327c063a3bb759ac4bba9d7f",
+          "sha256": "f39072c7c93ccf77e3648e29fc47ba86efd17da55136579e0b55f814ecad0c04",
+          "last_changed_at": "2b1084643",
+          "relation": "adapted; installed package, local build module, SMELT_LOOP validation"
+        }
+      ]
+    },
+    {
+      "path": "smelt_build.py",
+      "bytes": 6249,
+      "sha256": "95a8282b636712060631f3845d41a5cc76321c873a86e033af15a895eb8f9c57",
+      "donors": [
+        {
+          "repository": "private Latch repository",
+          "commit": "2c9ddb2e3d51964fa849e05ea0dca0bb8af3d77d",
+          "path": "research/smelt_latch/build.py",
+          "git_blob": "75f2825551d4f64d1b04c9cf656a623ff605397e",
+          "sha256": "c81c3cbaaf3529988cdc96d9a7d7a9f2c6f3ab7999aa7609991c6ab3fd0a943c",
+          "last_changed_at": "e4a25d20e",
+          "relation": "copy; imports, docstring names and lane_sources file names changed"
+        }
+      ]
+    },
+    {
+      "path": "smelt_looped.py",
+      "bytes": 16310,
+      "sha256": "c54c2ea3f15fe6f86c7d68f851b4e4475c60955cc618b67cdf25b2cb11f0761c",
+      "donors": [
+        {
+          "repository": "private Latch repository",
+          "commit": "2c9ddb2e3d51964fa849e05ea0dca0bb8af3d77d",
+          "path": "research/smelt_latch/looped.py",
+          "git_blob": "80ba398609e4ca03f84c89f981a7aa475faa19c4",
+          "sha256": "7974f168ba4e3d97c57353c6d8c704824d0e3039a810b98517335b671416c62c",
+          "last_changed_at": "d2c1f2587",
+          "relation": "copy of lines 1-283; FP64 audit reference (reference_fp64, grouped_aux_fp64) removed"
+        }
+      ]
+    },
+    {
+      "path": "smelt_recipe.py",
+      "bytes": 7082,
+      "sha256": "9f15cea972a6a0ce0c752249b7d3418f599199052b08a506df6376cf0c34a031",
+      "donors": [
+        {
+          "repository": "private Latch repository",
+          "commit": "2c9ddb2e3d51964fa849e05ea0dca0bb8af3d77d",
+          "path": "research/latch_tinymoe_batch_frontier/protocol.py",
+          "git_blob": "56521b5276eb87ca860a0a18d9502fe7f3091615",
+          "sha256": "9ee0499a332981e41729487d35bc31f2e2a276f73524ad4a82797356f25a5396",
+          "last_changed_at": "afd97c4eb",
+          "relation": "subset copy: constants, ARMS, tokens_per_update, beta2_for, weight_decay, hyperparameters",
+          "original_commit": "f9268c21b4dcec9e5d4df905fd95bd1e7a2b5e2f"
+        },
+        {
+          "repository": "private Latch repository",
+          "commit": "2c9ddb2e3d51964fa849e05ea0dca0bb8af3d77d",
+          "path": "research/latch_tinymoe_batch_frontier/observe.py",
+          "git_blob": "9a314272cc86fa36ddb4d2fbc10f865e26a8979c",
+          "sha256": "4bcfbd8ca3c9e19a03dad6c705e3ef1654ae450adcfd7aaf62b17b85a72cfbf1",
+          "last_changed_at": "afd97c4eb",
+          "relation": "subset copy: adam_slots",
+          "original_commit": "f9268c21b4dcec9e5d4df905fd95bd1e7a2b5e2f"
+        }
+      ]
+    },
+    {
+      "path": "smelt_runners.py",
+      "bytes": 17852,
+      "sha256": "6425cf93a11b13c72354fa0a380a8595803f1472bd6250342d4946ebcfaee2b7",
+      "donors": [
+        {
+          "repository": "private Latch repository",
+          "commit": "2c9ddb2e3d51964fa849e05ea0dca0bb8af3d77d",
+          "path": "research/smelt_latch/runners.py",
+          "git_blob": "ee816db44d8b332ae86a4021a305d41d3410a9f8",
+          "sha256": "dc93cc78ab1d92df6285d5690bdeaa813a8798e37539f1176cf81feed830c77f",
+          "last_changed_at": "86c4e2f42",
+          "relation": "copy; imports and one docstring module name changed"
+        }
+      ]
+    }
+  ],
+  "launch_documentation_note": "README updated for release 0.9.0rc2; source code and donor attribution unchanged."
+}

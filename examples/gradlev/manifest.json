@@ -1,0 +1,154 @@
+{
+  "compiler_files_identical_to_donor": [
+    "src/megakernel_lab/operation_compiler/vres_loop.py",
+    "src/megakernel_lab/operation_compiler/vres_codegen.py",
+    "src/megakernel_lab/operation_compiler/inference.py"
+  ],
+  "donor": {
+    "branch": "codex/latch-gradlev",
+    "commit": "df184a5f2579552d6b7afdc4f26d32bc0f7c4e47",
+    "lane": "GRADLEV-LATCH",
+    "repository": "Latch (megakernel-lab)"
+  },
+  "example": "gradlev",
+  "external_downloads": {
+    "fineweb-edu": {
+      "access": "HTTP range reads of needed row groups only",
+      "donor_full_split_sha256": {
+        "test.u16 (8192 windows)": "6dfb142e309d03022013cea897cc367d535564c3e005262abba7cfe12a05897f",
+        "validation.u16 (2048 windows)": "0b840cbccc06ec1591eb5fa9613d1f3ba22e086f9f71a59bca5cd213066aaaf8"
+      },
+      "first_shard": {
+        "bytes": 2152689867,
+        "git_lfs_sha256": "554fa2613c9261d6c9c396caab881de3160175794c6c3e1856bf28a0e9cb9b76",
+        "path": "sample/10BT/006_00000.parquet"
+      },
+      "license": "ODC-By 1.0",
+      "repo": "HuggingFaceFW/fineweb-edu",
+      "revision": "87f09149ef4734204d70ed1d046ddc9ca3f2b8f9",
+      "subset": "sample/10BT"
+    },
+    "gpt2-tokenizer.json": {
+      "bytes": 1355256,
+      "git_blob_sha1": "4b988bccc9dc5adacd403c00b4704976196548f8",
+      "sha256": "8414cab924d8b9b33013f0d221c5862f365ee9be39c5c2bfae8a5a9e970478a6",
+      "url": "https://huggingface.co/openai-community/gpt2/resolve/607a30d783dfa663caf39e06633721c8d4cfcd7e/tokenizer.json"
+    },
+    "gpt2.safetensors": {
+      "bytes": 548105171,
+      "license": "MIT",
+      "sha256": "248dfc3911869ec493c76e65bf2fcf7f615828b0254c12b473182f0f81d3a707",
+      "url": "https://huggingface.co/openai-community/gpt2/resolve/607a30d783dfa663caf39e06633721c8d4cfcd7e/model.safetensors"
+    }
+  },
+  "files": {
+    "README.md": {
+      "bytes": 16902,
+      "donor_git_blob": null,
+      "donor_path": null,
+      "relation": "new; quotes donor RESULTS.md ce1e2e4c8d013bfdecca281c15b7f25f2f6ef01b, SPEC.md 78804bd4140e4eb20ceb467c33f43adca2ad2701, COMPILER.md 2cb72b91c73e24d50d55d53bc01eb81b6c186319, PLAN.md c3eb1bea0b54fcf0b18a62f0ffac46f188d935a5",
+      "sha256": "dbc0dce1387cc5b828d0c5de3d8390f3f27f63ebbfbe0df2d0eac88c4a8315b3",
+      "pre_launch_documentation_sha256": "cbb93c691f2d7ccb22e0d7cfdc31d36403a8c1d746c12e6156e1fc0368a7a309"
+    },
+    "gradlev_example/__init__.py": {
+      "bytes": 293,
+      "donor_git_blob": null,
+      "donor_path": null,
+      "relation": "new",
+      "sha256": "beb1c927cb5d22ae46348087137ae4509b35fd97d320365e5f0078f4648854fe"
+    },
+    "gradlev_example/__main__.py": {
+      "bytes": 1799,
+      "donor_git_blob": null,
+      "donor_path": null,
+      "relation": "new: stage dispatcher",
+      "sha256": "4dd1f58129a1e68d9fffbb8db0aa60a223f9e4d87feab9b81e16c9f6381db847"
+    },
+    "gradlev_example/assets.py": {
+      "bytes": 13998,
+      "donor_git_blob": "515bfb384f56889f4a1244c21174798b75198f0f",
+      "donor_path": "research/latch_gradlev/gl/assets.py",
+      "relation": "adapted: public downloads only; held-out rebuild rule from src/megakernel_lab/moe4/_support/learning_scaling/prepare_data.py blob ce91c9a2779a7c34da2562a1b39d38c8c9b42cc3",
+      "sha256": "88246201eb2b61650cc1ea021522821b96ee4c20ccba517d6e429ce43386a6c5"
+    },
+    "gradlev_example/bench.py": {
+      "bytes": 10377,
+      "donor_git_blob": "ad98f15e551bf0c78cc7ec022d40a0767f0cbfde",
+      "donor_path": "research/latch_gradlev/bench.py",
+      "relation": "adapted: imports, prebuilt artifact, no cloud checkpoints",
+      "sha256": "f1e634075a649b5be150e0d83ad8de85cc1f0f0db862a09fa7c7cfaab4226117"
+    },
+    "gradlev_example/build.py": {
+      "bytes": 2786,
+      "donor_git_blob": null,
+      "donor_path": null,
+      "relation": "new: build stage calling latch_loop.build_artifact",
+      "sha256": "32d08b29ddbd42976d792850d877dbac719df519d34d573b1b3ba20a5cc37e1f"
+    },
+    "gradlev_example/check_state.py": {
+      "bytes": 8375,
+      "donor_git_blob": "0381f63bee86b44013cb8a592b386f9bf0b4b18d",
+      "donor_path": "research/latch_gradlev/check_state.py",
+      "relation": "adapted: imports, resume subprocess, root-local inductor cache",
+      "sha256": "bfd1f13cb5885fa5f13ae8ee52b51e2d2b7e6bff44dc6125d61a76fb095e1dd4"
+    },
+    "gradlev_example/conv.py": {
+      "bytes": 6803,
+      "donor_git_blob": "0d759df67e2de0d8d9cb52c6c38e4242b9f415ed",
+      "donor_path": "research/latch_gradlev/gl/conv.py",
+      "relation": "unchanged below header",
+      "sha256": "159ebed14bda9ea94c6bc2a767e1ca01695552c80b4bfcfb4fd66b7713efbd9a"
+    },
+    "gradlev_example/data.py": {
+      "bytes": 3319,
+      "donor_git_blob": "1d4be220207663c88bcec2a359d5d3f757e10fe4",
+      "donor_path": "research/latch_gradlev/gl/data.py",
+      "relation": "adapted: local files; training batches removed",
+      "sha256": "972fdeda462e9682e2fca169d581bae1f757f0034179211b6f699b589955f04b"
+    },
+    "gradlev_example/deploy.py": {
+      "bytes": 10487,
+      "donor_git_blob": "d6f0b6f5b2bf900facf380f8ef4efa9c82e99950",
+      "donor_path": "research/latch_gradlev/gl/deploy.py",
+      "relation": "unchanged below header",
+      "sha256": "151f6bfb1afe846f594e862ab57c51b39226234d580119db98f5e2a44c9637e2"
+    },
+    "gradlev_example/evaluate.py": {
+      "bytes": 7356,
+      "donor_git_blob": "92f19adb1d18921a1b0ea668244e54b8b2fc9ca2",
+      "donor_path": "research/latch_gradlev/evaluate.py",
+      "relation": "adapted: imports, prebuilt artifact, per-token NLL saved",
+      "sha256": "a8730540c53ee13ad8120be224bf3c5c6775bca7315809f88370769fef2f0c75"
+    },
+    "gradlev_example/latch_loop.py": {
+      "bytes": 4890,
+      "donor_git_blob": "8d7228875b00dec74b206d2bdfda3ebfc1bb36a1",
+      "donor_path": "research/latch_gradlev/gl/latch_loop.py",
+      "relation": "unchanged below header",
+      "sha256": "48fb33520c43d2c05c47263eb5a09034808b92704be9feb2467a19d81eea7899"
+    },
+    "gradlev_example/latch_run.py": {
+      "bytes": 1747,
+      "donor_git_blob": "240538b09fc668455f6088113c51ab223bbfdb61",
+      "donor_path": "research/latch_gradlev/gl/latch_run.py",
+      "relation": "unchanged below header",
+      "sha256": "157ee8db2a19777a71edb91c07e7397f7478d70ec997b57e83cb26b1ca460af7"
+    },
+    "gradlev_example/model.py": {
+      "bytes": 12217,
+      "donor_git_blob": "056a2b9579af324b3da17ce68f676605ef4b9747",
+      "donor_path": "research/latch_gradlev/gl/model.py",
+      "relation": "unchanged below header",
+      "sha256": "4678f0cf90acbb0512117fedf6ffc8b8b0f373f4a05fd473a64594ca1b7746b1"
+    },
+    "quickstart.sh": {
+      "bytes": 2198,
+      "donor_git_blob": null,
+      "donor_path": null,
+      "relation": "new",
+      "sha256": "6d68dd0943af83802452689e68c60d2b277dd6ed8c689a8c9315651e79c5665a"
+    }
+  },
+  "schema": "latch-example-manifest-v1",
+  "launch_documentation_note": "README updated for release 0.9.0rc2; source code and donor attribution unchanged."
+}

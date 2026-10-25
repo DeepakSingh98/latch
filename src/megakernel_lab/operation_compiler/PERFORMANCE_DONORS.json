@@ -1,0 +1,1412 @@
+{
+  "schema_version": 1,
+  "files": [
+    {
+      "path": "research/latch_ops/ops/attention_lower.py",
+      "source_path": "research/latch_ops/ops/attention_lower.py",
+      "source_commits": [
+        "f6f60bd1325cae4ded5fba17083feb3b85a791b0"
+      ],
+      "adaptations": [
+        "Common attention planner/packed-output hooks."
+      ],
+      "integrated_sha256": "87ea360d7880628f56a280655e7964e897c2d38ed8c811d45d52654f39041c75",
+      "pinned_sources": [
+        {
+          "commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+          "path": "research/latch_ops/ops/attention_lower.py",
+          "sha256": "87ea360d7880628f56a280655e7964e897c2d38ed8c811d45d52654f39041c75"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/codegen_rules.py",
+      "source_path": "research/latch_ops/ops/codegen_rules.py",
+      "source_commits": [
+        "6082a189f37f6afd6f7cd5509cc11a312948e8d8",
+        "f6f60bd1325cae4ded5fba17083feb3b85a791b0"
+      ],
+      "adaptations": [
+        "Shared exact-tree wide reduction prerequisite.",
+        "Union of B coalesced/quad exact-tree rules and C wide exact-tree/unsigned-index rules; options choose mutually disjoint extents."
+      ],
+      "integrated_sha256": "e37060e93c09d160889df27400e29aa7ac76f8142c89b4cae48e36bf56466fc0",
+      "pinned_sources": [
+        {
+          "commit": "6082a189f37f6afd6f7cd5509cc11a312948e8d8",
+          "path": "research/latch_ops/ops/codegen_rules.py",
+          "sha256": "b794be3df74b56e00809342760c6a5ce278d985ef2ec17454f071461fe52d410"
+        },
+        {
+          "commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+          "path": "research/latch_ops/ops/codegen_rules.py",
+          "sha256": "d0dff7a46b6aa706ffe50f7bf28c7eb5abd02f14a0e1ad645e15744879a36b15"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/flat_long_attention.py",
+      "source_commit": "81a52fc02783e0c537dcf1a909083916f2deaa66",
+      "source_path": "research/latch_ops/ops/long_attention.py",
+      "source_sha256": "48c799fe41c08de28418e4f3df2481e6defd6038e7659cd9fe5c50153fb92d71",
+      "adaptations": [
+        "flat long attention header/namespace/macros renamed to avoid loop-body collisions"
+      ],
+      "integrated_sha256": "0318752e3fc8715e5a4c6a2054593bac6db0c9d3e761da52bbb05a8466e075e5",
+      "pinned_sources": [
+        {
+          "commit": "81a52fc02783e0c537dcf1a909083916f2deaa66",
+          "path": "research/latch_ops/ops/long_attention.py",
+          "sha256": "48c799fe41c08de28418e4f3df2481e6defd6038e7659cd9fe5c50153fb92d71"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/fusion_p6d.py",
+      "source_commit": "81a52fc02783e0c537dcf1a909083916f2deaa66",
+      "source_path": "research/latch_ops/ops/fusion.py",
+      "source_sha256": "3cc4998a5c86c381c7b38aa5493b4e5da279b3617986590e3f6198f3a83adf32",
+      "adaptations": [
+        "private schedule/resource module names",
+        "P6D flat attention namespace separated",
+        "Generic scalar/view primitive union; explicit safe slice/select dispatch before legacy view handling."
+      ],
+      "additional_source_commits": [
+        "2f04ba284f73a480f7a81310a138f6211793f8bd",
+        "22c3231adddc9c12ce5e2088375542f5d42b2018"
+      ],
+      "integrated_sha256": "33ca16eabde37bcaa1b47a7fe5677e625988443a869f2c03c74837d44de5b9bd",
+      "pinned_sources": [
+        {
+          "commit": "81a52fc02783e0c537dcf1a909083916f2deaa66",
+          "path": "research/latch_ops/ops/fusion.py",
+          "sha256": "3cc4998a5c86c381c7b38aa5493b4e5da279b3617986590e3f6198f3a83adf32"
+        },
+        {
+          "commit": "2f04ba284f73a480f7a81310a138f6211793f8bd",
+          "path": "research/latch_ops/ops/fusion.py",
+          "sha256": "a9f9e55cefd51d6fd2bd584889e8357ad3960f97b814e70957aba78c4c033555"
+        },
+        {
+          "commit": "22c3231adddc9c12ce5e2088375542f5d42b2018",
+          "path": "research/latch_ops/ops/fusion.py",
+          "sha256": "0da198f88c6dfdcd4378c711e4e53fc35698ba6ff2352c259013661c234c0ce5"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/fusion_p6e.py",
+      "source_commit": "5f78a0ef1d044fccb5813bea5329b77901bdcab8",
+      "source_path": "research/latch_ops/ops/fusion.py",
+      "source_sha256": "1ed791e3c725b7ae6d26415fa94cf48b6d299eb5b33681ade5585a5818942d97",
+      "adaptations": [
+        "private schedule/resource module names",
+        "Generic scalar/view primitive union; explicit safe slice/select dispatch before legacy view handling."
+      ],
+      "additional_source_commits": [
+        "2f04ba284f73a480f7a81310a138f6211793f8bd",
+        "22c3231adddc9c12ce5e2088375542f5d42b2018"
+      ],
+      "integrated_sha256": "f9d43f3fe8d9c0253e6c5a3275ee445f6fef1d58cce9263abf2d43c3c2cef214",
+      "pinned_sources": [
+        {
+          "commit": "5f78a0ef1d044fccb5813bea5329b77901bdcab8",
+          "path": "research/latch_ops/ops/fusion.py",
+          "sha256": "1ed791e3c725b7ae6d26415fa94cf48b6d299eb5b33681ade5585a5818942d97"
+        },
+        {
+          "commit": "2f04ba284f73a480f7a81310a138f6211793f8bd",
+          "path": "research/latch_ops/ops/fusion.py",
+          "sha256": "a9f9e55cefd51d6fd2bd584889e8357ad3960f97b814e70957aba78c4c033555"
+        },
+        {
+          "commit": "22c3231adddc9c12ce5e2088375542f5d42b2018",
+          "path": "research/latch_ops/ops/fusion.py",
+          "sha256": "0da198f88c6dfdcd4378c711e4e53fc35698ba6ff2352c259013661c234c0ce5"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/fusion_p7a.py",
+      "source_commit": "f36b4737cee732e6915d11e233bcc068126b3e64",
+      "source_path": "research/latch_ops/ops/fusion.py",
+      "source_sha256": "c1b263c19e04a97702a734d92e696579831c6cd030c8e5dcea8cc94938a259e8",
+      "adaptations": [
+        "private scheduling/resource names",
+        "private TMA namespace/header names",
+        "Generic scalar/view primitive union; explicit safe slice/select dispatch before legacy view handling.",
+        "Keep P7A clamped slice_backward loads; do not import P7B indexed-expression flags into this protocol."
+      ],
+      "additional_source_commits": [
+        "2f04ba284f73a480f7a81310a138f6211793f8bd",
+        "22c3231adddc9c12ce5e2088375542f5d42b2018"
+      ],
+      "integrated_sha256": "04ea1a53dd0890ca42edacd3bec5bf40fa646b034fb99818b663d912c4498daf",
+      "pinned_sources": [
+        {
+          "commit": "f36b4737cee732e6915d11e233bcc068126b3e64",
+          "path": "research/latch_ops/ops/fusion.py",
+          "sha256": "c1b263c19e04a97702a734d92e696579831c6cd030c8e5dcea8cc94938a259e8"
+        },
+        {
+          "commit": "2f04ba284f73a480f7a81310a138f6211793f8bd",
+          "path": "research/latch_ops/ops/fusion.py",
+          "sha256": "a9f9e55cefd51d6fd2bd584889e8357ad3960f97b814e70957aba78c4c033555"
+        },
+        {
+          "commit": "22c3231adddc9c12ce5e2088375542f5d42b2018",
+          "path": "research/latch_ops/ops/fusion.py",
+          "sha256": "0da198f88c6dfdcd4378c711e4e53fc35698ba6ff2352c259013661c234c0ce5"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/fusion_p7b.py",
+      "source_commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+      "source_path": "research/latch_ops/ops/fusion.py",
+      "source_sha256": "bbd7c8fe6b4df8e0e17f75b49ff58a8666a4d59317885e6ac0eac80c76aef7bf",
+      "adaptations": [
+        "private schedule/resource module names",
+        "Generic scalar/view primitive union; explicit safe slice/select dispatch before legacy view handling."
+      ],
+      "additional_source_commits": [
+        "2f04ba284f73a480f7a81310a138f6211793f8bd",
+        "22c3231adddc9c12ce5e2088375542f5d42b2018"
+      ],
+      "integrated_sha256": "e4c73b581f4cd88e07b5724b55d71e946220553f26424ed037c40356a3d68aa9",
+      "pinned_sources": [
+        {
+          "commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+          "path": "research/latch_ops/ops/fusion.py",
+          "sha256": "bbd7c8fe6b4df8e0e17f75b49ff58a8666a4d59317885e6ac0eac80c76aef7bf"
+        },
+        {
+          "commit": "2f04ba284f73a480f7a81310a138f6211793f8bd",
+          "path": "research/latch_ops/ops/fusion.py",
+          "sha256": "a9f9e55cefd51d6fd2bd584889e8357ad3960f97b814e70957aba78c4c033555"
+        },
+        {
+          "commit": "22c3231adddc9c12ce5e2088375542f5d42b2018",
+          "path": "research/latch_ops/ops/fusion.py",
+          "sha256": "0da198f88c6dfdcd4378c711e4e53fc35698ba6ff2352c259013661c234c0ce5"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/fusion_reference.py",
+      "source_path": "research/latch_ops/ops/fusion_reference.py",
+      "source_commits": [
+        "af3138238f1b2b84fa17a5b0a71884fe80c1dea0",
+        "2f04ba284f73a480f7a81310a138f6211793f8bd",
+        "22c3231adddc9c12ce5e2088375542f5d42b2018"
+      ],
+      "adaptations": [
+        "Preserve original integrated dependency schedule; add generic primitive union and C4B long scalar reduction."
+      ],
+      "integrated_sha256": "42a9aafcaca269cba9b9d95dc1977ade716f849bc47622769311084d03095db2",
+      "pinned_sources": []
+    },
+    {
+      "path": "research/latch_ops/ops/group_rules.py",
+      "source_commit": "6082a189f37f6afd6f7cd5509cc11a312948e8d8",
+      "source_path": "research/latch_ops/ops/group_rules.py",
+      "source_sha256": "c03c065ddb669dcc8ff2377098212109ca2f20e502f25edef55b3b0a15554a38",
+      "adaptations": [
+        "Accept sink/sinki rule only; rejected tape ring is not imported."
+      ],
+      "additional_source_commits": [
+        "e0fcb8eecf1267a1bdc1201f9417a1a3b317a2b7"
+      ],
+      "integrated_sha256": "b7a644c5c2259a06ea3ca493d62cb0494604ac6ce5ca375744a626efd60c0a8c",
+      "pinned_sources": [
+        {
+          "commit": "6082a189f37f6afd6f7cd5509cc11a312948e8d8",
+          "path": "research/latch_ops/ops/group_rules.py",
+          "sha256": "c03c065ddb669dcc8ff2377098212109ca2f20e502f25edef55b3b0a15554a38"
+        },
+        {
+          "commit": "e0fcb8eecf1267a1bdc1201f9417a1a3b317a2b7",
+          "path": "research/latch_ops/ops/group_rules.py",
+          "sha256": "433c96a5318262725bed143c45d5f496618e36776a61462dfa1b37a4d50b922b"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/kernels/attention_long.cuh",
+      "source_commit": "6082a189f37f6afd6f7cd5509cc11a312948e8d8",
+      "source_path": "research/latch_ops/ops/kernels/attention_long.cuh",
+      "source_sha256": "9f34eace352b180a7148aab5a55a6d370fed7c24b129048e6983e3168468554c",
+      "adaptations": [],
+      "integrated_sha256": "9f34eace352b180a7148aab5a55a6d370fed7c24b129048e6983e3168468554c",
+      "pinned_sources": [
+        {
+          "commit": "6082a189f37f6afd6f7cd5509cc11a312948e8d8",
+          "path": "research/latch_ops/ops/kernels/attention_long.cuh",
+          "sha256": "9f34eace352b180a7148aab5a55a6d370fed7c24b129048e6983e3168468554c"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/kernels/attention_long_flat.cuh",
+      "source_commit": "81a52fc02783e0c537dcf1a909083916f2deaa66",
+      "source_path": "research/latch_ops/ops/kernels/attention_long.cuh",
+      "source_sha256": "d5d76a54cf2bec521436da48d65219511bfd957ec82276e50aec0c8165705a53",
+      "adaptations": [
+        "flat long attention header/namespace/macros renamed to avoid loop-body collisions",
+        "release step 09 (codex/latch-step-09): optional m_heads (per-example mask batch = bh / m_heads) and safe_rows (rows without an allowed key give output 0, lse = +inf) fields; defaults keep the donor semantics"
+      ],
+      "integrated_sha256": "554da18225e98a524ef442f7b118778e876d17f2b9681e90cef9519fbcaaedc7",
+      "pinned_sources": [
+        {
+          "commit": "81a52fc02783e0c537dcf1a909083916f2deaa66",
+          "path": "research/latch_ops/ops/kernels/attention_long.cuh",
+          "sha256": "d5d76a54cf2bec521436da48d65219511bfd957ec82276e50aec0c8165705a53"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/kernels/attention_mixed.cuh",
+      "source_commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+      "source_path": "research/latch_ops/ops/kernels/attention_mixed.cuh",
+      "source_sha256": "d876a1e643d8c751d0d25cb0e637e5e0c8a1b5cd4ee4192139a5d1c1b2d12b38",
+      "adaptations": [],
+      "integrated_sha256": "d876a1e643d8c751d0d25cb0e637e5e0c8a1b5cd4ee4192139a5d1c1b2d12b38",
+      "pinned_sources": [
+        {
+          "commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+          "path": "research/latch_ops/ops/kernels/attention_mixed.cuh",
+          "sha256": "d876a1e643d8c751d0d25cb0e637e5e0c8a1b5cd4ee4192139a5d1c1b2d12b38"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/kernels/attention_short.cuh",
+      "source_commit": "6082a189f37f6afd6f7cd5509cc11a312948e8d8",
+      "source_path": "research/latch_ops/ops/kernels/attention_short.cuh",
+      "source_sha256": "1c0c7f078ffac7ff24aed7b7147a776f84b2575c637d59b9f13a39f0a3fd126a",
+      "adaptations": [
+        "release step 09 (codex/latch-step-09): optional m_heads (per-example mask batch = bh / m_heads) and safe_rows (rows without an allowed key give output 0, lse = +inf) fields; defaults keep the donor semantics"
+      ],
+      "integrated_sha256": "f794dc203d347524ae41bdb8e1bfd3763104cc226adb25f7d402ecfea983b021",
+      "pinned_sources": [
+        {
+          "commit": "6082a189f37f6afd6f7cd5509cc11a312948e8d8",
+          "path": "research/latch_ops/ops/kernels/attention_short.cuh",
+          "sha256": "1c0c7f078ffac7ff24aed7b7147a776f84b2575c637d59b9f13a39f0a3fd126a"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/kernels/p5c_wg.cuh",
+      "source_path": "research/latch_ops/ops/kernels/p5c_wg.cuh",
+      "source_commits": [
+        "81a52fc02783e0c537dcf1a909083916f2deaa66",
+        "6082a189f37f6afd6f7cd5509cc11a312948e8d8"
+      ],
+      "adaptations": [
+        "Union of guarded flat and loop bodies; C release/refill macro and D synchronization guards retained."
+      ],
+      "integrated_sha256": "5b2b596203ed6e97a1b11c44eea8683c618b65169f30fc1bc968c2f551e30ff1",
+      "pinned_sources": [
+        {
+          "commit": "81a52fc02783e0c537dcf1a909083916f2deaa66",
+          "path": "research/latch_ops/ops/kernels/p5c_wg.cuh",
+          "sha256": "e80273e65a79d34b80070921b13b0135da05d0fbd17698b7ebbcf17fc1333175"
+        },
+        {
+          "commit": "6082a189f37f6afd6f7cd5509cc11a312948e8d8",
+          "path": "research/latch_ops/ops/kernels/p5c_wg.cuh",
+          "sha256": "ec6da8c4e36c1ed5432fadfd7b49fe51cf99ce4d6daecaaa5535e4046ecd8da8"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/kernels/p6e_tma.cuh",
+      "source_commit": "5f78a0ef1d044fccb5813bea5329b77901bdcab8",
+      "source_path": "research/latch_ops/ops/kernels/p6e_tma.cuh",
+      "source_sha256": "e1faa362e19acd0aa307c422c50374eca6f34db4cd1232fc4b84f6f144a03dd5",
+      "adaptations": [],
+      "integrated_sha256": "e1faa362e19acd0aa307c422c50374eca6f34db4cd1232fc4b84f6f144a03dd5",
+      "pinned_sources": [
+        {
+          "commit": "5f78a0ef1d044fccb5813bea5329b77901bdcab8",
+          "path": "research/latch_ops/ops/kernels/p6e_tma.cuh",
+          "sha256": "e1faa362e19acd0aa307c422c50374eca6f34db4cd1232fc4b84f6f144a03dd5"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/kernels/pops4b_tma.cuh",
+      "source_commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+      "source_path": "research/latch_ops/ops/kernels/pops4b_tma.cuh",
+      "source_sha256": "f67823b7d4d9ca555e0710f24eacfed6e83922fe6ef1d4127efe31803bb8a966",
+      "adaptations": [],
+      "integrated_sha256": "f67823b7d4d9ca555e0710f24eacfed6e83922fe6ef1d4127efe31803bb8a966",
+      "pinned_sources": [
+        {
+          "commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+          "path": "research/latch_ops/ops/kernels/pops4b_tma.cuh",
+          "sha256": "f67823b7d4d9ca555e0710f24eacfed6e83922fe6ef1d4127efe31803bb8a966"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/kernels/pops4b_tma_p7a.cuh",
+      "source_commit": "f36b4737cee732e6915d11e233bcc068126b3e64",
+      "source_path": "research/latch_ops/ops/kernels/pops4b_tma.cuh",
+      "source_sha256": "10f6c0ae21b0ef26348c93a4aa7516c6e45dfd76867e1177680d116771c43134",
+      "adaptations": [
+        "private namespace/header names"
+      ],
+      "integrated_sha256": "ff8c01db53bc6649b2bd96a1781eff65894dff306f132812c313fe6cc8b0f1e9",
+      "pinned_sources": [
+        {
+          "commit": "f36b4737cee732e6915d11e233bcc068126b3e64",
+          "path": "research/latch_ops/ops/kernels/pops4b_tma.cuh",
+          "sha256": "10f6c0ae21b0ef26348c93a4aa7516c6e45dfd76867e1177680d116771c43134"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/kernels/pops4b_wg.cuh",
+      "source_commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+      "source_path": "research/latch_ops/ops/kernels/pops4b_wg.cuh",
+      "source_sha256": "e33450f776a69fb5d76fc2df01227e885a5926a720892bd1b33ce311775129c5",
+      "adaptations": [],
+      "integrated_sha256": "e33450f776a69fb5d76fc2df01227e885a5926a720892bd1b33ce311775129c5",
+      "pinned_sources": [
+        {
+          "commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+          "path": "research/latch_ops/ops/kernels/pops4b_wg.cuh",
+          "sha256": "e33450f776a69fb5d76fc2df01227e885a5926a720892bd1b33ce311775129c5"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/kernels/pops4b_wg_p7a.cuh",
+      "source_commit": "f36b4737cee732e6915d11e233bcc068126b3e64",
+      "source_path": "research/latch_ops/ops/kernels/pops4b_wg.cuh",
+      "source_sha256": "e33450f776a69fb5d76fc2df01227e885a5926a720892bd1b33ce311775129c5",
+      "adaptations": [
+        "private namespace/header names"
+      ],
+      "integrated_sha256": "610b7181bf4e140fe5b38209bca9addc829cdaba0bb69d20478342011e98e204",
+      "pinned_sources": [
+        {
+          "commit": "f36b4737cee732e6915d11e233bcc068126b3e64",
+          "path": "research/latch_ops/ops/kernels/pops4b_wg.cuh",
+          "sha256": "e33450f776a69fb5d76fc2df01227e885a5926a720892bd1b33ce311775129c5"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/kernels/popsc_mm.cuh",
+      "source_path": "research/latch_ops/ops/kernels/popsc_mm.cuh",
+      "source_commits": [
+        "22c3231adddc9c12ce5e2088375542f5d42b2018",
+        "f6f60bd1325cae4ded5fba17083feb3b85a791b0"
+      ],
+      "adaptations": [
+        "Retain P6C/C4B aligned and tail bodies.",
+        "Append only P7B masked-edge/split bodies; private btile_edge name prevents overwriting aligned btile."
+      ],
+      "integrated_sha256": "f11f58408985f98e0d6964ac046d8917b6e6d9eb3dd4d5cd8d1ca4664e8650b0",
+      "pinned_sources": [
+        {
+          "commit": "22c3231adddc9c12ce5e2088375542f5d42b2018",
+          "path": "research/latch_ops/ops/kernels/popsc_mm.cuh",
+          "sha256": "9b094f53f5824d239b945d36c8151a596c39071ad576378f35476fe6f70f9245"
+        },
+        {
+          "commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+          "path": "research/latch_ops/ops/kernels/popsc_mm.cuh",
+          "sha256": "70c8863dbe300d07965dd143e8fc71f6ff62d5af439feaf476e9f54ed93da0a6"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/layout_normalize.py",
+      "source_commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+      "source_path": "research/latch_ops/ops/layout_normalize.py",
+      "source_sha256": "993d19fef73ab070c58179813bb43c7dbdb8bf5ad41cd63577c70a1187ff7466",
+      "adaptations": [],
+      "integrated_sha256": "993d19fef73ab070c58179813bb43c7dbdb8bf5ad41cd63577c70a1187ff7466",
+      "pinned_sources": [
+        {
+          "commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+          "path": "research/latch_ops/ops/layout_normalize.py",
+          "sha256": "993d19fef73ab070c58179813bb43c7dbdb8bf5ad41cd63577c70a1187ff7466"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/long_attention.py",
+      "source_commit": "6082a189f37f6afd6f7cd5509cc11a312948e8d8",
+      "source_path": "research/latch_ops/ops/long_attention.py",
+      "source_sha256": "5c645c34365c510a0e8c4134ac6cf687a3dc12e148d19ea65a60f574ac762c82",
+      "adaptations": [],
+      "integrated_sha256": "5c645c34365c510a0e8c4134ac6cf687a3dc12e148d19ea65a60f574ac762c82",
+      "pinned_sources": [
+        {
+          "commit": "6082a189f37f6afd6f7cd5509cc11a312948e8d8",
+          "path": "research/latch_ops/ops/long_attention.py",
+          "sha256": "5c645c34365c510a0e8c4134ac6cf687a3dc12e148d19ea65a60f574ac762c82"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/loop_attention.py",
+      "source_commit": "6082a189f37f6afd6f7cd5509cc11a312948e8d8",
+      "source_path": "research/latch_ops/ops/loop_attention.py",
+      "source_sha256": "db133104802423814019aa818a83aa43588fe203e3cc62cc29c65d063c86557d",
+      "adaptations": [],
+      "integrated_sha256": "db133104802423814019aa818a83aa43588fe203e3cc62cc29c65d063c86557d",
+      "pinned_sources": [
+        {
+          "commit": "6082a189f37f6afd6f7cd5509cc11a312948e8d8",
+          "path": "research/latch_ops/ops/loop_attention.py",
+          "sha256": "db133104802423814019aa818a83aa43588fe203e3cc62cc29c65d063c86557d"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/matrix_codegen.py",
+      "source_commits": [
+        "af3138238f1b2b84fa17a5b0a71884fe80c1dea0",
+        "6082a189f37f6afd6f7cd5509cc11a312948e8d8"
+      ],
+      "common_base": "b84c7a5e6cc06b250530a614f9572c16ffa569b1",
+      "source_path": "research/latch_ops/ops/matrix_codegen.py",
+      "adaptations": [
+        "three-way union merge",
+        "C4B BF16 tail body admission and explicit popsc_tail_bf16 metadata; implicit mixed dtype still refused."
+      ],
+      "additional_source_commits": [
+        "22c3231adddc9c12ce5e2088375542f5d42b2018"
+      ],
+      "integrated_sha256": "e274c9dd39cd39ee77e008560d3aa36b56f8ac09c779722ed50593af29b3b557",
+      "pinned_sources": [
+        {
+          "commit": "af3138238f1b2b84fa17a5b0a71884fe80c1dea0",
+          "path": "research/latch_ops/ops/matrix_codegen.py",
+          "sha256": "fe7b48a71d06bd17eb2b7ab99155cbef99d95f033456b0dd349cd7fff1963a0b"
+        },
+        {
+          "commit": "6082a189f37f6afd6f7cd5509cc11a312948e8d8",
+          "path": "research/latch_ops/ops/matrix_codegen.py",
+          "sha256": "40ccbee38303ffd228f74b870cf1fd918e03dea9d6848318e15742d30297712a"
+        },
+        {
+          "commit": "22c3231adddc9c12ce5e2088375542f5d42b2018",
+          "path": "research/latch_ops/ops/matrix_codegen.py",
+          "sha256": "a4a3ba589f5b72881eb8739edb122ef6e95f1156a08d54780b675067f2f0040f"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/matrix_codegen_p6d.py",
+      "source_commit": "81a52fc02783e0c537dcf1a909083916f2deaa66",
+      "source_path": "research/latch_ops/ops/matrix_codegen.py",
+      "source_sha256": "1dd507448b53731b3a2b3a59b387a6311787ad715e9e799205fcf5d5e8a14591",
+      "adaptations": [
+        "private schedule/resource module names",
+        "P6D flat attention namespace separated",
+        "C4B BF16 tail body admission and explicit popsc_tail_bf16 metadata; implicit mixed dtype still refused."
+      ],
+      "additional_source_commits": [
+        "22c3231adddc9c12ce5e2088375542f5d42b2018"
+      ],
+      "integrated_sha256": "0a1cf81f0a197ffd6eeae8644b96920cc7c7e107687cf02d49253bc34946f75f",
+      "pinned_sources": [
+        {
+          "commit": "81a52fc02783e0c537dcf1a909083916f2deaa66",
+          "path": "research/latch_ops/ops/matrix_codegen.py",
+          "sha256": "1dd507448b53731b3a2b3a59b387a6311787ad715e9e799205fcf5d5e8a14591"
+        },
+        {
+          "commit": "22c3231adddc9c12ce5e2088375542f5d42b2018",
+          "path": "research/latch_ops/ops/matrix_codegen.py",
+          "sha256": "a4a3ba589f5b72881eb8739edb122ef6e95f1156a08d54780b675067f2f0040f"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/matrix_codegen_p6e.py",
+      "source_commit": "5f78a0ef1d044fccb5813bea5329b77901bdcab8",
+      "source_path": "research/latch_ops/ops/matrix_codegen.py",
+      "source_sha256": "e2d1bf5806557ebee8949bfb0278a999359219cb14af20d9c38a628d743a8ca7",
+      "adaptations": [
+        "private schedule/resource module names"
+      ],
+      "integrated_sha256": "9b5091ea4777486c77a9fb7ffb9eea242a1e6c3426f1f485512f5d75b5ebd02f",
+      "pinned_sources": [
+        {
+          "commit": "5f78a0ef1d044fccb5813bea5329b77901bdcab8",
+          "path": "research/latch_ops/ops/matrix_codegen.py",
+          "sha256": "e2d1bf5806557ebee8949bfb0278a999359219cb14af20d9c38a628d743a8ca7"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/matrix_codegen_p7a.py",
+      "source_commit": "f36b4737cee732e6915d11e233bcc068126b3e64",
+      "source_path": "research/latch_ops/ops/matrix_codegen.py",
+      "source_sha256": "e2d1bf5806557ebee8949bfb0278a999359219cb14af20d9c38a628d743a8ca7",
+      "adaptations": [
+        "private scheduling/resource names",
+        "private TMA namespace/header names"
+      ],
+      "integrated_sha256": "33ebb65aaddbf844497ed9302e90d64f0dbb8bbdf6f9037abfd68bb13d95c9d9",
+      "pinned_sources": [
+        {
+          "commit": "f36b4737cee732e6915d11e233bcc068126b3e64",
+          "path": "research/latch_ops/ops/matrix_codegen.py",
+          "sha256": "e2d1bf5806557ebee8949bfb0278a999359219cb14af20d9c38a628d743a8ca7"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/matrix_codegen_p7b.py",
+      "source_commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+      "source_path": "research/latch_ops/ops/matrix_codegen.py",
+      "source_sha256": "e2d1bf5806557ebee8949bfb0278a999359219cb14af20d9c38a628d743a8ca7",
+      "adaptations": [
+        "private schedule/resource module names"
+      ],
+      "integrated_sha256": "621b924d69c57ef0f84441d808f597ecc496ea8a6051155aa2159d66b686e0be",
+      "pinned_sources": [
+        {
+          "commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+          "path": "research/latch_ops/ops/matrix_codegen.py",
+          "sha256": "e2d1bf5806557ebee8949bfb0278a999359219cb14af20d9c38a628d743a8ca7"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/matrix_rules.py",
+      "source_commits": [
+        "af3138238f1b2b84fa17a5b0a71884fe80c1dea0",
+        "6082a189f37f6afd6f7cd5509cc11a312948e8d8"
+      ],
+      "common_base": "b84c7a5e6cc06b250530a614f9572c16ffa569b1",
+      "source_path": "research/latch_ops/ops/matrix_rules.py",
+      "adaptations": [
+        "three-way union merge",
+        "C4B BF16 tail body admission and explicit popsc_tail_bf16 metadata; implicit mixed dtype still refused."
+      ],
+      "additional_source_commits": [
+        "22c3231adddc9c12ce5e2088375542f5d42b2018"
+      ],
+      "integrated_sha256": "ec497e26262cadd4bcabd499b80780d6f97c454b8b5eb0e612a55ce118593bad",
+      "pinned_sources": [
+        {
+          "commit": "af3138238f1b2b84fa17a5b0a71884fe80c1dea0",
+          "path": "research/latch_ops/ops/matrix_rules.py",
+          "sha256": "20d14a67f0740d1c298174bcfd6bfb193cb61073c97efa39edb90de4e3a493bd"
+        },
+        {
+          "commit": "6082a189f37f6afd6f7cd5509cc11a312948e8d8",
+          "path": "research/latch_ops/ops/matrix_rules.py",
+          "sha256": "600e25ee25c6dd924aa4787596ef947f1946817cf5875fde689294f4bd3f97c8"
+        },
+        {
+          "commit": "22c3231adddc9c12ce5e2088375542f5d42b2018",
+          "path": "research/latch_ops/ops/matrix_rules.py",
+          "sha256": "d6488e811cb5ceb17c6a3d2e47f515693d4b1470f06ceb4dda18813770eafb12"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/matrix_rules_p6d.py",
+      "source_commit": "81a52fc02783e0c537dcf1a909083916f2deaa66",
+      "source_path": "research/latch_ops/ops/matrix_rules.py",
+      "source_sha256": "ea70a290624fa9b11c7d8a292ff12e44860ee94e5ad3de1a56f72101e86e402a",
+      "adaptations": [
+        "private schedule/resource module names",
+        "P6D flat attention namespace separated",
+        "C4B BF16 tail body admission and explicit popsc_tail_bf16 metadata; implicit mixed dtype still refused."
+      ],
+      "additional_source_commits": [
+        "22c3231adddc9c12ce5e2088375542f5d42b2018"
+      ],
+      "integrated_sha256": "1617283fc56087ee5a2660cef6c9cd9bd2dd62aff43d3e9c50fd04e806aa41cf",
+      "pinned_sources": [
+        {
+          "commit": "81a52fc02783e0c537dcf1a909083916f2deaa66",
+          "path": "research/latch_ops/ops/matrix_rules.py",
+          "sha256": "ea70a290624fa9b11c7d8a292ff12e44860ee94e5ad3de1a56f72101e86e402a"
+        },
+        {
+          "commit": "22c3231adddc9c12ce5e2088375542f5d42b2018",
+          "path": "research/latch_ops/ops/matrix_rules.py",
+          "sha256": "d6488e811cb5ceb17c6a3d2e47f515693d4b1470f06ceb4dda18813770eafb12"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/matrix_rules_p6e.py",
+      "source_commit": "5f78a0ef1d044fccb5813bea5329b77901bdcab8",
+      "source_path": "research/latch_ops/ops/matrix_rules.py",
+      "source_sha256": "82eccd980059b5d83ccf007a17ee0f76f074af007c8611c610eb17ce2809fde7",
+      "adaptations": [
+        "private schedule/resource module names"
+      ],
+      "integrated_sha256": "b0e5b84b21748f1bb0ad12fb72b9d5390986fc0a4dd5c62bba73dda14e2241bd",
+      "pinned_sources": [
+        {
+          "commit": "5f78a0ef1d044fccb5813bea5329b77901bdcab8",
+          "path": "research/latch_ops/ops/matrix_rules.py",
+          "sha256": "82eccd980059b5d83ccf007a17ee0f76f074af007c8611c610eb17ce2809fde7"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/matrix_rules_p7a.py",
+      "source_commit": "f36b4737cee732e6915d11e233bcc068126b3e64",
+      "source_path": "research/latch_ops/ops/matrix_rules.py",
+      "source_sha256": "859cb7417bb9f522fdf2bfad2c1979f37250135e630e2218b09e182bc26c9d13",
+      "adaptations": [
+        "private scheduling/resource names",
+        "private TMA namespace/header names"
+      ],
+      "integrated_sha256": "8e828baa0b6e5955e2160d2bfd9dc5af2929ff238808dbb28c2e571e30ad317a",
+      "pinned_sources": [
+        {
+          "commit": "f36b4737cee732e6915d11e233bcc068126b3e64",
+          "path": "research/latch_ops/ops/matrix_rules.py",
+          "sha256": "859cb7417bb9f522fdf2bfad2c1979f37250135e630e2218b09e182bc26c9d13"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/matrix_rules_p7b.py",
+      "source_commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+      "source_path": "research/latch_ops/ops/matrix_rules.py",
+      "source_sha256": "71409c966beca9f1e378ddff1758a643fbf90395be3bf3fa56eee9d512056ed8",
+      "adaptations": [
+        "private schedule/resource module names"
+      ],
+      "integrated_sha256": "8345838ba525f70c9c9d58c1cc09e243ccb878467a13d48facd84aa58613ddbb",
+      "pinned_sources": [
+        {
+          "commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+          "path": "research/latch_ops/ops/matrix_rules.py",
+          "sha256": "71409c966beca9f1e378ddff1758a643fbf90395be3bf3fa56eee9d512056ed8"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/matrix_select.py",
+      "source_path": "research/latch_ops/ops/matrix_select.py",
+      "source_commits": [
+        "2f04ba284f73a480f7a81310a138f6211793f8bd"
+      ],
+      "adaptations": [
+        "Strict FP32 transposed-product admission including N32."
+      ],
+      "integrated_sha256": "c90b18af4d0d5165ca4cca4f5d0f64b5b64b93a3a367902a34a06e739ddc5d28",
+      "pinned_sources": [
+        {
+          "commit": "2f04ba284f73a480f7a81310a138f6211793f8bd",
+          "path": "research/latch_ops/ops/matrix_select.py",
+          "sha256": "c90b18af4d0d5165ca4cca4f5d0f64b5b64b93a3a367902a34a06e739ddc5d28"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/mixed_attention.py",
+      "source_commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+      "source_path": "research/latch_ops/ops/mixed_attention.py",
+      "source_sha256": "6caa68d7a120d9e044536c75d50a26fefebcfcf86ceb8c76a3146dc58f01adcb",
+      "adaptations": [
+        "Accept optional single_only argument for the private P7A schedule; default preserves B pipelined implementation."
+      ],
+      "additional_source_commits": [
+        "f36b4737cee732e6915d11e233bcc068126b3e64"
+      ],
+      "integrated_sha256": "8b9361be96919b109d2fcb068bfef8786c389ba8e87b8ac87ee9170cde71a0c8",
+      "pinned_sources": [
+        {
+          "commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+          "path": "research/latch_ops/ops/mixed_attention.py",
+          "sha256": "6caa68d7a120d9e044536c75d50a26fefebcfcf86ceb8c76a3146dc58f01adcb"
+        },
+        {
+          "commit": "f36b4737cee732e6915d11e233bcc068126b3e64",
+          "path": "research/latch_ops/ops/mixed_attention.py",
+          "sha256": "aae6d05aeddb7cf5d55a8c1265bd198d64ffba1a47fc750ed6fd83893f89a52f"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/norm_rules.py",
+      "source_commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+      "source_path": "research/latch_ops/ops/norm_rules.py",
+      "source_sha256": "27a04397288bb05113201ef0e2c0ffddb8e14b7a68650b9db9b1a07f7c396573",
+      "adaptations": [],
+      "integrated_sha256": "27a04397288bb05113201ef0e2c0ffddb8e14b7a68650b9db9b1a07f7c396573",
+      "pinned_sources": [
+        {
+          "commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+          "path": "research/latch_ops/ops/norm_rules.py",
+          "sha256": "27a04397288bb05113201ef0e2c0ffddb8e14b7a68650b9db9b1a07f7c396573"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/norm_rules_p7a.py",
+      "source_commit": "f36b4737cee732e6915d11e233bcc068126b3e64",
+      "source_path": "research/latch_ops/ops/norm_rules.py",
+      "source_sha256": "039fee765ff3479fd04ef5755dbcfafbd07ebe9f1ec71aed0cc2373b252cf83a",
+      "adaptations": [
+        "private scheduling/resource names",
+        "private TMA namespace/header names"
+      ],
+      "integrated_sha256": "7066dc9c1c328805ac64d36a71520f447e1723fff0672c76c87bc07982e3e952",
+      "pinned_sources": [
+        {
+          "commit": "f36b4737cee732e6915d11e233bcc068126b3e64",
+          "path": "research/latch_ops/ops/norm_rules.py",
+          "sha256": "039fee765ff3479fd04ef5755dbcfafbd07ebe9f1ec71aed0cc2373b252cf83a"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/p5c_epilogue.py",
+      "source_commits": [
+        "81a52fc02783e0c537dcf1a909083916f2deaa66",
+        "6082a189f37f6afd6f7cd5509cc11a312948e8d8"
+      ],
+      "common_base": "4e2b745452bb4733bfa67d65be318b86bb374eb6",
+      "source_path": "research/latch_ops/ops/p5c_epilogue.py",
+      "adaptations": [
+        "Three-way union against 4e2b745452bb4733bfa67d65be318b86bb374eb6."
+      ],
+      "integrated_sha256": "674a392042994335f804bd186ca7987e27a834625dbae4917165be130aa305f1",
+      "pinned_sources": [
+        {
+          "commit": "81a52fc02783e0c537dcf1a909083916f2deaa66",
+          "path": "research/latch_ops/ops/p5c_epilogue.py",
+          "sha256": "674a392042994335f804bd186ca7987e27a834625dbae4917165be130aa305f1"
+        },
+        {
+          "commit": "6082a189f37f6afd6f7cd5509cc11a312948e8d8",
+          "path": "research/latch_ops/ops/p5c_epilogue.py",
+          "sha256": "ea840681db0e4ac363b9d1a6cfc221d18ad98df3b2f42a3754603fcb907e6241"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/p5c_matrix.py",
+      "source_path": "research/latch_ops/ops/p5c_matrix.py",
+      "source_commits": [
+        "81a52fc02783e0c537dcf1a909083916f2deaa66",
+        "6082a189f37f6afd6f7cd5509cc11a312948e8d8"
+      ],
+      "adaptations": [
+        "Union of flat and loop TMA map schemas; preserves layout offsets; C address table retained.",
+        "Rejected diagnostic globals remain off.",
+        "Architecture admission recognizes standalone long-attention WGMMA headers even without a large matrix engine."
+      ],
+      "integrated_sha256": "dd21e5f90a2023cf1b8ca32c4e81e42ed5577a7e0ecb75801a5edfce84fb067b",
+      "pinned_sources": [
+        {
+          "commit": "81a52fc02783e0c537dcf1a909083916f2deaa66",
+          "path": "research/latch_ops/ops/p5c_matrix.py",
+          "sha256": "829f02da35715013b42252ca416f81ea1000b83517af2e517272d90652c003b4"
+        },
+        {
+          "commit": "6082a189f37f6afd6f7cd5509cc11a312948e8d8",
+          "path": "research/latch_ops/ops/p5c_matrix.py",
+          "sha256": "678b84e9c7983858da6a7bd7a783f2b22d05f9a7c8527a1fc383ae43a1be6c82"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/p6d_rules.py",
+      "source_commit": "81a52fc02783e0c537dcf1a909083916f2deaa66",
+      "source_path": "research/latch_ops/ops/p6d_rules.py",
+      "source_sha256": "b637b3380129e2bdfc6cbd2122ab08e2bf56e5ad8cc1ff31ee14720fc4c6967c",
+      "adaptations": [],
+      "integrated_sha256": "b637b3380129e2bdfc6cbd2122ab08e2bf56e5ad8cc1ff31ee14720fc4c6967c",
+      "pinned_sources": [
+        {
+          "commit": "81a52fc02783e0c537dcf1a909083916f2deaa66",
+          "path": "research/latch_ops/ops/p6d_rules.py",
+          "sha256": "b637b3380129e2bdfc6cbd2122ab08e2bf56e5ad8cc1ff31ee14720fc4c6967c"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/p6e_rules.py",
+      "source_commit": "5f78a0ef1d044fccb5813bea5329b77901bdcab8",
+      "source_path": "research/latch_ops/ops/p6e_rules.py",
+      "source_sha256": "73182a4953b08b8ffab41d6f54aaf388fe30ae2a6afb98035a8f9f0ae92dd008",
+      "adaptations": [],
+      "integrated_sha256": "73182a4953b08b8ffab41d6f54aaf388fe30ae2a6afb98035a8f9f0ae92dd008",
+      "pinned_sources": [
+        {
+          "commit": "5f78a0ef1d044fccb5813bea5329b77901bdcab8",
+          "path": "research/latch_ops/ops/p6e_rules.py",
+          "sha256": "73182a4953b08b8ffab41d6f54aaf388fe30ae2a6afb98035a8f9f0ae92dd008"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/p7_rows.py",
+      "source_commit": "f36b4737cee732e6915d11e233bcc068126b3e64",
+      "source_path": "research/latch_ops/ops/p7_rows.py",
+      "source_sha256": "b65a6273b6c93fee41acb4f3d32b383b6c60d896004336bbacf73187b4a8eb43",
+      "adaptations": [],
+      "integrated_sha256": "b65a6273b6c93fee41acb4f3d32b383b6c60d896004336bbacf73187b4a8eb43",
+      "pinned_sources": [
+        {
+          "commit": "f36b4737cee732e6915d11e233bcc068126b3e64",
+          "path": "research/latch_ops/ops/p7_rows.py",
+          "sha256": "b65a6273b6c93fee41acb4f3d32b383b6c60d896004336bbacf73187b4a8eb43"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/p7e_codegen.py",
+      "source_commit": "004c6f72adbca670505333ab2b644d4ae900be7e",
+      "source_path": "research/latch_ops/ops/p7e_codegen.py",
+      "source_sha256": "c68475b55bc6faa31fb510f5091caa540d857e4d3293f7c9f1b36d12211798c9",
+      "adaptations": [
+        "Invoked only by explicit compact_codegen=fold with admitted P6D flat protocol."
+      ],
+      "source_commits": [
+        "004c6f72adbca670505333ab2b644d4ae900be7e"
+      ],
+      "integrated_sha256": "c68475b55bc6faa31fb510f5091caa540d857e4d3293f7c9f1b36d12211798c9",
+      "pinned_sources": [
+        {
+          "commit": "004c6f72adbca670505333ab2b644d4ae900be7e",
+          "path": "research/latch_ops/ops/p7e_codegen.py",
+          "sha256": "c68475b55bc6faa31fb510f5091caa540d857e4d3293f7c9f1b36d12211798c9"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/pops2b_rules.py",
+      "source_path": "research/latch_ops/ops/pops2b_rules.py",
+      "source_commits": [
+        "af3138238f1b2b84fa17a5b0a71884fe80c1dea0",
+        "22c3231adddc9c12ce5e2088375542f5d42b2018"
+      ],
+      "adaptations": [
+        "BF16 tail products bypass operand cast and epilogue absorption."
+      ],
+      "integrated_sha256": "fa2d8667424b812c1dd13ceedfda3f6bfbbd49282ad54bfbed3a959cd8e65522",
+      "pinned_sources": [
+        {
+          "commit": "af3138238f1b2b84fa17a5b0a71884fe80c1dea0",
+          "path": "research/latch_ops/ops/pops2b_rules.py",
+          "sha256": "bbab22e540e6f2ad484d4f3cc48a72991109fe256bc2e6f4bdbf4dd7e68a4797"
+        },
+        {
+          "commit": "22c3231adddc9c12ce5e2088375542f5d42b2018",
+          "path": "research/latch_ops/ops/pops2b_rules.py",
+          "sha256": "a23510dae8d83b57942a298241352fe34c22f41c8b8c4507afefe545b8d04295"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/pops2b_rules_p6e.py",
+      "source_commit": "5f78a0ef1d044fccb5813bea5329b77901bdcab8",
+      "source_path": "research/latch_ops/ops/pops2b_rules.py",
+      "source_sha256": "5bf319f3616fbfce95e6a94e6587937d1a180cc7cf1f998e71a84cbde6426b96",
+      "adaptations": [
+        "private schedule/resource module names"
+      ],
+      "integrated_sha256": "53f4bea2ff7bbf98e6b3454a07f7558d1c77dcef69c0303e6816c3830d6e98d2",
+      "pinned_sources": [
+        {
+          "commit": "5f78a0ef1d044fccb5813bea5329b77901bdcab8",
+          "path": "research/latch_ops/ops/pops2b_rules.py",
+          "sha256": "5bf319f3616fbfce95e6a94e6587937d1a180cc7cf1f998e71a84cbde6426b96"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/pops2b_rules_p7a.py",
+      "source_commit": "f36b4737cee732e6915d11e233bcc068126b3e64",
+      "source_path": "research/latch_ops/ops/pops2b_rules.py",
+      "source_sha256": "9ff8a375c3cd1ef8a4c3e11c3d14d103cb07bcfff924b66fde02cd76d8c70cf3",
+      "adaptations": [
+        "private scheduling/resource names",
+        "private TMA namespace/header names"
+      ],
+      "integrated_sha256": "a5d9e0b0ee7d139fe68ade6130d75366f99842930df324761b8965ca226fe4bd",
+      "pinned_sources": [
+        {
+          "commit": "f36b4737cee732e6915d11e233bcc068126b3e64",
+          "path": "research/latch_ops/ops/pops2b_rules.py",
+          "sha256": "9ff8a375c3cd1ef8a4c3e11c3d14d103cb07bcfff924b66fde02cd76d8c70cf3"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/pops2b_rules_p7b.py",
+      "source_commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+      "source_path": "research/latch_ops/ops/pops2b_rules.py",
+      "source_sha256": "957d892a44595630f4893ff9fde45f007d74bb8cabb848f34526d80a7bd07edb",
+      "adaptations": [
+        "private schedule/resource module names"
+      ],
+      "integrated_sha256": "cc7cb5f8c986067e49f371ddef57890aea4d8e957183d188d0b9eb9be1b31ee7",
+      "pinned_sources": [
+        {
+          "commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+          "path": "research/latch_ops/ops/pops2b_rules.py",
+          "sha256": "957d892a44595630f4893ff9fde45f007d74bb8cabb848f34526d80a7bd07edb"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/pops4a_rules.py",
+      "source_commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+      "source_path": "research/latch_ops/ops/pops4a_rules.py",
+      "source_sha256": "1025bfb39e367714d019a5ecc21bc5a66d958310bc083fce78287c505ab20e24",
+      "adaptations": [],
+      "integrated_sha256": "1025bfb39e367714d019a5ecc21bc5a66d958310bc083fce78287c505ab20e24",
+      "pinned_sources": [
+        {
+          "commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+          "path": "research/latch_ops/ops/pops4a_rules.py",
+          "sha256": "1025bfb39e367714d019a5ecc21bc5a66d958310bc083fce78287c505ab20e24"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/pops4a_rules_p7a.py",
+      "source_commit": "f36b4737cee732e6915d11e233bcc068126b3e64",
+      "source_path": "research/latch_ops/ops/pops4a_rules.py",
+      "source_sha256": "1efe492e1f06f2a552a69444e38093cd1cd3a1fcfe40822746869ccf695720fa",
+      "adaptations": [
+        "private scheduling/resource names",
+        "private TMA namespace/header names"
+      ],
+      "integrated_sha256": "e705947f775f677272162d30e9b89b869e2b331c9c1efdbdbece4e2cccf339a2",
+      "pinned_sources": [
+        {
+          "commit": "f36b4737cee732e6915d11e233bcc068126b3e64",
+          "path": "research/latch_ops/ops/pops4a_rules.py",
+          "sha256": "1efe492e1f06f2a552a69444e38093cd1cd3a1fcfe40822746869ccf695720fa"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/pops5e_rules.py",
+      "source_commit": "5f78a0ef1d044fccb5813bea5329b77901bdcab8",
+      "source_path": "research/latch_ops/ops/pops5e_rules.py",
+      "source_sha256": "6654e2b9912243eb3b4dd8ed08544d405c258a1bfe4be1a78af1c4375f1b7233",
+      "adaptations": [],
+      "integrated_sha256": "6654e2b9912243eb3b4dd8ed08544d405c258a1bfe4be1a78af1c4375f1b7233",
+      "pinned_sources": [
+        {
+          "commit": "5f78a0ef1d044fccb5813bea5329b77901bdcab8",
+          "path": "research/latch_ops/ops/pops5e_rules.py",
+          "sha256": "6654e2b9912243eb3b4dd8ed08544d405c258a1bfe4be1a78af1c4375f1b7233"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/remat.py",
+      "source_commit": "81a52fc02783e0c537dcf1a909083916f2deaa66",
+      "source_path": "research/latch_ops/ops/remat.py",
+      "source_sha256": "c74da4caad0b6c8535438ec2e5e128f8aea1bcb9c71d1d3c3746c4d6fef08f52",
+      "adaptations": [],
+      "integrated_sha256": "c74da4caad0b6c8535438ec2e5e128f8aea1bcb9c71d1d3c3746c4d6fef08f52",
+      "pinned_sources": [
+        {
+          "commit": "81a52fc02783e0c537dcf1a909083916f2deaa66",
+          "path": "research/latch_ops/ops/remat.py",
+          "sha256": "c74da4caad0b6c8535438ec2e5e128f8aea1bcb9c71d1d3c3746c4d6fef08f52"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/row_fusion.py",
+      "source_path": "research/latch_ops/ops/row_fusion.py",
+      "source_commits": [
+        "6082a189f37f6afd6f7cd5509cc11a312948e8d8"
+      ],
+      "adaptations": [
+        "Shared flat row-fusion prerequisite."
+      ],
+      "integrated_sha256": "f49cd9d060f40fd820f44f865313e4f0fba815cf754db01324d61c3316c63e9b",
+      "pinned_sources": [
+        {
+          "commit": "6082a189f37f6afd6f7cd5509cc11a312948e8d8",
+          "path": "research/latch_ops/ops/row_fusion.py",
+          "sha256": "f49cd9d060f40fd820f44f865313e4f0fba815cf754db01324d61c3316c63e9b"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/scan_lower.py",
+      "source_commit": "5f78a0ef1d044fccb5813bea5329b77901bdcab8",
+      "source_path": "research/latch_ops/ops/scan_lower.py",
+      "source_sha256": "97ba327b9764e2e6dec375ddbabf950d6248840dbe22e092c9bc6cc0bb92f5b5",
+      "adaptations": [],
+      "integrated_sha256": "97ba327b9764e2e6dec375ddbabf950d6248840dbe22e092c9bc6cc0bb92f5b5",
+      "pinned_sources": [
+        {
+          "commit": "5f78a0ef1d044fccb5813bea5329b77901bdcab8",
+          "path": "research/latch_ops/ops/scan_lower.py",
+          "sha256": "97ba327b9764e2e6dec375ddbabf950d6248840dbe22e092c9bc6cc0bb92f5b5"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/short_attention.py",
+      "source_commit": "6082a189f37f6afd6f7cd5509cc11a312948e8d8",
+      "source_path": "research/latch_ops/ops/short_attention.py",
+      "source_sha256": "ed3a6a5e5b25b5b9db45e96f83c2c883f8040a8d1609d55203411bbb76f1802d",
+      "adaptations": [],
+      "integrated_sha256": "ed3a6a5e5b25b5b9db45e96f83c2c883f8040a8d1609d55203411bbb76f1802d",
+      "pinned_sources": [
+        {
+          "commit": "6082a189f37f6afd6f7cd5509cc11a312948e8d8",
+          "path": "research/latch_ops/ops/short_attention.py",
+          "sha256": "ed3a6a5e5b25b5b9db45e96f83c2c883f8040a8d1609d55203411bbb76f1802d"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/test_group_rules.py",
+      "source_commit": "6082a189f37f6afd6f7cd5509cc11a312948e8d8",
+      "source_path": "research/latch_ops/ops/test_group_rules.py",
+      "source_sha256": "9184a855db0c8a2878612cf48e2bfefa6aec4832d0196a690653417ea8e9daee",
+      "adaptations": [],
+      "integrated_sha256": "9184a855db0c8a2878612cf48e2bfefa6aec4832d0196a690653417ea8e9daee",
+      "pinned_sources": [
+        {
+          "commit": "6082a189f37f6afd6f7cd5509cc11a312948e8d8",
+          "path": "research/latch_ops/ops/test_group_rules.py",
+          "sha256": "9184a855db0c8a2878612cf48e2bfefa6aec4832d0196a690653417ea8e9daee"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/test_long_attention.py",
+      "source_commit": "81a52fc02783e0c537dcf1a909083916f2deaa66",
+      "source_path": "research/latch_ops/ops/test_long_attention.py",
+      "source_sha256": "139323c256aaba251da620ad38e1a07ffe5552432448ad91637f0baac0364f08",
+      "adaptations": [],
+      "integrated_sha256": "139323c256aaba251da620ad38e1a07ffe5552432448ad91637f0baac0364f08",
+      "pinned_sources": [
+        {
+          "commit": "81a52fc02783e0c537dcf1a909083916f2deaa66",
+          "path": "research/latch_ops/ops/test_long_attention.py",
+          "sha256": "139323c256aaba251da620ad38e1a07ffe5552432448ad91637f0baac0364f08"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/test_loop_attention.py",
+      "source_commit": "6082a189f37f6afd6f7cd5509cc11a312948e8d8",
+      "source_path": "research/latch_ops/ops/test_loop_attention.py",
+      "source_sha256": "11a0680f58c35f06d42230c51d0418f8049b12e39ad595ff0087afcdf596af93",
+      "adaptations": [],
+      "integrated_sha256": "11a0680f58c35f06d42230c51d0418f8049b12e39ad595ff0087afcdf596af93",
+      "pinned_sources": [
+        {
+          "commit": "6082a189f37f6afd6f7cd5509cc11a312948e8d8",
+          "path": "research/latch_ops/ops/test_loop_attention.py",
+          "sha256": "11a0680f58c35f06d42230c51d0418f8049b12e39ad595ff0087afcdf596af93"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/test_matrix_edges.py",
+      "source_commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+      "source_path": "research/latch_ops/ops/test_matrix_edges.py",
+      "source_sha256": "bc8a8455d203cdfe6231dc3962dcb8d048eafc5a5d72defea48aaf99e25aebc6",
+      "adaptations": [],
+      "integrated_sha256": "bc8a8455d203cdfe6231dc3962dcb8d048eafc5a5d72defea48aaf99e25aebc6",
+      "pinned_sources": [
+        {
+          "commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+          "path": "research/latch_ops/ops/test_matrix_edges.py",
+          "sha256": "bc8a8455d203cdfe6231dc3962dcb8d048eafc5a5d72defea48aaf99e25aebc6"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/test_mixed_attention.py",
+      "source_commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+      "source_path": "research/latch_ops/ops/test_mixed_attention.py",
+      "source_sha256": "9d2415b378a35f92414ad6def5494531d334a055879428442340cc012e8d185f",
+      "adaptations": [],
+      "integrated_sha256": "9d2415b378a35f92414ad6def5494531d334a055879428442340cc012e8d185f",
+      "pinned_sources": [
+        {
+          "commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+          "path": "research/latch_ops/ops/test_mixed_attention.py",
+          "sha256": "9d2415b378a35f92414ad6def5494531d334a055879428442340cc012e8d185f"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/test_p5c.py",
+      "source_commit": "81a52fc02783e0c537dcf1a909083916f2deaa66",
+      "source_path": "research/latch_ops/ops/test_p5c.py",
+      "source_sha256": "ed26a30c1e17a54a24ef01fbb430e0f404e8952f51bb9c4b7e2ab7f6f71a0ee8",
+      "adaptations": [],
+      "integrated_sha256": "ed26a30c1e17a54a24ef01fbb430e0f404e8952f51bb9c4b7e2ab7f6f71a0ee8",
+      "pinned_sources": [
+        {
+          "commit": "81a52fc02783e0c537dcf1a909083916f2deaa66",
+          "path": "research/latch_ops/ops/test_p5c.py",
+          "sha256": "ed26a30c1e17a54a24ef01fbb430e0f404e8952f51bb9c4b7e2ab7f6f71a0ee8"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/test_p6b.py",
+      "source_commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+      "source_path": "research/latch_ops/ops/test_p6b.py",
+      "source_sha256": "694f1968f08fa3160a189529b4c1e585ee5d1acacf78c84b33799d984c49780c",
+      "adaptations": [],
+      "integrated_sha256": "694f1968f08fa3160a189529b4c1e585ee5d1acacf78c84b33799d984c49780c",
+      "pinned_sources": [
+        {
+          "commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+          "path": "research/latch_ops/ops/test_p6b.py",
+          "sha256": "694f1968f08fa3160a189529b4c1e585ee5d1acacf78c84b33799d984c49780c"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/test_p6d.py",
+      "source_commit": "81a52fc02783e0c537dcf1a909083916f2deaa66",
+      "source_path": "research/latch_ops/ops/test_p6d.py",
+      "source_sha256": "3772ba1a6ed2f9fdc6dd5face83b00669e736f1463bf631da8329dcf4efdfb41",
+      "adaptations": [],
+      "integrated_sha256": "3772ba1a6ed2f9fdc6dd5face83b00669e736f1463bf631da8329dcf4efdfb41",
+      "pinned_sources": [
+        {
+          "commit": "81a52fc02783e0c537dcf1a909083916f2deaa66",
+          "path": "research/latch_ops/ops/test_p6d.py",
+          "sha256": "3772ba1a6ed2f9fdc6dd5face83b00669e736f1463bf631da8329dcf4efdfb41"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/test_p7b.py",
+      "source_commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+      "source_path": "research/latch_ops/ops/test_p7b.py",
+      "source_sha256": "d169c3dc71bc6b6702fcb5fbe7e70a68cd7c0f02cdb57265e915aed2f2bd3175",
+      "adaptations": [],
+      "integrated_sha256": "d169c3dc71bc6b6702fcb5fbe7e70a68cd7c0f02cdb57265e915aed2f2bd3175",
+      "pinned_sources": [
+        {
+          "commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+          "path": "research/latch_ops/ops/test_p7b.py",
+          "sha256": "d169c3dc71bc6b6702fcb5fbe7e70a68cd7c0f02cdb57265e915aed2f2bd3175"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/test_p7c_rules.py",
+      "source_commit": "6082a189f37f6afd6f7cd5509cc11a312948e8d8",
+      "source_path": "research/latch_ops/ops/test_p7c_rules.py",
+      "source_sha256": "6f54d4e2644823b763b9eab3a277950e9aea3c4eb1321fcfcaaba2862e42f9e1",
+      "adaptations": [],
+      "integrated_sha256": "6f54d4e2644823b763b9eab3a277950e9aea3c4eb1321fcfcaaba2862e42f9e1",
+      "pinned_sources": [
+        {
+          "commit": "6082a189f37f6afd6f7cd5509cc11a312948e8d8",
+          "path": "research/latch_ops/ops/test_p7c_rules.py",
+          "sha256": "6f54d4e2644823b763b9eab3a277950e9aea3c4eb1321fcfcaaba2862e42f9e1"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/test_p7e.py",
+      "source_commit": "004c6f72adbca670505333ab2b644d4ae900be7e",
+      "source_path": "research/latch_ops/ops/test_p7e.py",
+      "source_sha256": "620cb35b6edb3a50f59ecb5d844b7884130e0893dd2b22ee2fe7d166468f9382",
+      "adaptations": [],
+      "integrated_sha256": "620cb35b6edb3a50f59ecb5d844b7884130e0893dd2b22ee2fe7d166468f9382",
+      "pinned_sources": [
+        {
+          "commit": "004c6f72adbca670505333ab2b644d4ae900be7e",
+          "path": "research/latch_ops/ops/test_p7e.py",
+          "sha256": "620cb35b6edb3a50f59ecb5d844b7884130e0893dd2b22ee2fe7d166468f9382"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/test_pops3c.py",
+      "source_commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+      "source_path": "research/latch_ops/ops/test_pops3c.py",
+      "source_sha256": "02b273e68fcdb60f65ab9e3ee82533bba4ccc8f4fcfc9e0364b1879f22336ec0",
+      "adaptations": [],
+      "integrated_sha256": "02b273e68fcdb60f65ab9e3ee82533bba4ccc8f4fcfc9e0364b1879f22336ec0",
+      "pinned_sources": [
+        {
+          "commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+          "path": "research/latch_ops/ops/test_pops3c.py",
+          "sha256": "02b273e68fcdb60f65ab9e3ee82533bba4ccc8f4fcfc9e0364b1879f22336ec0"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/test_pops4a.py",
+      "source_commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+      "source_path": "research/latch_ops/ops/test_pops4a.py",
+      "source_sha256": "9668295579f5d76d237e029666e4edac00519179f4e24732e4e6c1c9fc083f72",
+      "adaptations": [],
+      "integrated_sha256": "9668295579f5d76d237e029666e4edac00519179f4e24732e4e6c1c9fc083f72",
+      "pinned_sources": [
+        {
+          "commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+          "path": "research/latch_ops/ops/test_pops4a.py",
+          "sha256": "9668295579f5d76d237e029666e4edac00519179f4e24732e4e6c1c9fc083f72"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/test_pops5e.py",
+      "source_commit": "5f78a0ef1d044fccb5813bea5329b77901bdcab8",
+      "source_path": "research/latch_ops/ops/test_pops5e.py",
+      "source_sha256": "76111fdcfd6a70191b041bd90f8bf767a83bd41c95e581c0c583882a59ec5a49",
+      "adaptations": [],
+      "integrated_sha256": "76111fdcfd6a70191b041bd90f8bf767a83bd41c95e581c0c583882a59ec5a49",
+      "pinned_sources": [
+        {
+          "commit": "5f78a0ef1d044fccb5813bea5329b77901bdcab8",
+          "path": "research/latch_ops/ops/test_pops5e.py",
+          "sha256": "76111fdcfd6a70191b041bd90f8bf767a83bd41c95e581c0c583882a59ec5a49"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/transformer_lower.py",
+      "source_commits": [
+        "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+        "5f78a0ef1d044fccb5813bea5329b77901bdcab8"
+      ],
+      "common_base": "af3138238f1b2b84fa17a5b0a71884fe80c1dea0",
+      "source_path": "research/latch_ops/ops/transformer_lower.py",
+      "adaptations": [
+        "three-way union merge",
+        "Generic standard_ops and extra_ops union, C4A logsumexp, stateful field operands, sequential clamp handler supplied by extra_ops."
+      ],
+      "additional_source_commits": [
+        "2f04ba284f73a480f7a81310a138f6211793f8bd",
+        "22c3231adddc9c12ce5e2088375542f5d42b2018"
+      ],
+      "integrated_sha256": "495bb95ab2fd42b2834f62ab6a6961cb715b84371c78bc7b94bc5b252b73b8ca",
+      "pinned_sources": [
+        {
+          "commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+          "path": "research/latch_ops/ops/transformer_lower.py",
+          "sha256": "dc5c41e94a67f4b961278a6710c135fa1877612add7bd9336aca02e410d538e6"
+        },
+        {
+          "commit": "5f78a0ef1d044fccb5813bea5329b77901bdcab8",
+          "path": "research/latch_ops/ops/transformer_lower.py",
+          "sha256": "ea63bafb9d225f79945ca402f217b27d8ea9f36db93491473fd4d5b51552c095"
+        },
+        {
+          "commit": "2f04ba284f73a480f7a81310a138f6211793f8bd",
+          "path": "research/latch_ops/ops/transformer_lower.py",
+          "sha256": "047da06536a10c51d933faed547e9559b2f8161726c86cb134d562ac0efddc7f"
+        },
+        {
+          "commit": "22c3231adddc9c12ce5e2088375542f5d42b2018",
+          "path": "research/latch_ops/ops/transformer_lower.py",
+          "sha256": "264ec7c797739973de9926a983b851282ffa8a089550d325eddc12f4322c76d6"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/vendor/s107a_wgmma.cuh",
+      "source_commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+      "source_path": "research/latch_ops/ops/vendor/s107a_wgmma.cuh",
+      "source_sha256": "55a84eb46996f7b9ec3722eba20cd22b4ff69b8aa503f968e4d60036ee9a178d",
+      "adaptations": [],
+      "integrated_sha256": "55a84eb46996f7b9ec3722eba20cd22b4ff69b8aa503f968e4d60036ee9a178d",
+      "pinned_sources": [
+        {
+          "commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+          "path": "research/latch_ops/ops/vendor/s107a_wgmma.cuh",
+          "sha256": "55a84eb46996f7b9ec3722eba20cd22b4ff69b8aa503f968e4d60036ee9a178d"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/vendor/scan_generic.cuh",
+      "source_commit": "5f78a0ef1d044fccb5813bea5329b77901bdcab8",
+      "source_path": "research/latch_ops/ops/vendor/scan_generic.cuh",
+      "source_sha256": "56b46d268a6ddcd0f8fcdee960f9247170390e81281ed5e92fb6b54e1511cfb3",
+      "adaptations": [],
+      "integrated_sha256": "56b46d268a6ddcd0f8fcdee960f9247170390e81281ed5e92fb6b54e1511cfb3",
+      "pinned_sources": [
+        {
+          "commit": "5f78a0ef1d044fccb5813bea5329b77901bdcab8",
+          "path": "research/latch_ops/ops/vendor/scan_generic.cuh",
+          "sha256": "56b46d268a6ddcd0f8fcdee960f9247170390e81281ed5e92fb6b54e1511cfb3"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/vendor/scan_p1a.cuh",
+      "source_commit": "5f78a0ef1d044fccb5813bea5329b77901bdcab8",
+      "source_path": "research/latch_ops/ops/vendor/scan_p1a.cuh",
+      "source_sha256": "838a5efd9fc262e7f70cae17b50bb812c0add4a1b180ccbfe330317decaf3e9e",
+      "adaptations": [],
+      "integrated_sha256": "838a5efd9fc262e7f70cae17b50bb812c0add4a1b180ccbfe330317decaf3e9e",
+      "pinned_sources": [
+        {
+          "commit": "5f78a0ef1d044fccb5813bea5329b77901bdcab8",
+          "path": "research/latch_ops/ops/vendor/scan_p1a.cuh",
+          "sha256": "838a5efd9fc262e7f70cae17b50bb812c0add4a1b180ccbfe330317decaf3e9e"
+        }
+      ]
+    },
+    {
+      "path": "research/latch_ops/ops/vendor/scan_p1a_cops2c.cuh",
+      "source_commit": "5f78a0ef1d044fccb5813bea5329b77901bdcab8",
+      "source_path": "research/latch_ops/ops/vendor/scan_p1a_cops2c.cuh",
+      "source_sha256": "e0e0d8fb42b0955d914b8abf660d3b0feb73468385618ab2a0eb8571a1d9bd94",
+      "adaptations": [],
+      "integrated_sha256": "e0e0d8fb42b0955d914b8abf660d3b0feb73468385618ab2a0eb8571a1d9bd94",
+      "pinned_sources": [
+        {
+          "commit": "5f78a0ef1d044fccb5813bea5329b77901bdcab8",
+          "path": "research/latch_ops/ops/vendor/scan_p1a_cops2c.cuh",
+          "sha256": "e0e0d8fb42b0955d914b8abf660d3b0feb73468385618ab2a0eb8571a1d9bd94"
+        }
+      ]
+    }
+  ],
+  "selection": {
+    "mutually_exclusive_flat_protocols": [
+      "reference",
+      "p6d",
+      "p6e",
+      "p7b",
+      "p7a"
+    ],
+    "selector": "ops/performance_schedule.py",
+    "criterion": "operation semantics, precision, static layouts, masked context tails and resource admission",
+    "compact": "Explicit P6D-only fold preference; default off. P7E medium-case 4% runtime increase is retained as a limitation.",
+    "loop": "P7C saved O/lse with P7D storage-remat sink; combined benefit requires new qualification; no tape ring.",
+    "private_namespace": "P6D long header uses pflatlong; loop long uses plong; P7A TMA uses p7a4b while P7B uses pops4b.",
+    "concurrency": "RLock plus scoped module settings restored on every exception and successful return.",
+    "qualification": "Historical donor qualification is not qualification of integrated source.",
+    "short_mixed_protocol": "Use exact forward/backward shared-memory requirements under the frozen B fit limit; choose B if two-CTA fit, else A if admitted one-CTA. Context tail alone is not a selector. Outside admitted attention keep generic fallback."
+  },
+  "integration_authored": [
+    "fusion.py",
+    "performance_schedule.py",
+    "performance_defaults.py",
+    "expression_rules.py",
+    "test_performance_schedule.py"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "schema": "latch-v0-source-transplant-v1",
+  "source_commit": "6127a450ce897a83eb7c7237b3c340376c2c1779",
+  "source_path": "src/megakernel_lab/moe4/weight_ema.py",
+  "destination": "src/megakernel_lab/tinymoe/weight_ema.py",
+  "sha256": "4227c46559029bea407f717dd7e0a67400ddedcdd0040610be421e6c86dff476",
+  "bytes_unchanged": true,
+  "adaptations": [
+    "conventional.py and benchmark.py imports made package-relative; source_identity still binds exact helper bytes and conventional.py; historical checkpoints retain their original identity restrictions"
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "schema": "latch-v0-upstream-license-intake-v1",
+  "checked_date": "2026-10-14",
+  "licenses": [
+    {
+      "path": "provenance/upstream/MUON_LICENSE.txt",
+      "url": "https://raw.githubusercontent.com/KellerJordan/Muon/f98f1cacc0263b04290753e32be8d498c1efc806/LICENSE",
+      "sha256": "8c8d17398ecce3dd3fcb1bb77b5d268a427f8250f364ac655c9b38df5b693f6b",
+      "bytes": 1070
+    },
+    {
+      "path": "provenance/upstream/LLM_RANDOM_LICENSE.txt",
+      "url": "https://raw.githubusercontent.com/llm-random/llm-random/810e6451a402f9a37c2f6f43c1bb75bc00f37140/LICENSE",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "bytes": 11357
+    },
+    {
+      "path": "provenance/upstream/PYTORCH_LICENSE.txt",
+      "url": "https://raw.githubusercontent.com/pytorch/pytorch/v2.9.1/LICENSE",
+      "sha256": "a8a2c6b67cf8a597ffaa5c82380a6bd1b82629c0417e00673d8013d662eb500a",
+      "bytes": 3464
+    }
+  ],
+  "notes": [
+    "PyTorch and llm-random license files fetched from the exact URLs; llm-random compared byte-for-byte to retained notice.",
+    "Muon retained notice matches fetched upstream text and historical SHA256.",
+    "llm-random pinned root tree verified: LICENSE blob261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64; no root NOTICE."
+  ]
+}

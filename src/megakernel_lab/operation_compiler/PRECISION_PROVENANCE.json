@@ -1,0 +1,6 @@
+{
+  "source_commit": "f6f60bd1325cae4ded5fba17083feb3b85a791b0",
+  "source_path": "research/latch_ops/ops/precision.py",
+  "sha256": "2c86eaac452ea34adc007ce5c1366b7c16f41f69a9a63e9a5a76d0e1cd96516d",
+  "scope": "C-OPS3-A forward arithmetic policy prerequisite selected by accepted P7-A/P7-B image programs; applied before AD, default None unchanged"
+}

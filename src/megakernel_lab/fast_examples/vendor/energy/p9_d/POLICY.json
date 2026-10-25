@@ -1,0 +1,47 @@
+{
+  "schema": "p9d-policy-v1",
+  "frozen": "2026-10-05, before any GPU execution or timing by P9-D",
+  "lane": "P9-D: whole-training-update parity on the deeper energy model (SD) through the common operation compiler, preserving the WB result",
+  "base": "021f1b241eac1b1ae1e5ef980cbfd0f538b9e5c3 (P8-D closure; qualified compiler dca0a3ab1); harness c_ops4_b (bytes of C-OPS4-B 22c3231ad) and p8_d controls/diagnostics unchanged",
+  "learning_problem": "unchanged and frozen: examples/energy.py recipe (s100l-rmlp-ebm-v1 equations, s100l-p1 BF16 product policy, s100l-rng-v1, s100l-cd-v1 sampler with stop-gradient negatives and input-gradient Langevin steps, global-norm clip + AdamW beta1=0, FIFO replay commit), Fashion-MNIST s100l-fmnist-v1 order; sampling steps, precision policy and optimizer are not changed by this lane",
+  "primary": "SD: crop 28, H384 F768 L8 B256 K32 R10000, 5,029,632 parameters (c_ops4_b POLICY 'sd')",
+  "transfer": [
+    "WB K=64 (P8-D primary; its parity 0.965 must be re-measured and reported, not traded away)",
+    "WB at runtime counts 8 and 32 (same native binary; controls compiled per count)"
+  ],
+  "score": {
+    "metric": "generated complete-update median ms / fastest valid tested conventional complete-update median ms, SD K=32",
+    "clock": "c_ops4_b.gpu_tasks.perf via p8_d.gpu_extra.perfx: CUDA events over CUDA-graph replays of one complete changing-state update (init, K-step chain, positives, loss, gradients, casts, clip+AdamW, replay commit); state restored before each paired round; randomized arm order; same H100 and job; bootstrap 95% CI of the median ratio",
+    "target": 1.0,
+    "finalist_replication": "the selected candidate is paired with its controls on one H100 and replicated on a second independent H100 job; both must give ratio <= 1.00 (point estimate) for success",
+    "memory_and_setup": "reported separately; never folded into the score"
+  },
+  "controls": {
+    "frozen_set": ["bf16_fused_autotune", "fused_autotune", "fused_autotune_cd", "pieces_autotune"],
+    "same_policy_validity": "fused_autotune, fused_autotune_cd, pieces_autotune: valid iff the c_ops4_b same-state rule passes from the same state in the timing job",
+    "practical_bf16_validity": "bf16_fused_autotune (P8-D declaration, unchanged) is a valid SD denominator iff, AT SD, a 400-update Fashion-MNIST run from the shared init/data/RNG has finite losses and d(control, C1 eager) <= max(2 d(C2 manual, C1), 0.02). Its same-state rule at the fresh SD state and at its own SD trained state is reported (not required, changed arithmetic). WB learning does not qualify SD. If it fails, it is excluded, the failure is retained, and the fastest passing control is the denominator.",
+    "denominator": "fastest valid control in the same paired job"
+  },
+  "native_gates": {
+    "numerical": "c_ops4_b/POLICY.json v1.1 unchanged (exact init/commit/counters/key, repeat bitwise, CUDA-graph replay bitwise, status 0, sampled chain-step increments and every update observable within the same-state rule; optimizer tier v1.1); the v1 optimizer verdict is reported and its failure retained",
+    "learning": "SD 400-update Fashion-MNIST run from the shared init: finite losses and d(native, C1) <= max(2 d(C2, C1), 0.02); all numerical gates repeated at the SD trained state",
+    "transfer_gates": "WB fresh, WB counts 8/32, tiny, small fresh gates; WB 400-update learning gate re-run for the final candidate if the WB program bytes change",
+    "single_kernel": "one generated cooperative kernel launch per complete update (sampling, forward/loss/backward/casts/optimizer/state); no external kernels, no benchmark-name dispatch"
+  },
+  "precision": {
+    "declared": "no new mixed precision: products keep BF16 operands, FP32 accumulation and one BF16 rounding (summation order inside a product may differ: k-split chains, wgmma k16 association, split-K partials in fixed order); elementwise FP32 with ops.lower expressions; saved activations spilled to global/L2 keep their exact stored dtype and bits (FP32 stays FP32, BF16 product outputs stay BF16)",
+    "amendment_rule": "any new storage/compute precision must be declared here as a versioned amendment before its validation runs, checked against its arithmetic reference AND the learning gate"
+  },
+  "compiler_scope": "reusable rules reached through ops.lower(...) by graph properties only; refusals fall back to existing schedules with a recorded reason; no model names",
+  "resources": {
+    "owner": "P9-D",
+    "provider": "modal",
+    "max_h100": 2,
+    "max_cpu_cores_total": 8,
+    "budget_usd": 100,
+    "local_growth_mib": 250,
+    "host_free_floor_gib": 5
+  },
+  "tolerance_changes": "none",
+  "amendments": []
+}

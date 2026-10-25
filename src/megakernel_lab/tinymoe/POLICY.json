@@ -1,0 +1,32 @@
+{
+  "schema": "latch-tinymoe-prospective-bf16-v1",
+  "frozen_before_gpu_numerical_results": true,
+  "semantics": {
+    "selected_indices_from_identical_probabilities": "exact",
+    "unused_expert_parameters_moments_counters": "bitwise unchanged",
+    "restart_same_backend": "bitwise equal complete parameter/optimizer/EMA state and cursor",
+    "internal_padding": "no mathematical or optimizer effect",
+    "router_loss": "original Mixtral coefficient0.02 independent of supervision normalization",
+    "all_observations": "finite; preserve every failed attempt"
+  },
+  "independent_small_fp64": {
+    "fp32_gradient_relative_l2_max": 0.00001,
+    "bf16_gradient_relative_l2_max": 0.05,
+    "bf16_forward_relative_l2_max": 0.025,
+    "absolute_floor": 0.000001
+  },
+  "same_state_fixed_membership_complete_update": {
+    "objective_absolute_max": 0.02,
+    "per_parameter_gradient_relative_l2_max": 0.08,
+    "gradient_absolute_rms_floor": 0.00001,
+    "clip_norm_relative_max": 0.04,
+    "own_gradient_optimizer_relative_l2_max": 0.00001,
+    "own_gradient_optimizer_absolute_max": 0.000002
+  },
+  "unconstrained_routing": {
+    "selection": "report agreements and top2/top3 margins; investigate every disagreement exceeding measured probability error bound",
+    "trajectory": "report raw/EMA heldout NLL and loss/norm trajectories; no claimed learning advantage or long-run parameter identity",
+    "near_ties": "do not require whole-model CPU/GPU identical membership; exact same-probability selection tested separately"
+  },
+  "rejection_policy": "These gates are prospective. Failure is retained and investigated; no threshold relaxation to turn a failed candidate into a pass."
+}

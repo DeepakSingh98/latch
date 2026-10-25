@@ -1,0 +1,59 @@
+{
+  "schema": "latch-tinymoe-confirmation-config-v1",
+  "status": "Historical frozen longer-horizon study configuration; its changed LR schedule is not direct pilot replication. See followup.json for separate original-schedule replication.",
+  "model": "FlameF0X/TinyMoE-200m-2x16",
+  "revision": "9b209f7439aadfac282e0bf44f2fda19771aba90",
+  "seeds": [
+    1730,
+    1731,
+    1732
+  ],
+  "horizon_tokens": 1048576000,
+  "eval_every_tokens": 8388608,
+  "eval_windows": 256,
+  "final_eval_windows": 2048,
+  "final_test_windows": 4096,
+  "checkpoint_every_tokens": 67108864,
+  "targets": [
+    4.3,
+    4.1,
+    3.9,
+    3.75,
+    3.6,
+    3.5,
+    3.4,
+    3.3
+  ],
+  "arms": {
+    "A": {
+      "backend": "compiled-grouped",
+      "microbatch": 8,
+      "accumulation": 16,
+      "peak_learning_rate": 0.0024
+    },
+    "B2": {
+      "backend": "Latch",
+      "microbatch": 2,
+      "accumulation": 1,
+      "peak_learning_rate": 0.0003
+    }
+  },
+  "sequence_length": 1024,
+  "source_corpus_manifest_sha256": "75e67515b176d59a594c4727b0e0e8f7131427d22bec3c56fcd4d3949dba8590",
+  "historical_tokenized_manifest_sha256": "06c682ac2fd49a4fb00a954c663e28d960087a0baf4f01642b84cc47ee54ecb9",
+  "source_snapshot": "742ba9113e0c38c05527fcd433b08499edec7275",
+  "training_source": "cfb782d8d25bea4bcfa959091619d3348442e798",
+  "confirmation_freeze_sha256": "40b9b40333b59b5be7d178d54badf29896bd375ea6f5ec376711cad802ec2fae",
+  "study_classification": {
+    "kind": "longer_horizon_changed_schedule",
+    "pilot_horizon_tokens": 131072000,
+    "pilot_warmup_tokens": 6553600,
+    "study_warmup_tokens": 52428800,
+    "warmup_fraction": 0.05,
+    "schedule": "linear warmup then cosine to zero over the horizon, evaluated at update token midpoint",
+    "direct_pilot_replication": false,
+    "historical_cli": "learning confirm",
+    "original_configuration_sha256": "8793702ad8bcce2b236f843bf12a61d0bde33989d5f0b47d9dd153df3082413a",
+    "numerical_protocol_fields_preserved": true
+  }
+}

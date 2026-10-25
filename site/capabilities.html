@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Latch — Open problems</title>
+<meta name="description" content="Open compiler problems for Latch: performance, memory use, numerical checks and broader model support.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/site.css?v=15">
+<script src="assets/config.js" defer></script>
+<script src="assets/reading.js" defer></script>
+</head>
+<body>
+<div class="draft-banner"><div class="wrap">Research preview · v0</div></div>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="./">Latch <span>research preview</span></a>
+    <nav aria-label="Main">
+      <ul>
+        <li><a href="walkthrough.html">How it works</a></li>
+        <li><a href="capabilities.html" aria-current="page">Open problems</a></li>
+        <li><a href="methodology.html">Results</a></li>
+        <li><a href="https://github.com/DeepakSingh98/latch">Get started</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap">
+    <article class="prose" id="contribute">
+      <h1>Open problems</h1>
+      <p class="lede">This preview includes runnable examples for a limited set of models and learning rules. <a href="https://github.com/DeepakSingh98/latch">See what is included</a>; the problems below describe the next work, not promised capabilities.</p>
+<h2 id="performance">Performance</h2>
+<ol class="plain">
+<li><strong>Idle time at grid barriers.</strong> Each interval ends at a grid barrier, so every SM waits for the slowest one. A per-SM trace of one TinyMoE update on an H100 shows SMs waiting 13% of the time at 32 × 1024 and 20% at 2 × 1024. At 32 × 1024, each layer’s expert-dispatch gather runs on one SM and its bucket ordering on 16 while the other SMs wait, about 2 ms per update. Starting each task when its own inputs are ready, instead of at the next grid barrier, could recover part of this time.
+<figure>
+<a href="profiler/latch-profiler.html"><img src="profiler/q-layer-waits.png" width="1920" height="1080" loading="lazy" alt="Per-SM trace of one forward layer of a TinyMoE training update at batch 32 on an H100. Each of 132 rows is one SM; coloured bars are barrier intervals and dark hatched gaps are time spent waiting for slower SMs."></a>
+<figcaption>One forward layer of a batch-32 TinyMoE update, one row per SM. Dark hatched gaps are SMs waiting for slower SMs; the long gap near the middle is the routing step running on a few SMs. <a href="profiler/latch-profiler.html">Explore the full trace</a>.</figcaption>
+</figure></li>
+<li><strong>Fewer barrier-separated phases.</strong> Granite spends about 25 ms on 1,200 small elementwise, normalization and routing intervals. Standalone elementwise phases take 55% of E2-TTT’s memory-region time at four sequences. Combining these operations could reduce that cost.</li>
+<li><strong>Large-batch efficiency.</strong> The current compiler’s same-session update speedup is about 2.75× at 2 × 1024 and 1.67× at 32 × 1024 against the conventional trunk-graph control. An older measurement saved about 10% at the published batch of 16 × 8 × 1024. Granite remains slower at 4,096 tokens.</li>
+<li><strong>Long-sequence attention.</strong> On Granite at 4,096 tokens, Latch's attention takes about 20 ms per update against about 14 ms for FlashAttention-2.</li>
+<li><strong>Gradients of repeated gathers.</strong> Top-8 routing sends each token to eight experts. Latch’s deterministic backward scatter takes about 32 ms against about 5 ms conventionally. The number of contributions is known in advance. A direct sum per row may be faster.</li>
+<li><strong>Feed-forward blocks.</strong> Latch’s feed-forward blocks remain 1.24–1.45× slower than compiled PyTorch.</li>
+</ol>
+<h2 id="generality">Generality</h2>
+<ol class="plain">
+<li><strong>New models and learning algorithms.</strong> Port another public model or test a learning rule that uses frequent small updates.</li>
+<li><strong>Smaller activation arenas.</strong> The current compiler includes opt-in lifetime and recomputation rules (<code>memory_rules</code>). E2-TTT’s B4 <code>remat_absorbed</code> program matches the validated memory-lane program, which reduced peak allocated memory from 75.3 to about 50 GiB. Broader automatic planning remains open; the published B8 setting was estimated at 137 GiB before recomputation. E2-TTT’s research runner is not included.</li>
+<li><strong>Multiple GPUs.</strong> This release runs on one H100. The experimental distributed-training implementation is excluded. Earlier two-GPU research was slower than one GPU on TinyMoE and missed a late-training numerical check. A convincing future test needs a model too large for one GPU.</li>
+<li><strong>Other GPUs.</strong> Latch generates programs for NVIDIA H100 only.</li>
+</ol>
+<h2 id="correctness">Correctness</h2>
+<ol class="plain">
+<li><strong>Keep numerical checks broad.</strong> The current compiler fixes the <code>rpackb</code> gated-attention defect by tracking arena lifetimes from the earliest writer. The gated TinyMoE checks pass. This fix does not requalify the older skips-and-gates learning result, whose separate trained-state audit remains failed.</li>
+<li><strong>Numerical checks for BF16 expert models.</strong> Tested BF16 implementations of Granite differ from FP64 by a median 25–33% on individual accumulation microbatches at trained states. Latch and PyTorch also sometimes exceed the 0.08 gradient gate at TinyMoE’s trained 2 × 512 states. The latest tuned 2 × 1024 and recipe-Q candidate states pass their tested gates; these are different programs. Keep the unchanged gates and the failures visible when testing new candidates.</li>
+</ol>
+<h2 id="build">Build</h2>
+<ol class="plain">
+<li><strong>Faster lowering.</strong> Earlier 0.9.0rc1 measurements cut TinyMoE build time from 544 to 283 s on 64 vCPUs with identical output. Lowering still uses single-threaded Python and takes the largest share of most builds.</li>
+<li><strong>Automatic build configuration.</strong> The compiler could choose device units, outlining and shared-memory reserves. These require explicit flags today.</li>
+</ol>
+    </article>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>Latch · Research preview</span>
+    <a data-repo-link hidden aria-disabled="true" href="https://github.com/DeepakSingh98/latch">Repository</a>
+  </div>
+</footer>
+</body>
+</html>

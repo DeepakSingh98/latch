@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Latch — Results</title>
+<meta name="description" content="Latch results: faster training and generated GPU programs across different models and learning rules.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/site.css?v=15">
+<script src="assets/config.js" defer></script>
+<script src="assets/reading.js" defer></script>
+</head>
+<body>
+<div class="draft-banner"><div class="wrap">Research preview · v0</div></div>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="./">Latch <span>research preview</span></a>
+    <nav aria-label="Main">
+      <ul>
+        <li><a href="walkthrough.html">How it works</a></li>
+        <li><a href="capabilities.html">Open problems</a></li>
+        <li><a href="methodology.html" aria-current="page">Results</a></li>
+        <li><a href="https://github.com/DeepakSingh98/latch">Get started</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="results-page">
+  <article class="wrap">
+    <div class="article">
+      <h1>Results</h1>
+      <p class="lede">Latch generates GPU programs from models and learning rules. We test how fast they run and how much the compiler can handle.</p>
+    </div>
+
+    <section id="execution" aria-labelledby="execution-title">
+      <h2 id="execution-title">Faster execution</h2>
+      <p>These clocks compare complete updates of the same model and learning recipe. Each run uses one H100; the paired measurements were repeated on two H100s at fresh, mid and late training states.</p>
+      <div class="table-wrap"><table class="stack">
+        <caption>Current compiler; milliseconds per complete update</caption>
+        <thead><tr><th scope="col">Workload</th><th scope="col">Latch</th><th scope="col">Conventional</th><th scope="col">What this demonstrates</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">TinyMoE tuned B2 × 1,024</th><td data-label="Latch">13.63–13.77 ms</td><td data-label="Conventional">37.50–38.42 ms</td><td data-label="Meaning">About 2.75× faster updates at this small batch</td></tr>
+          <tr><th scope="row">TinyMoE recipe Q, B32 × 1,024</th><td data-label="Latch">68.27–68.61 ms</td><td data-label="Conventional">114.02–114.77 ms</td><td data-label="Meaning">About 1.67× faster updates at batch 32</td></tr>
+        </tbody>
+      </table></div>
+      <p class="result-footnote">The fastest conventional control measured here compiles the trunk with TorchInductor and replays a CUDA graph. Its recipe-Q numerical limitation is described below. These are execution ratios, not data-efficiency gains.</p>
+    </section>
+
+    <section id="learning" aria-labelledby="learning-title">
+      <h2 id="learning-title">Training to the same quality</h2>
+      <p>TinyMoE-200M trains from random initialization on the same fixed text stream. Each comparison below keeps the recipe and batch size fixed between Latch and the conventional control. The target is validation loss 3.30. The full horizon is 655.36 million tokens.</p>
+      <div class="table-wrap"><table class="stack">
+        <caption>Training-update seconds to loss 3.30; lower is better</caption>
+        <thead><tr><th scope="col">Program and recipe</th><th scope="col">Latch</th><th scope="col">Conventional</th><th scope="col">Measured scope</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Current program, Q B32, seed 1740</th><td data-label="Latch">857 s</td><td data-label="Conventional">1,432 s</td><td data-label="Measured scope">One full-run confirmation: about 40% less update time</td></tr>
+          <tr><th scope="row">Earlier compiler (c2), Q B32</th><td data-label="Latch">885–941 s</td><td data-label="Conventional">1,407–1,432 s</td><td data-label="Measured scope">Three seeds; 0.629–0.659× the paired control time</td></tr>
+          <tr><th scope="row">Earlier compiler (c2), tuned B2</th><td data-label="Latch">2,523–2,583 s</td><td data-label="Conventional">7,044–7,340 s</td><td data-label="Measured scope">Three seeds; 0.352–0.358× the paired control time</td></tr>
+        </tbody>
+      </table></div>
+      <p>The confirmation used the same generated program as this release. Its batch-2 full training results remain from the earlier compiler.</p>
+      <p>Update time excludes compilation, evaluation and checkpointing. In the Q confirmation, elapsed time from the first evaluation panel to the target panel, including evaluation and checkpoints, was 1,117 versus 1,766 seconds.</p>
+      <p><strong>Numerical scope.</strong> Latch passes the tested fresh- and trained-state FP64 checks. The conventional control fails one trained-state gradient check: relative L2 error 0.0914 against a 0.08 limit, traced to TorchInductor rounding placement. It remains the fastest measured control, but is not numerically qualified.</p>
+      <p id="batch-comparison">Batch size changes the learning recipe. In the earlier full runs, tuned B2 needed fewer tokens than B32 to reach the target, but about 2.8× as much update time.</p>
+    </section>
+
+    <section id="earlier" aria-labelledby="earlier-title">
+      <h2 id="earlier-title">Other measured compiler work</h2>
+      <p>These measurements used the earlier 0.9.0rc1 package. Their runnable examples remain included; these timings have not been remeasured for this release.</p>
+      <div class="table-wrap"><table class="stack result-highlights">
+        <caption>Earlier package measurements on H100</caption>
+        <thead><tr><th scope="col">Task</th><th scope="col">Latch vs control</th><th scope="col">What it demonstrates</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Selective updates, B2 × 1,024</th><td data-label="Timing">10.28 vs 66.45 ms per microbatch; 6.5×</td><td data-label="Meaning">Shared weights update every microbatch, experts every 16</td></tr>
+          <tr id="case-gradlev"><th scope="row">GradLev on GPT-2 small</th><td data-label="Timing">53.98 vs 189.53 ms per 1,024-step block; 3.5×</td><td data-label="Meaning">Dependent token-by-token adaptation; both use ordinary PyTorch for the rest of GPT-2</td></tr>
+          <tr id="case-smelt"><th scope="row">Looped TinyMoE, B32 × 1,024</th><td data-label="Timing">114.82 vs 154.22 ms per update; 1.34×</td><td data-label="Meaning">Repeated layers share weights and accumulate gradients across visits</td></tr>
+          <tr><th scope="row">TinyMoE cold build</th><td data-label="Timing">544.5 → 283.1 s on 64 vCPUs</td><td data-label="Meaning">Generation and compilation got faster with identical generated output; separate from GPU speed</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="compiler" aria-labelledby="compiler-title">
+      <h2 id="compiler-title">Different models and learning rules</h2>
+      <p>The compiler determines operation order, synchronization and memory reuse from the input program. This release includes TinyMoE, selective updates, looped SMELT-style TinyMoE, GradLev and the fast-example families. <a href="https://github.com/DeepakSingh98/latch">Examples and installation</a>.</p>
+      <p id="case-e2ttt">E2-TTT, Granite and experimental distributed training remain research workloads outside this runnable release.</p>
+      <p>Latch is a research preview with a limited set of supported operations. The goal is to make changing a learning program enough to produce a new GPU implementation. <a href="walkthrough.html#megakernel">How the compiler works</a>.</p>
+    </section>
+  </article>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>Latch · Research preview</span>
+    <a href="methodology.html">Results</a>
+    <a data-repo-link hidden aria-disabled="true" href="https://github.com/DeepakSingh98/latch">Repository</a>
+  </div>
+</footer>
+</body>
+</html>

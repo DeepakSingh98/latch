@@ -1,0 +1,834 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Latch — Walkthrough</title>
+<meta name="description" content="A visual walkthrough of training megakernels: one training update from first principles, conventional GPU execution, what Latch generates, what fusion can and cannot save, and measured case studies.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/site.css?v=15">
+<script>document.documentElement.className += " js";</script>
+<script src="assets/config.js" defer></script>
+<script src="assets/reading.js" defer></script>
+<script src="assets/walkthrough.js?v=6" defer></script>
+<script>
+  (function () {
+    var moved = { "case-tinymoe": "methodology.html#execution", "case-smelt": "methodology.html#case-smelt",
+      "case-gradlev": "methodology.html#case-gradlev", "case-e2ttt": "methodology.html#case-e2ttt",
+      "headline-scope": "methodology.html#learning", "run-it": "https://github.com/DeepakSingh98/latch",
+      "what-to-change": "https://github.com/DeepakSingh98/latch" };
+    var h = location.hash.slice(1);
+    if (moved[h]) location.replace(moved[h]);
+  })();
+</script>
+</head>
+<body>
+<div class="draft-banner"><div class="wrap">Research preview · v0</div></div>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="./">Latch <span>research preview</span></a>
+    <nav aria-label="Main">
+      <ul>
+        <li><a href="walkthrough.html" aria-current="page">How it works</a></li>
+        <li><a href="capabilities.html">Open problems</a></li>
+        <li><a href="methodology.html">Results</a></li>
+        <li><a href="https://github.com/DeepakSingh98/latch">Get started</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap">
+    <div class="prose">
+      <h1>How a training megakernel works</h1>
+      <p class="lede">A training update makes a prediction and measures its error. It then changes the weights. The example below shows this with two multiplications. We follow that update through PyTorch and a Latch megakernel.</p>
+      <p class="small mute sans">Use the controls to step through the diagrams. The diagrams explain execution. Measured timings are linked separately.</p>
+    </div>
+
+    <nav class="toc" aria-label="On this page">
+      <ol>
+        <li><a href="#update">One training update</a></li>
+        <li><a href="#conventional">How GPUs usually run it</a></li>
+        <li><a href="#megakernel">What Latch does</a></li>
+        <li><a href="#fusion">Where the time goes</a></li>
+        <li><a href="#workloads">Three kinds of workload</a></li>
+        <li><a href="#results">Where the measurements are</a></li>
+      </ol>
+    </nav>
+
+    <!-- 1 ─────────────────────────────────────────────────────────── -->
+    <section id="update" class="chapter" aria-labelledby="update-h">
+      <div class="prose">
+
+        <h2 id="update-h">One training update</h2>
+        <p>A model has adjustable numbers called <em>weights</em>. It uses these weights to turn an input into a prediction. A loss function measures the prediction error. Backpropagation computes how a small change in each weight would change the loss. The optimizer uses these <em>gradients</em> to update the weights.</p>
+        <p>The example has one input, two weights and one target.</p>
+      </div>
+
+      <figure class="fig" id="fig-update" aria-labelledby="fig-update-cap">
+        <div class="scroll-x"><svg viewBox="0 0 720 306" role="img" aria-labelledby="fu-t fu-d">
+          <title id="fu-t">Computation graph of a tiny training update</title>
+          <desc id="fu-d">Input x equals 2. Weight w1 equals 0.5 multiplies x to give h equals 1. Weight w2 equals 1.5 multiplies h to give the prediction y equals 1.5. The loss compares y with target 1, giving 0.125. Backward: the gradient with respect to y is 0.5; with respect to w2 it is 0.5; with respect to h it is 0.75; with respect to w1 it is 1.5. The update moves each weight against its gradient.</desc>
+          <text x="0" y="12" font-size="10.5" class="t-faint">FORWARD →</text>
+          <text x="0" y="300" font-size="10.5" class="t-faint">← BACKWARD</text>
+          <g class="edge" id="e1"><path d="M110 140 H154"/><polygon points="160,140 154,136.5 154,143.5"/></g>
+          <g class="edge" id="e2"><path d="M210 70 V110"/><polygon points="210,116 206.5,110 213.5,110"/></g>
+          <g class="edge" id="e3"><path d="M260 140 H334"/><polygon points="340,140 334,136.5 334,143.5"/></g>
+          <g class="edge" id="e4"><path d="M390 70 V110"/><polygon points="390,116 386.5,110 393.5,110"/></g>
+          <g class="edge" id="e5"><path d="M440 140 H514"/><polygon points="520,140 514,136.5 514,143.5"/></g>
+          <g class="edge" id="e6"><path d="M570 70 V110"/><polygon points="570,116 566.5,110 573.5,110"/></g>
+          <g class="edge back" id="b1"><path d="M570 164 V220"/><polygon points="570,226 566.5,220 573.5,220"/></g>
+          <g class="edge back" id="b2"><path d="M520 250 H476"/><polygon points="470,250 476,246.5 476,253.5"/></g>
+          <g class="edge back" id="b3"><path d="M545 274 C545 298 295 298 295 280"/><polygon points="295,274 291.5,280 298.5,280"/></g>
+          <g class="edge back" id="b4"><path d="M220 250 H176"/><polygon points="170,250 176,246.5 176,253.5"/></g>
+          <g class="edge upd" id="u1"><path d="M126 226 C126 110 126 46 154 46"/><polygon points="160,46 154,42.5 154,49.5"/></g>
+          <g class="edge upd" id="u2"><path d="M456 226 C478 150 478 46 446 46"/><polygon points="440,46 446,42.5 446,49.5"/></g>
+
+          <g class="node" id="n-w1" transform="translate(210,46)"><rect x="-50" y="-24" width="100" height="48" rx="3"/><text class="lbl" x="0" y="-6" text-anchor="middle">weight w₁</text><text class="v" x="0" y="13" text-anchor="middle" data-v="w1">0.5</text></g>
+          <g class="node" id="n-w2" transform="translate(390,46)"><rect x="-50" y="-24" width="100" height="48" rx="3"/><text class="lbl" x="0" y="-6" text-anchor="middle">weight w₂</text><text class="v" x="0" y="13" text-anchor="middle" data-v="w2">1.5</text></g>
+          <g class="node" id="n-t" transform="translate(570,46)"><rect x="-50" y="-24" width="100" height="48" rx="3"/><text class="lbl" x="0" y="-6" text-anchor="middle">target t</text><text class="v" x="0" y="13" text-anchor="middle">1</text></g>
+          <g class="node stored" id="n-x" transform="translate(60,140)"><rect x="-50" y="-24" width="100" height="48" rx="3"/><text class="lbl" x="0" y="-6" text-anchor="middle">input x</text><text class="v" x="0" y="13" text-anchor="middle">2</text></g>
+          <g class="node stored" id="n-h" transform="translate(210,140)"><rect x="-50" y="-24" width="100" height="48" rx="3"/><text class="lbl" x="0" y="-6" text-anchor="middle">h = w₁·x</text><text class="v" x="0" y="13" text-anchor="middle" data-v="h">1</text></g>
+          <g class="node stored" id="n-y" transform="translate(390,140)"><rect x="-50" y="-24" width="100" height="48" rx="3"/><text class="lbl" x="0" y="-6" text-anchor="middle">prediction y</text><text class="v" x="0" y="13" text-anchor="middle" data-v="y">1.5</text></g>
+          <g class="node" id="n-L" transform="translate(570,140)"><rect x="-50" y="-24" width="100" height="48" rx="3"/><text class="lbl" x="0" y="-6" text-anchor="middle">loss ½(y−t)²</text><text class="v" x="0" y="13" text-anchor="middle" data-v="L">0.125</text></g>
+          <g class="node" id="n-gy" transform="translate(570,250)"><rect x="-50" y="-24" width="100" height="48" rx="3"/><text class="lbl" x="0" y="-6" text-anchor="middle">∂L/∂y = y−t</text><text class="v" x="0" y="13" text-anchor="middle">0.5</text></g>
+          <g class="node" id="n-gw2" transform="translate(420,250)"><rect x="-50" y="-24" width="100" height="48" rx="3"/><text class="lbl" x="0" y="-6" text-anchor="middle">∂L/∂w₂ = ∂L/∂y·h</text><text class="v" x="0" y="13" text-anchor="middle">0.5</text></g>
+          <g class="node" id="n-gh" transform="translate(270,250)"><rect x="-50" y="-24" width="100" height="48" rx="3"/><text class="lbl" x="0" y="-6" text-anchor="middle">∂L/∂h = ∂L/∂y·w₂</text><text class="v" x="0" y="13" text-anchor="middle">0.75</text></g>
+          <g class="node" id="n-gw1" transform="translate(120,250)"><rect x="-50" y="-24" width="100" height="48" rx="3"/><text class="lbl" x="0" y="-6" text-anchor="middle">∂L/∂w₁ = ∂L/∂h·x</text><text class="v" x="0" y="13" text-anchor="middle">1.5</text></g>
+        </svg></div>
+        <p class="scroll-hint" aria-hidden="true">Scroll sideways to see the whole diagram.</p>
+
+        <div class="controls js-only" role="group" aria-label="Step through the update">
+          <button type="button" class="btn" data-step="prev" aria-label="Previous step">← Back</button>
+          <button type="button" class="btn" data-step="next" aria-label="Next step">Next →</button>
+          <button type="button" class="btn" data-step="reset">Start over</button>
+          <label for="lr">Step size η</label>
+          <select id="lr">
+            <option value="0.05">0.05</option>
+            <option value="0.1" selected>0.1</option>
+            <option value="0.3">0.3</option>
+          </select>
+          <span class="hint" id="step-count" aria-hidden="true"></span>
+        </div>
+
+        <ol class="stepper-list" id="steps" aria-live="polite">
+          <li data-n="01"><strong>Start.</strong> The input is <span class="eq">x = 2</span> and the correct answer is <span class="eq">t = 1</span>. The two weights begin at <span class="eq">w₁ = 0.5</span> and <span class="eq">w₂ = 1.5</span>.</li>
+          <li data-n="02"><strong>Forward.</strong> Multiply: <span class="eq">h = w₁ · x = 0.5 × 2 = 1</span>. The value <em>h</em> is an <em>intermediate</em>: the backward pass will need it again, so it has to be kept somewhere.</li>
+          <li data-n="03"><strong>Forward.</strong> Multiply again to get the prediction: <span class="eq">y = w₂ · h = 1.5 × 1 = 1.5</span>.</li>
+          <li data-n="04"><strong>Loss.</strong> Measure the error: <span class="eq">L = ½(y − t)² = ½ × 0.5² = 0.125</span>. Training tries to make this number small.</li>
+          <li data-n="05"><strong>Backward.</strong> Start from the loss. How does it change if <em>y</em> changes? <span class="eq">∂L/∂y = y − t = 0.5</span>.</li>
+          <li data-n="06"><strong>Backward.</strong> Gradient of the second weight: <span class="eq">∂L/∂w₂ = ∂L/∂y · h = 0.5 × 1 = 0.5</span>. This reads <em>h</em> from the forward pass — the reason it was kept.</li>
+          <li data-n="07"><strong>Backward.</strong> Pass the gradient back through the multiplication: <span class="eq">∂L/∂h = ∂L/∂y · w₂ = 0.5 × 1.5 = 0.75</span>.</li>
+          <li data-n="08"><strong>Backward.</strong> Gradient of the first weight: <span class="eq">∂L/∂w₁ = ∂L/∂h · x = 0.75 × 2 = 1.5</span>. Now every weight has a gradient.</li>
+          <li data-n="09"><strong>Update.</strong> Move each weight against its gradient by a step size <em>η</em> = <span class="eq" data-v="lr">0.1</span>: <span class="eq">w₁ ← 0.5 − <span data-v="lr">0.1</span> × 1.5 = <span data-v="w1n">0.35</span></span> and <span class="eq">w₂ ← 1.5 − <span data-v="lr">0.1</span> × 0.5 = <span data-v="w2n">1.45</span></span>.</li>
+          <li data-n="10"><strong>Check.</strong> Run the forward pass again with the new weights: <span class="eq">h = <span data-v="hn">0.7</span>, y = <span data-v="yn">1.015</span>, L = <span data-v="Ln">0.00011</span></span>, <span data-v="dir">down</span> from 0.125. <span data-v="verdict">One update made the prediction much better.</span></li>
+        </ol>
+        <figcaption id="fig-update-cap">Dashed outlines mark values saved for the backward pass: <i>x</i>, <i>h</i> and <i>y</i>. Try η = 0.3. The step is too large and the loss rises.</figcaption>
+      </figure>
+
+      <div class="prose">
+        <h3>From two weights to 200 million</h3>
+        <p>TinyMoE applies the same process to matrices. It has 199,837,056 weights. Its forward pass includes attention and expert layers. In each expert layer a router sends each token to two of sixteen small feed-forward networks. AdamW updates the weights using running averages of the gradients and their squares. We time the complete training update at several batch sizes.</p>
+        <p>Each operation must wait for its inputs. The backward pass also needs values from the forward pass. These values must remain available until they are used. The GPU must therefore coordinate both execution and storage.</p>
+      </div>
+    </section>
+
+    <!-- 2 ─────────────────────────────────────────────────────────── -->
+    <section id="conventional" class="chapter" aria-labelledby="conv-h">
+      <div class="prose">
+
+        <h2 id="conv-h">How GPUs usually run it</h2>
+        <p>A GPU runs programs called <em>kernels</em> across its streaming multiprocessors (SMs). Our H100 has 132 SMs. PyTorch dispatches tensor operations to kernels. Compilation can combine several operations into one kernel. Intermediate results passed between kernels usually go through GPU memory.</p>
+        <p>There are three common ways to run the same sequence. Choose one to compare.</p>
+      </div>
+
+      <figure class="fig" aria-labelledby="fig-conv-cap">
+        <div class="controls js-only" role="group" aria-label="Execution mode">
+          <div class="group" data-toggle="conv">
+            <button type="button" class="seg" aria-pressed="true" data-show="conv-eager">Eager PyTorch</button>
+            <button type="button" class="seg" aria-pressed="false" data-show="conv-compiled">torch.compile</button>
+            <button type="button" class="seg" aria-pressed="false" data-show="conv-graph">+ CUDA graphs</button>
+          </div>
+        </div>
+        <div data-group="conv" id="conv-eager">
+          <h3 class="panel-head no-js-only">Eager PyTorch</h3>
+          <div class="scroll-x"><svg viewBox="0 0 760 196" role="img" aria-labelledby="conv-eager-t conv-eager-d">
+<title id="conv-eager-t">Eager PyTorch, schematic</title><desc id="conv-eager-d">Python issues each kernel launch in turn. Each small kernel finishes before the next is issued, so the GPU waits. Every kernel reads its inputs from GPU memory and writes its outputs back.</desc>
+<text x="0" y="38" font-size="11" class="t-mute">CPU</text>
+<line class="ln" x1="92" y1="34" x2="752" y2="34" stroke-dasharray="1 4"/>
+<text x="0" y="96" font-size="11" class="t-mute">GPU</text>
+<line class="ln" x1="92" y1="92" x2="752" y2="92" stroke-dasharray="1 4"/>
+<text x="0" y="162" font-size="11" class="t-mute">Memory</text>
+<rect class="box-wash" x="92" y="151" width="660" height="14"/>
+<rect class="host" x="94" y="25" width="40" height="18"/>
+<line class="ln" x1="134" y1="43" x2="138" y2="77"/>
+<rect class="k" x="138" y="77" width="16" height="30"/>
+<g class="mem"><line class="ln-cost" x1="142" y1="151" x2="142" y2="113"/><polygon class="fill-cost" points="142,107 138.5,113 145.5,113"/></g>
+<g class="mem"><line class="ln-cost" x1="150" y1="107" x2="150" y2="145"/><polygon class="fill-cost" points="150,151 146.5,145 153.5,145"/></g>
+<rect class="host" x="158" y="25" width="40" height="18"/>
+<line class="ln" x1="198" y1="43" x2="202" y2="77"/>
+<rect class="k" x="202" y="77" width="16" height="30"/>
+<g class="mem"><line class="ln-cost" x1="206" y1="151" x2="206" y2="113"/><polygon class="fill-cost" points="206,107 202.5,113 209.5,113"/></g>
+<g class="mem"><line class="ln-cost" x1="214" y1="107" x2="214" y2="145"/><polygon class="fill-cost" points="214,151 210.5,145 217.5,145"/></g>
+<rect class="host" x="222" y="25" width="40" height="18"/>
+<line class="ln" x1="262" y1="43" x2="266" y2="77"/>
+<rect class="k" x="266" y="77" width="16" height="30"/>
+<g class="mem"><line class="ln-cost" x1="270" y1="151" x2="270" y2="113"/><polygon class="fill-cost" points="270,107 266.5,113 273.5,113"/></g>
+<g class="mem"><line class="ln-cost" x1="278" y1="107" x2="278" y2="145"/><polygon class="fill-cost" points="278,151 274.5,145 281.5,145"/></g>
+<rect class="host" x="286" y="25" width="40" height="18"/>
+<line class="ln" x1="326" y1="43" x2="330" y2="77"/>
+<rect class="k" x="330" y="77" width="16" height="30"/>
+<g class="mem"><line class="ln-cost" x1="334" y1="151" x2="334" y2="113"/><polygon class="fill-cost" points="334,107 330.5,113 337.5,113"/></g>
+<g class="mem"><line class="ln-cost" x1="342" y1="107" x2="342" y2="145"/><polygon class="fill-cost" points="342,151 338.5,145 345.5,145"/></g>
+<rect class="host" x="350" y="25" width="40" height="18"/>
+<line class="ln" x1="390" y1="43" x2="394" y2="77"/>
+<rect class="k" x="394" y="77" width="16" height="30"/>
+<g class="mem"><line class="ln-cost" x1="398" y1="151" x2="398" y2="113"/><polygon class="fill-cost" points="398,107 394.5,113 401.5,113"/></g>
+<g class="mem"><line class="ln-cost" x1="406" y1="107" x2="406" y2="145"/><polygon class="fill-cost" points="406,151 402.5,145 409.5,145"/></g>
+<rect class="host" x="414" y="25" width="40" height="18"/>
+<line class="ln" x1="454" y1="43" x2="458" y2="77"/>
+<rect class="k" x="458" y="77" width="16" height="30"/>
+<g class="mem"><line class="ln-cost" x1="462" y1="151" x2="462" y2="113"/><polygon class="fill-cost" points="462,107 458.5,113 465.5,113"/></g>
+<g class="mem"><line class="ln-cost" x1="470" y1="107" x2="470" y2="145"/><polygon class="fill-cost" points="470,151 466.5,145 473.5,145"/></g>
+<rect class="host" x="478" y="25" width="40" height="18"/>
+<line class="ln" x1="518" y1="43" x2="522" y2="77"/>
+<rect class="k" x="522" y="77" width="16" height="30"/>
+<g class="mem"><line class="ln-cost" x1="526" y1="151" x2="526" y2="113"/><polygon class="fill-cost" points="526,107 522.5,113 529.5,113"/></g>
+<g class="mem"><line class="ln-cost" x1="534" y1="107" x2="534" y2="145"/><polygon class="fill-cost" points="534,151 530.5,145 537.5,145"/></g>
+<rect class="host" x="542" y="25" width="40" height="18"/>
+<line class="ln" x1="582" y1="43" x2="586" y2="77"/>
+<rect class="k" x="586" y="77" width="16" height="30"/>
+<g class="mem"><line class="ln-cost" x1="590" y1="151" x2="590" y2="113"/><polygon class="fill-cost" points="590,107 586.5,113 593.5,113"/></g>
+<g class="mem"><line class="ln-cost" x1="598" y1="107" x2="598" y2="145"/><polygon class="fill-cost" points="598,151 594.5,145 601.5,145"/></g>
+<rect class="host" x="606" y="25" width="40" height="18"/>
+<line class="ln" x1="646" y1="43" x2="650" y2="77"/>
+<rect class="k" x="650" y="77" width="16" height="30"/>
+<g class="mem"><line class="ln-cost" x1="654" y1="151" x2="654" y2="113"/><polygon class="fill-cost" points="654,107 650.5,113 657.5,113"/></g>
+<g class="mem"><line class="ln-cost" x1="662" y1="107" x2="662" y2="145"/><polygon class="fill-cost" points="662,151 658.5,145 665.5,145"/></g>
+<line class="ln-ink" x1="138" y1="68" x2="282" y2="68"/>
+<text x="138" y="63" font-size="10" class="t-mute">forward + loss</text>
+<line class="ln-ink" x1="330" y1="68" x2="538" y2="68"/>
+<text x="330" y="63" font-size="10" class="t-mute">backward</text>
+<line class="ln-ink" x1="586" y1="68" x2="666" y2="68"/>
+<text x="586" y="63" font-size="10" class="t-mute">update</text>
+</svg></div>
+          <p class="status-line">Python issues each launch. The GPU can finish a small kernel before Python issues the next one. It then waits.</p>
+        </div>
+        <div data-group="conv" id="conv-compiled">
+          <h3 class="panel-head no-js-only">torch.compile</h3>
+          <div class="scroll-x"><svg viewBox="0 0 760 196" role="img" aria-labelledby="conv-compiled-t conv-compiled-d">
+<title id="conv-compiled-t">torch.compile, schematic</title><desc id="conv-compiled-d">Compilation fuses some elementwise steps, so there are fewer kernels and less Python work per launch. Kernel boundaries and memory round trips remain.</desc>
+<text x="0" y="38" font-size="11" class="t-mute">CPU</text>
+<line class="ln" x1="92" y1="34" x2="752" y2="34" stroke-dasharray="1 4"/>
+<text x="0" y="96" font-size="11" class="t-mute">GPU</text>
+<line class="ln" x1="92" y1="92" x2="752" y2="92" stroke-dasharray="1 4"/>
+<text x="0" y="162" font-size="11" class="t-mute">Memory</text>
+<rect class="box-wash" x="92" y="151" width="660" height="14"/>
+<rect class="host" x="94" y="25" width="18" height="18"/>
+<line class="ln" x1="112" y1="43" x2="116" y2="77"/>
+<rect class="k" x="116" y="77" width="16" height="30"/>
+<g class="mem"><line class="ln-cost" x1="120" y1="151" x2="120" y2="113"/><polygon class="fill-cost" points="120,107 116.5,113 123.5,113"/></g>
+<g class="mem"><line class="ln-cost" x1="128" y1="107" x2="128" y2="145"/><polygon class="fill-cost" points="128,151 124.5,145 131.5,145"/></g>
+<rect class="host" x="140" y="25" width="18" height="18"/>
+<line class="ln" x1="158" y1="43" x2="162" y2="77"/>
+<rect class="k" x="162" y="77" width="16" height="30"/>
+<g class="mem"><line class="ln-cost" x1="166" y1="151" x2="166" y2="113"/><polygon class="fill-cost" points="166,107 162.5,113 169.5,113"/></g>
+<g class="mem"><line class="ln-cost" x1="174" y1="107" x2="174" y2="145"/><polygon class="fill-cost" points="174,151 170.5,145 177.5,145"/></g>
+<rect class="host" x="186" y="25" width="18" height="18"/>
+<line class="ln" x1="204" y1="43" x2="208" y2="77"/>
+<rect class="k" x="208" y="77" width="22" height="30"/>
+<g class="mem"><line class="ln-cost" x1="212" y1="151" x2="212" y2="113"/><polygon class="fill-cost" points="212,107 208.5,113 215.5,113"/></g>
+<g class="mem"><line class="ln-cost" x1="226" y1="107" x2="226" y2="145"/><polygon class="fill-cost" points="226,151 222.5,145 229.5,145"/></g>
+<rect class="host" x="232" y="25" width="18" height="18"/>
+<line class="ln" x1="250" y1="43" x2="254" y2="77"/>
+<rect class="k" x="254" y="77" width="16" height="30"/>
+<g class="mem"><line class="ln-cost" x1="258" y1="151" x2="258" y2="113"/><polygon class="fill-cost" points="258,107 254.5,113 261.5,113"/></g>
+<g class="mem"><line class="ln-cost" x1="266" y1="107" x2="266" y2="145"/><polygon class="fill-cost" points="266,151 262.5,145 269.5,145"/></g>
+<rect class="host" x="278" y="25" width="18" height="18"/>
+<line class="ln" x1="296" y1="43" x2="300" y2="77"/>
+<rect class="k" x="300" y="77" width="16" height="30"/>
+<g class="mem"><line class="ln-cost" x1="304" y1="151" x2="304" y2="113"/><polygon class="fill-cost" points="304,107 300.5,113 307.5,113"/></g>
+<g class="mem"><line class="ln-cost" x1="312" y1="107" x2="312" y2="145"/><polygon class="fill-cost" points="312,151 308.5,145 315.5,145"/></g>
+<rect class="host" x="324" y="25" width="18" height="18"/>
+<line class="ln" x1="342" y1="43" x2="346" y2="77"/>
+<rect class="k" x="346" y="77" width="16" height="30"/>
+<g class="mem"><line class="ln-cost" x1="350" y1="151" x2="350" y2="113"/><polygon class="fill-cost" points="350,107 346.5,113 353.5,113"/></g>
+<g class="mem"><line class="ln-cost" x1="358" y1="107" x2="358" y2="145"/><polygon class="fill-cost" points="358,151 354.5,145 361.5,145"/></g>
+<rect class="host" x="370" y="25" width="18" height="18"/>
+<line class="ln" x1="388" y1="43" x2="392" y2="77"/>
+<rect class="k" x="392" y="77" width="24" height="30"/>
+<g class="mem"><line class="ln-cost" x1="396" y1="151" x2="396" y2="113"/><polygon class="fill-cost" points="396,107 392.5,113 399.5,113"/></g>
+<g class="mem"><line class="ln-cost" x1="412" y1="107" x2="412" y2="145"/><polygon class="fill-cost" points="412,151 408.5,145 415.5,145"/></g>
+<line class="ln-ink" x1="116" y1="68" x2="230" y2="68"/>
+<text x="116" y="63" font-size="10" class="t-mute">forward + loss</text>
+<line class="ln-ink" x1="254" y1="68" x2="362" y2="68"/>
+<text x="254" y="63" font-size="10" class="t-mute">backward</text>
+<line class="ln-ink" x1="392" y1="68" x2="416" y2="68"/>
+<text x="392" y="63" font-size="10" class="t-mute">update</text>
+</svg></div>
+          <p class="status-line">The compiler combines some operations. In this example it combines the loss with its gradient and fuses the optimizer operations. This reduces the number of launches. Results passed between kernels still go through GPU memory.</p>
+        </div>
+        <div data-group="conv" id="conv-graph">
+          <h3 class="panel-head no-js-only">torch.compile with CUDA graphs</h3>
+          <div class="scroll-x"><svg viewBox="0 0 760 196" role="img" aria-labelledby="conv-graph-t conv-graph-d">
+<title id="conv-graph-t">torch.compile with CUDA graphs, schematic</title><desc id="conv-graph-d">The whole sequence is replayed with one host call, so the GPU no longer waits for Python. Each kernel still starts and drains, and intermediates still pass through GPU memory.</desc>
+<text x="0" y="38" font-size="11" class="t-mute">CPU</text>
+<line class="ln" x1="92" y1="34" x2="752" y2="34" stroke-dasharray="1 4"/>
+<text x="0" y="96" font-size="11" class="t-mute">GPU</text>
+<line class="ln" x1="92" y1="92" x2="752" y2="92" stroke-dasharray="1 4"/>
+<text x="0" y="162" font-size="11" class="t-mute">Memory</text>
+<rect class="box-wash" x="92" y="151" width="660" height="14"/>
+<rect class="host" x="94" y="25" width="30" height="18"/>
+<text x="130" y="38" font-size="10.5" class="t-mute">one graph replay</text>
+<rect class="k" x="130" y="77" width="16" height="30"/>
+<g class="mem"><line class="ln-cost" x1="134" y1="151" x2="134" y2="113"/><polygon class="fill-cost" points="134,107 130.5,113 137.5,113"/></g>
+<g class="mem"><line class="ln-cost" x1="142" y1="107" x2="142" y2="145"/><polygon class="fill-cost" points="142,151 138.5,145 145.5,145"/></g>
+<rect class="k" x="158" y="77" width="16" height="30"/>
+<g class="mem"><line class="ln-cost" x1="162" y1="151" x2="162" y2="113"/><polygon class="fill-cost" points="162,107 158.5,113 165.5,113"/></g>
+<g class="mem"><line class="ln-cost" x1="170" y1="107" x2="170" y2="145"/><polygon class="fill-cost" points="170,151 166.5,145 173.5,145"/></g>
+<rect class="k" x="186" y="77" width="22" height="30"/>
+<g class="mem"><line class="ln-cost" x1="190" y1="151" x2="190" y2="113"/><polygon class="fill-cost" points="190,107 186.5,113 193.5,113"/></g>
+<g class="mem"><line class="ln-cost" x1="204" y1="107" x2="204" y2="145"/><polygon class="fill-cost" points="204,151 200.5,145 207.5,145"/></g>
+<rect class="k" x="220" y="77" width="16" height="30"/>
+<g class="mem"><line class="ln-cost" x1="224" y1="151" x2="224" y2="113"/><polygon class="fill-cost" points="224,107 220.5,113 227.5,113"/></g>
+<g class="mem"><line class="ln-cost" x1="232" y1="107" x2="232" y2="145"/><polygon class="fill-cost" points="232,151 228.5,145 235.5,145"/></g>
+<rect class="k" x="248" y="77" width="16" height="30"/>
+<g class="mem"><line class="ln-cost" x1="252" y1="151" x2="252" y2="113"/><polygon class="fill-cost" points="252,107 248.5,113 255.5,113"/></g>
+<g class="mem"><line class="ln-cost" x1="260" y1="107" x2="260" y2="145"/><polygon class="fill-cost" points="260,151 256.5,145 263.5,145"/></g>
+<rect class="k" x="276" y="77" width="16" height="30"/>
+<g class="mem"><line class="ln-cost" x1="280" y1="151" x2="280" y2="113"/><polygon class="fill-cost" points="280,107 276.5,113 283.5,113"/></g>
+<g class="mem"><line class="ln-cost" x1="288" y1="107" x2="288" y2="145"/><polygon class="fill-cost" points="288,151 284.5,145 291.5,145"/></g>
+<rect class="k" x="304" y="77" width="24" height="30"/>
+<g class="mem"><line class="ln-cost" x1="308" y1="151" x2="308" y2="113"/><polygon class="fill-cost" points="308,107 304.5,113 311.5,113"/></g>
+<g class="mem"><line class="ln-cost" x1="324" y1="107" x2="324" y2="145"/><polygon class="fill-cost" points="324,151 320.5,145 327.5,145"/></g>
+<line class="ln-ink" x1="130" y1="68" x2="208" y2="68"/>
+<text x="130" y="63" font-size="10" class="t-mute">forward + loss</text>
+<line class="ln-ink" x1="220" y1="68" x2="292" y2="68"/>
+<text x="220" y="63" font-size="10" class="t-mute">backward</text>
+<line class="ln-ink" x1="304" y1="68" x2="328" y2="68"/>
+<text x="304" y="63" font-size="10" class="t-mute">update</text>
+</svg></div>
+          <p class="status-line">A CUDA graph records the launches once and replays them with one host call. The GPU no longer needs a call from Python for each launch. Each kernel still has to start and finish. Intermediate results still pass through GPU memory.</p>
+        </div>
+        <figcaption id="fig-conv-cap">Three ways to run the toy update. Box widths and gaps illustrate mechanisms and are not measurements. Orange arrows are reads from and writes to GPU memory.</figcaption>
+      </figure>
+
+      <div class="prose">
+        <p>Our controls use compiled PyTorch. Some also use CUDA graphs.</p>
+        <p>TinyMoE’s published batch contains 16 microbatches of 8 × 1024 tokens. An optimizer update follows all 16 microbatches. In an earlier published-batch benchmark, compiled PyTorch launched <strong>69,394 kernels per update</strong>. A reconstruction of the original Hugging Face Trainer setup launched 228,417. Latch launched one generated kernel per microbatch and 17 small scalar fills.</p>
+      </div>
+    </section>
+
+    <!-- 3 ─────────────────────────────────────────────────────────── -->
+    <section id="megakernel" class="chapter" aria-labelledby="mk-h">
+      <div class="prose">
+
+        <h2 id="mk-h">What Latch does</h2>
+        <p>A <em>training megakernel</em> performs the forward pass, loss, backward pass and weight update in one persistent GPU program. That program stays resident across the SMs for the whole update. Latch generates it from model code.</p>
+      </div>
+
+      <div class="fig">
+        <ol class="pipeline" role="tablist" aria-label="Latch compilation stages">
+          <li role="presentation"><button type="button" role="tab" id="st-1" aria-controls="sp-1" aria-selected="true"><span class="idx">1</span><span class="name">Supported model code</span><span class="what">nn.Module, objective, update rule</span></button></li>
+          <li role="presentation"><button type="button" role="tab" id="st-2" aria-controls="sp-2" aria-selected="false" tabindex="-1"><span class="idx">2</span><span class="name">Captured computation</span><span class="what">forward, loss and optimizer as a graph</span></button></li>
+          <li role="presentation"><button type="button" role="tab" id="st-3" aria-controls="sp-3" aria-selected="false" tabindex="-1"><span class="idx">3</span><span class="name">Autograd</span><span class="what">PyTorch supplies the backward graph</span></button></li>
+          <li role="presentation"><button type="button" role="tab" id="st-4" aria-controls="sp-4" aria-selected="false" tabindex="-1"><span class="idx">4</span><span class="name">Scheduling and storage</span><span class="what">phases, barriers, one memory arena</span></button></li>
+          <li role="presentation"><button type="button" role="tab" id="st-5" aria-controls="sp-5" aria-selected="false" tabindex="-1"><span class="idx">5</span><span class="name">Generated GPU program</span><span class="what">CUDA, compiled on a CPU machine</span></button></li>
+        </ol>
+
+        <div class="stage-detail prose" role="tabpanel" id="sp-1" aria-labelledby="st-1" tabindex="0">
+          <h3 id="what-you-write">1 · Describe the model and update</h3>
+          <p>You supply the model as an <code>nn.Module</code>. You also supply an objective and an optimizer written as a pure tensor function. TinyMoE uses a short adapter over the public Hugging Face checkpoint. It preserves every parameter name and value. The adapter calls Latch’s attention and routing operations: <code>bf16_sdpa.sdpa</code>, <code>token_topk</code>, <code>route_order</code> and <code>ragged_mm</code>. Global-norm clipping and AdamW are tensor arithmetic passed to <code>tensor_update</code>.</p>
+          <p class="mute">We added TinyMoE’s routing and expert operations to the compiler and wrote the adapter. These are now included in the package. The build command generates the training program automatically.</p>
+        </div>
+        <div class="stage-detail prose" role="tabpanel" id="sp-2" aria-labelledby="st-2" tabindex="0">
+          <h3>2 · Capture records the whole update as tensor operations</h3>
+          <p>Capture traces the model and update rule at the supplied tensor shapes. It records their operations and dependencies as a graph. This runs on CPU. TinyMoE’s published-batch program captured 32,010 operations.</p>
+<pre><code>captured = capture_module(model, objective, (tokens,), (labels, coefficients),
+                          optimizer=tensor_update(update, init_state=initialize,
+                                                  forward_state=True),
+                          state=model_state)</code></pre>
+          <p class="small mute">Abridged from <code>megakernel_lab/tinymoe/build.py</code>.</p>
+        </div>
+        <div class="stage-detail prose" role="tabpanel" id="sp-3" aria-labelledby="st-3" tabindex="0">
+          <h3>3 · PyTorch supplies the gradients</h3>
+          <p>PyTorch autograd supplies the backward operations during capture. It applies the chain rule as in steps 5–8 of the example. Latch records these operations with the forward pass and optimizer. Latch provides derivative rules for its custom operations such as expert products and BF16 attention.</p>
+          <p>The graph records which forward values the backward pass needs. Expert gradients must also return to the tokens routed through each expert. The number of tokens per expert changes at every update.</p>
+        </div>
+        <div class="stage-detail prose" role="tabpanel" id="sp-4" aria-labelledby="st-4" tabindex="0">
+          <h3>4 · Scheduling and storage</h3>
+          <p>Latch groups operations into phases across all 132 SMs. Operations within a phase can share intermediate values in registers or shared memory. A phase that needs results from other SMs must wait for them. Latch enforces this with a <em>grid-wide barrier</em>. Values passed between phases are stored in a planned GPU-memory arena.</p>
+          <p>The plan also fixes a numerical policy. TinyMoE's practical policy keeps FP32 master weights and Adam moments and uses BF16 matrix products and attention.</p>
+        </div>
+        <div class="stage-detail prose" role="tabpanel" id="sp-5" aria-labelledby="st-5" tabindex="0">
+          <h3>5 · Generation and compilation</h3>
+          <p>Latch emits CUDA using reusable hand-written implementations of matrix products, attention, routing and reductions. It compiles this code with <code>nvcc</code> on a CPU-only machine. TinyMoE’s code is divided into 16 device units. These compile separately and link into one kernel.</p>
+          <p>TinyMoE runs as one cooperative kernel with 132 blocks. Each update also needs three scalar fills and five small copies. In the earlier 0.9.0rc1 measurements, a cold build at 2 × 512 tokens took 283 seconds on a dedicated 64-vCPU machine, including model loading, capture, generation and linking. The previous compiler took 544 seconds on the same machine. Both produced byte-identical output.</p>
+          <p class="mute">Use the generated program’s comparison and numerical-check commands before starting a new experiment.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 ─────────────────────────────────────────────────────────── -->
+    <section id="fusion" class="chapter" aria-labelledby="fusion-h">
+      <div class="prose">
+
+        <h2 id="fusion-h">Where the time goes</h2>
+        <p>Combining operations removes kernel boundaries and some trips to memory. The arithmetic remains. Use the controls to compare the execution costs.</p>
+      </div>
+
+      <figure class="fig" id="fig-fuse" data-hl="none" aria-labelledby="fig-fuse-cap">
+        <div class="controls js-only" role="group" aria-label="Fusion comparison">
+          <div class="group" data-toggle="fuse">
+            <button type="button" class="seg" aria-pressed="true" data-show="fuse-kernels">Separate kernels</button>
+            <button type="button" class="seg" aria-pressed="false" data-show="fuse-mega">One megakernel</button>
+          </div>
+          <div class="group" data-hl-group>
+            <button type="button" class="seg" aria-pressed="true" data-hl="none">All</button>
+            <button type="button" class="seg" aria-pressed="false" data-hl="sync">Synchronization</button>
+            <button type="button" class="seg" aria-pressed="false" data-hl="mem">Memory traffic</button>
+            <button type="button" class="seg" aria-pressed="false" data-hl="arith">Arithmetic</button>
+          </div>
+        </div>
+        <div data-group="fuse" id="fuse-kernels">
+          <h3 class="panel-head no-js-only">Separate kernels, replayed by a CUDA graph</h3>
+          <div class="scroll-x"><svg viewBox="0 0 760 222" role="img" aria-labelledby="fu-kernels-t fu-kernels-d">
+<title id="fu-kernels-t">Separate kernels replayed by a CUDA graph, schematic</title><desc id="fu-kernels-d">Seven kernels run one after another across all streaming multiprocessors. Each kernel ends when its slowest SM finishes; the next starts after a short boundary. Intermediates are written to GPU memory and read back at every boundary; weights are read and written as well.</desc>
+<text x="0" y="51" font-size="11" class="t-mute">SM 0</text>
+<text x="0" y="73" font-size="11" class="t-mute">SM 1</text>
+<text x="0" y="95" font-size="11" class="t-mute">SM 2</text>
+<text x="0" y="117" font-size="11" class="t-mute">SM 3</text>
+<text x="0" y="151" font-size="11" class="t-mute">SM 131</text>
+<text x="0" y="133" font-size="11" class="t-faint">⋮</text>
+<text x="0" y="204" font-size="11" class="t-mute">Memory</text>
+<rect class="box-wash" x="92" y="193" width="660" height="14"/>
+<rect class="k arith" x="96" y="40" width="52.0" height="14"/>
+<rect class="k arith" x="96" y="62" width="42.6" height="14"/>
+<rect class="wait" x="138.6" y="62" width="9.4" height="14"/>
+<rect class="k arith" x="96" y="84" width="48.4" height="14"/>
+<rect class="wait" x="144.4" y="84" width="3.6" height="14"/>
+<rect class="k arith" x="96" y="106" width="36.4" height="14"/>
+<rect class="wait" x="132.4" y="106" width="15.6" height="14"/>
+<rect class="k arith" x="96" y="140" width="45.8" height="14"/>
+<rect class="wait" x="141.8" y="140" width="6.2" height="14"/>
+<rect class="kframe" x="94" y="34" width="56" height="126" fill="none" style="stroke:var(--rule-strong)"/>
+<g class="mem inter"><line class="ln-cost" x1="101" y1="193" x2="101" y2="166"/><polygon class="fill-cost" points="101,160 97.5,166 104.5,166"/></g>
+<g class="mem inter"><line class="ln-cost" x1="143" y1="160" x2="143" y2="187"/><polygon class="fill-cost" points="143,193 139.5,187 146.5,187"/></g>
+<g class="mem weights"><line class="ln-cost" x1="112" y1="193" x2="112" y2="166"/><polygon class="fill-cost" points="112,160 108.5,166 115.5,166"/></g>
+<rect class="k arith" x="170" y="40" width="52.0" height="14"/>
+<rect class="k arith" x="170" y="62" width="42.6" height="14"/>
+<rect class="wait" x="212.6" y="62" width="9.4" height="14"/>
+<rect class="k arith" x="170" y="84" width="48.4" height="14"/>
+<rect class="wait" x="218.4" y="84" width="3.6" height="14"/>
+<rect class="k arith" x="170" y="106" width="36.4" height="14"/>
+<rect class="wait" x="206.4" y="106" width="15.6" height="14"/>
+<rect class="k arith" x="170" y="140" width="45.8" height="14"/>
+<rect class="wait" x="215.8" y="140" width="6.2" height="14"/>
+<rect class="kframe" x="168" y="34" width="56" height="126" fill="none" style="stroke:var(--rule-strong)"/>
+<g class="mem inter"><line class="ln-cost" x1="175" y1="193" x2="175" y2="166"/><polygon class="fill-cost" points="175,160 171.5,166 178.5,166"/></g>
+<g class="mem inter"><line class="ln-cost" x1="217" y1="160" x2="217" y2="187"/><polygon class="fill-cost" points="217,193 213.5,187 220.5,187"/></g>
+<g class="mem weights"><line class="ln-cost" x1="186" y1="193" x2="186" y2="166"/><polygon class="fill-cost" points="186,160 182.5,166 189.5,166"/></g>
+<rect class="k arith" x="244" y="40" width="68.0" height="14"/>
+<rect class="k arith" x="244" y="62" width="55.8" height="14"/>
+<rect class="wait" x="299.8" y="62" width="12.2" height="14"/>
+<rect class="k arith" x="244" y="84" width="63.2" height="14"/>
+<rect class="wait" x="307.2" y="84" width="4.8" height="14"/>
+<rect class="k arith" x="244" y="106" width="47.6" height="14"/>
+<rect class="wait" x="291.6" y="106" width="20.4" height="14"/>
+<rect class="k arith" x="244" y="140" width="59.8" height="14"/>
+<rect class="wait" x="303.8" y="140" width="8.2" height="14"/>
+<rect class="kframe" x="242" y="34" width="72" height="126" fill="none" style="stroke:var(--rule-strong)"/>
+<g class="mem inter"><line class="ln-cost" x1="249" y1="193" x2="249" y2="166"/><polygon class="fill-cost" points="249,160 245.5,166 252.5,166"/></g>
+<g class="mem inter"><line class="ln-cost" x1="307" y1="160" x2="307" y2="187"/><polygon class="fill-cost" points="307,193 303.5,187 310.5,187"/></g>
+<rect class="k arith" x="334" y="40" width="52.0" height="14"/>
+<rect class="k arith" x="334" y="62" width="42.6" height="14"/>
+<rect class="wait" x="376.6" y="62" width="9.4" height="14"/>
+<rect class="k arith" x="334" y="84" width="48.4" height="14"/>
+<rect class="wait" x="382.4" y="84" width="3.6" height="14"/>
+<rect class="k arith" x="334" y="106" width="36.4" height="14"/>
+<rect class="wait" x="370.4" y="106" width="15.6" height="14"/>
+<rect class="k arith" x="334" y="140" width="45.8" height="14"/>
+<rect class="wait" x="379.8" y="140" width="6.2" height="14"/>
+<rect class="kframe" x="332" y="34" width="56" height="126" fill="none" style="stroke:var(--rule-strong)"/>
+<g class="mem inter"><line class="ln-cost" x1="339" y1="193" x2="339" y2="166"/><polygon class="fill-cost" points="339,160 335.5,166 342.5,166"/></g>
+<g class="mem inter"><line class="ln-cost" x1="381" y1="160" x2="381" y2="187"/><polygon class="fill-cost" points="381,193 377.5,187 384.5,187"/></g>
+<g class="mem weights"><line class="ln-cost" x1="350" y1="193" x2="350" y2="166"/><polygon class="fill-cost" points="350,160 346.5,166 353.5,166"/></g>
+<rect class="k arith" x="408" y="40" width="52.0" height="14"/>
+<rect class="k arith" x="408" y="62" width="42.6" height="14"/>
+<rect class="wait" x="450.6" y="62" width="9.4" height="14"/>
+<rect class="k arith" x="408" y="84" width="48.4" height="14"/>
+<rect class="wait" x="456.4" y="84" width="3.6" height="14"/>
+<rect class="k arith" x="408" y="106" width="36.4" height="14"/>
+<rect class="wait" x="444.4" y="106" width="15.6" height="14"/>
+<rect class="k arith" x="408" y="140" width="45.8" height="14"/>
+<rect class="wait" x="453.8" y="140" width="6.2" height="14"/>
+<rect class="kframe" x="406" y="34" width="56" height="126" fill="none" style="stroke:var(--rule-strong)"/>
+<g class="mem inter"><line class="ln-cost" x1="413" y1="193" x2="413" y2="166"/><polygon class="fill-cost" points="413,160 409.5,166 416.5,166"/></g>
+<g class="mem inter"><line class="ln-cost" x1="455" y1="160" x2="455" y2="187"/><polygon class="fill-cost" points="455,193 451.5,187 458.5,187"/></g>
+<g class="mem weights"><line class="ln-cost" x1="424" y1="193" x2="424" y2="166"/><polygon class="fill-cost" points="424,160 420.5,166 427.5,166"/></g>
+<rect class="k arith" x="482" y="40" width="52.0" height="14"/>
+<rect class="k arith" x="482" y="62" width="42.6" height="14"/>
+<rect class="wait" x="524.6" y="62" width="9.4" height="14"/>
+<rect class="k arith" x="482" y="84" width="48.4" height="14"/>
+<rect class="wait" x="530.4" y="84" width="3.6" height="14"/>
+<rect class="k arith" x="482" y="106" width="36.4" height="14"/>
+<rect class="wait" x="518.4" y="106" width="15.6" height="14"/>
+<rect class="k arith" x="482" y="140" width="45.8" height="14"/>
+<rect class="wait" x="527.8" y="140" width="6.2" height="14"/>
+<rect class="kframe" x="480" y="34" width="56" height="126" fill="none" style="stroke:var(--rule-strong)"/>
+<g class="mem inter"><line class="ln-cost" x1="487" y1="193" x2="487" y2="166"/><polygon class="fill-cost" points="487,160 483.5,166 490.5,166"/></g>
+<g class="mem inter"><line class="ln-cost" x1="529" y1="160" x2="529" y2="187"/><polygon class="fill-cost" points="529,193 525.5,187 532.5,187"/></g>
+<g class="mem weights"><line class="ln-cost" x1="498" y1="193" x2="498" y2="166"/><polygon class="fill-cost" points="498,160 494.5,166 501.5,166"/></g>
+<rect class="k arith" x="556" y="40" width="60.0" height="14"/>
+<rect class="k arith" x="556" y="62" width="49.2" height="14"/>
+<rect class="wait" x="605.2" y="62" width="10.8" height="14"/>
+<rect class="k arith" x="556" y="84" width="55.8" height="14"/>
+<rect class="wait" x="611.8" y="84" width="4.2" height="14"/>
+<rect class="k arith" x="556" y="106" width="42.0" height="14"/>
+<rect class="wait" x="598.0" y="106" width="18.0" height="14"/>
+<rect class="k arith" x="556" y="140" width="52.8" height="14"/>
+<rect class="wait" x="608.8" y="140" width="7.2" height="14"/>
+<rect class="kframe" x="554" y="34" width="64" height="126" fill="none" style="stroke:var(--rule-strong)"/>
+<g class="mem inter"><line class="ln-cost" x1="561" y1="193" x2="561" y2="166"/><polygon class="fill-cost" points="561,160 557.5,166 564.5,166"/></g>
+<g class="mem inter"><line class="ln-cost" x1="611" y1="160" x2="611" y2="187"/><polygon class="fill-cost" points="611,193 607.5,187 614.5,187"/></g>
+<g class="mem weights"><line class="ln-cost" x1="572" y1="193" x2="572" y2="166"/><polygon class="fill-cost" points="572,160 568.5,166 575.5,166"/></g>
+<g class="mem weights"><line class="ln-cost" x1="600" y1="160" x2="600" y2="187"/><polygon class="fill-cost" points="600,193 596.5,187 603.5,187"/></g>
+<rect class="bnd" x="152" y="34" width="10" height="126"/>
+<rect class="bnd" x="226" y="34" width="10" height="126"/>
+<rect class="bnd" x="316" y="34" width="10" height="126"/>
+<rect class="bnd" x="390" y="34" width="10" height="126"/>
+<rect class="bnd" x="464" y="34" width="10" height="126"/>
+<rect class="bnd" x="538" y="34" width="10" height="126"/>
+<text x="96" y="26" font-size="10" class="t-mute">7 kernels · 6 boundaries · every intermediate through GPU memory</text>
+</svg></div>
+        </div>
+        <div data-group="fuse" id="fuse-mega">
+          <h3 class="panel-head no-js-only">One generated megakernel</h3>
+          <div class="scroll-x"><svg viewBox="0 0 760 222" role="img" aria-labelledby="fu-mega-t fu-mega-d">
+<title id="fu-mega-t">One generated megakernel, schematic</title><desc id="fu-mega-d">One cooperative kernel occupies every SM for the whole update. Work is divided into four phases separated by grid-wide barriers, where every SM waits for the slowest. Fused steps inside a phase keep intermediates in registers or shared memory; values needed across phases still go through an arena in GPU memory; weights are still read and written in GPU memory. The arithmetic is the same.</desc>
+<text x="0" y="51" font-size="11" class="t-mute">SM 0</text>
+<text x="0" y="73" font-size="11" class="t-mute">SM 1</text>
+<text x="0" y="95" font-size="11" class="t-mute">SM 2</text>
+<text x="0" y="117" font-size="11" class="t-mute">SM 3</text>
+<text x="0" y="151" font-size="11" class="t-mute">SM 131</text>
+<text x="0" y="133" font-size="11" class="t-faint">⋮</text>
+<text x="0" y="204" font-size="11" class="t-mute">Memory</text>
+<rect class="box-wash" x="92" y="193" width="660" height="14"/>
+<rect class="k arith" x="96" y="40" width="105.0" height="14"/>
+<rect class="k arith" x="96" y="62" width="86.1" height="14"/>
+<rect class="wait" x="182.1" y="62" width="18.9" height="14"/>
+<rect class="k arith" x="96" y="84" width="97.7" height="14"/>
+<rect class="wait" x="193.7" y="84" width="7.3" height="14"/>
+<rect class="k arith" x="96" y="106" width="73.5" height="14"/>
+<rect class="wait" x="169.5" y="106" width="31.5" height="14"/>
+<rect class="k arith" x="96" y="140" width="92.4" height="14"/>
+<rect class="wait" x="188.4" y="140" width="12.6" height="14"/>
+<text x="96" y="32" font-size="10" class="t-mute">phase 1</text>
+<g class="mem weights"><line class="ln-cost" x1="102" y1="193" x2="102" y2="166"/><polygon class="fill-cost" points="102,160 98.5,166 105.5,166"/></g>
+<g class="mem inter"><line class="ln-cost" x1="213" y1="193" x2="213" y2="166"/><polygon class="fill-cost" points="213,160 209.5,166 216.5,166"/></g>
+<g class="mem inter"><line class="ln-cost" x1="197" y1="160" x2="197" y2="187"/><polygon class="fill-cost" points="197,193 193.5,187 200.5,187"/></g>
+<rect class="k arith" x="213" y="40" width="138.0" height="14"/>
+<rect class="k arith" x="213" y="62" width="113.2" height="14"/>
+<rect class="wait" x="326.2" y="62" width="24.8" height="14"/>
+<rect class="k arith" x="213" y="84" width="128.3" height="14"/>
+<rect class="wait" x="341.3" y="84" width="9.7" height="14"/>
+<rect class="k arith" x="213" y="106" width="96.6" height="14"/>
+<rect class="wait" x="309.6" y="106" width="41.4" height="14"/>
+<rect class="k arith" x="213" y="140" width="121.4" height="14"/>
+<rect class="wait" x="334.4" y="140" width="16.6" height="14"/>
+<text x="213" y="32" font-size="10" class="t-mute">phase 2</text>
+<g class="mem weights"><line class="ln-cost" x1="219" y1="193" x2="219" y2="166"/><polygon class="fill-cost" points="219,160 215.5,166 222.5,166"/></g>
+<g class="mem inter"><line class="ln-cost" x1="363" y1="193" x2="363" y2="166"/><polygon class="fill-cost" points="363,160 359.5,166 366.5,166"/></g>
+<g class="mem inter"><line class="ln-cost" x1="347" y1="160" x2="347" y2="187"/><polygon class="fill-cost" points="347,193 343.5,187 350.5,187"/></g>
+<rect class="k arith" x="363" y="40" width="153.0" height="14"/>
+<rect class="k arith" x="363" y="62" width="125.5" height="14"/>
+<rect class="wait" x="488.5" y="62" width="27.5" height="14"/>
+<rect class="k arith" x="363" y="84" width="142.3" height="14"/>
+<rect class="wait" x="505.3" y="84" width="10.7" height="14"/>
+<rect class="k arith" x="363" y="106" width="107.1" height="14"/>
+<rect class="wait" x="470.1" y="106" width="45.9" height="14"/>
+<rect class="k arith" x="363" y="140" width="134.6" height="14"/>
+<rect class="wait" x="497.6" y="140" width="18.4" height="14"/>
+<text x="363" y="32" font-size="10" class="t-mute">phase 3</text>
+<g class="mem weights"><line class="ln-cost" x1="369" y1="193" x2="369" y2="166"/><polygon class="fill-cost" points="369,160 365.5,166 372.5,166"/></g>
+<g class="mem inter"><line class="ln-cost" x1="528" y1="193" x2="528" y2="166"/><polygon class="fill-cost" points="528,160 524.5,166 531.5,166"/></g>
+<g class="mem inter"><line class="ln-cost" x1="512" y1="160" x2="512" y2="187"/><polygon class="fill-cost" points="512,193 508.5,187 515.5,187"/></g>
+<rect class="k arith" x="528" y="40" width="60.0" height="14"/>
+<rect class="k arith" x="528" y="62" width="49.2" height="14"/>
+<rect class="wait" x="577.2" y="62" width="10.8" height="14"/>
+<rect class="k arith" x="528" y="84" width="55.8" height="14"/>
+<rect class="wait" x="583.8" y="84" width="4.2" height="14"/>
+<rect class="k arith" x="528" y="106" width="42.0" height="14"/>
+<rect class="wait" x="570.0" y="106" width="18.0" height="14"/>
+<rect class="k arith" x="528" y="140" width="52.8" height="14"/>
+<rect class="wait" x="580.8" y="140" width="7.2" height="14"/>
+<text x="528" y="32" font-size="10" class="t-mute">phase 4</text>
+<g class="mem weights"><line class="ln-cost" x1="534" y1="193" x2="534" y2="166"/><polygon class="fill-cost" points="534,160 530.5,166 537.5,166"/></g>
+<g class="mem weights"><line class="ln-cost" x1="582" y1="160" x2="582" y2="187"/><polygon class="fill-cost" points="582,193 578.5,187 585.5,187"/></g>
+<line class="barrier" x1="207" y1="36" x2="207" y2="158"/>
+<line class="barrier" x1="357" y1="36" x2="357" y2="158"/>
+<line class="barrier" x1="522" y1="36" x2="522" y2="158"/>
+<rect x="92" y="36" width="500" height="122" fill="none" style="stroke:var(--ink)" stroke-width="1.2"/>
+<text x="600" y="51" font-size="10.5" class="t-mute">one launch</text>
+<text x="600" y="73" font-size="10.5" class="t-cost">3 grid barriers</text>
+<text x="600" y="95" font-size="10.5" class="t-mute">shaded = waiting</text>
+<text x="600" y="117" font-size="10.5" class="t-mute">for slowest SM</text>
+</svg></div>
+        </div>
+        <p class="status-line js-only" id="fuse-explain" aria-live="polite"></p>
+        <figcaption id="fig-fuse-cap">Five of 132 SMs shown. Blue bars show arithmetic. Orange shading marks kernel boundaries and time spent waiting at barriers. Orange arrows show intermediate traffic. Grey arrows show weight and optimizer-state traffic. Not to scale.</figcaption>
+      </figure>
+
+      <div class="table-wrap">
+        <table class="stack">
+          <caption>What changes and what stays when the same update becomes one generated kernel</caption>
+          <thead><tr><th scope="col">Cost</th><th scope="col">Separate kernels (CUDA graph)</th><th scope="col">One megakernel</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Host launch</th><td data-label="Separate kernels">One graph replay; each kernel still starts and drains</td><td data-label="Megakernel">One launch, plus small fills and copies</td></tr>
+            <tr><th scope="row">Dependencies</th><td data-label="Separate kernels">A kernel boundary between dependent steps</td><td data-label="Megakernel">A grid-wide barrier where results cross SMs; every SM waits for the slowest</td></tr>
+            <tr><th scope="row">Intermediates</th><td data-label="Separate kernels">Written to GPU memory, read back by the next kernel</td><td data-label="Megakernel">Fused steps keep them on chip; values crossing phases still use the arena in GPU memory</td></tr>
+            <tr><th scope="row">Weights and optimizer state</th><td data-label="Separate kernels">Read and written in GPU memory</td><td data-label="Megakernel">Also read and written in GPU memory</td></tr>
+            <tr><th scope="row">Arithmetic</th><td data-label="Separate kernels">The full update</td><td data-label="Megakernel">The same update, under the stated numerical policy</td></tr>
+            <tr><th scope="row">Operation quality</th><td data-label="Separate kernels">Vendor libraries such as cuBLAS and FlashAttention</td><td data-label="Megakernel">Latch's own operation bodies, which can be slower</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="prose">
+        <h3>The weights do not fit on chip</h3>
+        <p>A megakernel can keep intermediate values in registers and shared memory. TinyMoE’s weights and AdamW state must stay in GPU memory. Together they occupy about twenty times the H100’s total on-chip storage. Each update must read and write them.</p>
+      </div>
+      <figure class="time-chart" style="--chart-steps:5" aria-labelledby="fig-mem-cap">
+<div class="time-row" data-values="2.4" data-scale="2.5">
+<div class="time-label"><span>TinyMoE weights + two Adam moments</span><span>2.40 GB</span></div>
+<div class="time-track" aria-hidden="true"><span class="time-fill" style="width:96.0000%"></span>
+</div></div>
+<div class="time-row" data-values="0.12" data-scale="2.5">
+<div class="time-label"><span>H100 registers + L1/shared + L2</span><span>0.12 GB</span></div>
+<div class="time-track" aria-hidden="true"><span class="time-fill" style="width:4.8000%"></span>
+</div></div>
+<div class="time-axis" aria-hidden="true"><span>0</span><span>0.5</span><span>1</span><span>1.5</span><span>2</span><span>2.5</span></div>
+<figcaption id="fig-mem-cap">199,837,056 parameters × 4 bytes × 3 buffers = 2.40 GB. This excludes gradients and activations. On-chip storage: 132 SMs × (256 KB registers + 256 KB L1/shared memory) + 50 MB L2 ≈ 0.12 GB. These capacities come from NVIDIA’s Hopper Tuning Guide.</figcaption>
+      </figure>
+
+      <div class="prose">
+        <h3>Operation size matters</h3>
+        <p>Removing kernel boundaries helps most when each operation is small. Large matrix products depend more on the quality of the matrix and attention implementations. Grid barriers can also waste time: fast SMs must wait for slower ones.</p>
+      </div>
+    </section>
+
+    <!-- 5 ─────────────────────────────────────────────────────────── -->
+    <section id="workloads" class="chapter" aria-labelledby="wl-h">
+      <div class="prose">
+
+        <h2 id="wl-h">Three kinds of workload</h2>
+        <p>These three workloads illustrate where megakernels help and where they need more work.</p>
+      </div>
+
+      <div role="tablist" aria-label="Workload shapes" id="wl-tabs">
+        <button type="button" role="tab" id="wt-1" aria-controls="wp-1" aria-selected="true">Large regular matrices<span class="sub">big batches, long contexts</span></button>
+        <button type="button" role="tab" id="wt-2" aria-controls="wp-2" aria-selected="false" tabindex="-1">Many small routed experts<span class="sub">token-choice mixture of experts</span></button>
+        <button type="button" role="tab" id="wt-3" aria-controls="wp-3" aria-selected="false" tabindex="-1">Sequential predict-and-learn<span class="sub">updates inside the sequence</span></button>
+      </div>
+
+      <div class="panel" role="tabpanel" id="wp-1" aria-labelledby="wt-1" tabindex="0">
+        <h3 class="panel-head">Large regular matrices</h3>
+        <div class="split">
+          <figure class="fig" style="margin:0">
+            <svg viewBox="0 0 360 150" role="img" aria-label="Schematic: a few large matrix products, each keeping every SM busy for a long time"><title>Large regular matrix work, schematic</title>
+<rect class="k-soft" x="4" y="24" width="120" height="96"/>
+<line x1="4" y1="40" x2="124" y2="40" style="stroke:var(--paper)" stroke-width="1"/>
+<line x1="4" y1="56" x2="124" y2="56" style="stroke:var(--paper)" stroke-width="1"/>
+<line x1="4" y1="72" x2="124" y2="72" style="stroke:var(--paper)" stroke-width="1"/>
+<line x1="4" y1="88" x2="124" y2="88" style="stroke:var(--paper)" stroke-width="1"/>
+<line x1="4" y1="104" x2="124" y2="104" style="stroke:var(--paper)" stroke-width="1"/>
+<text x="4" y="16" font-size="10.5" class="t-mute">large matmul</text>
+<rect class="k-soft" x="132" y="24" width="84" height="96"/>
+<line x1="132" y1="40" x2="216" y2="40" style="stroke:var(--paper)" stroke-width="1"/>
+<line x1="132" y1="56" x2="216" y2="56" style="stroke:var(--paper)" stroke-width="1"/>
+<line x1="132" y1="72" x2="216" y2="72" style="stroke:var(--paper)" stroke-width="1"/>
+<line x1="132" y1="88" x2="216" y2="88" style="stroke:var(--paper)" stroke-width="1"/>
+<line x1="132" y1="104" x2="216" y2="104" style="stroke:var(--paper)" stroke-width="1"/>
+<text x="132" y="16" font-size="10.5" class="t-mute">attention</text>
+<rect class="k-soft" x="224" y="24" width="120" height="96"/>
+<line x1="224" y1="40" x2="344" y2="40" style="stroke:var(--paper)" stroke-width="1"/>
+<line x1="224" y1="56" x2="344" y2="56" style="stroke:var(--paper)" stroke-width="1"/>
+<line x1="224" y1="72" x2="344" y2="72" style="stroke:var(--paper)" stroke-width="1"/>
+<line x1="224" y1="88" x2="344" y2="88" style="stroke:var(--paper)" stroke-width="1"/>
+<line x1="224" y1="104" x2="344" y2="104" style="stroke:var(--paper)" stroke-width="1"/>
+<text x="224" y="16" font-size="10.5" class="t-mute">large matmul</text>
+<text x="4" y="140" font-size="10.5" class="t-mute">each kernel keeps all SMs busy for a long time</text></svg>
+            <figcaption>Big batches and long contexts make each operation large.</figcaption>
+          </figure>
+          <div class="facts">
+
+            <p>Each large kernel can keep the SMs busy for a long time. Launch and boundary costs account for a small share of the update. Vendor matrix and attention libraries are highly tuned for this work.</p>
+
+            <p>Fusion can combine the elementwise operations between large matrix products. It can also avoid some writes and reads of intermediate values. The potential saving is small relative to the matrix work.</p>
+
+            <p>Latch’s matrix and attention implementations need to match cuBLAS and FlashAttention. Frequent barriers between small operations add further cost.</p>
+
+            <p>TinyMoE at its published batch (8 × 1024 tokens per microbatch): 977.2 ms versus 1,088.4 ms compiled, 1.11× faster <span class="tag hist">Historical</span>. Granite 3.0-1B-A400M at 4,096 tokens: 161.45 ms versus 97.89 ms, <strong>1.65× slower</strong> <span class="tag hist">Historical · not qualified</span>. See also <a href="methodology.html#case-e2ttt">E2-TTT outer training</a>, about 3× slower <span class="tag research">Research branch</span>.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" role="tabpanel" id="wp-2" aria-labelledby="wt-2" tabindex="0">
+        <h3 class="panel-head">Many small routed experts</h3>
+        <div class="split">
+          <figure class="fig" style="margin:0">
+            <svg viewBox="0 0 360 150" role="img" aria-label="Schematic: tokens routed to experts; each expert receives a different, changing number of tokens"><title>Many small routed experts, schematic</title>
+<line class="ln" x1="18" y1="22" x2="125.0" y2="118" opacity="0.8"/>
+<line class="ln" x1="18" y1="22" x2="197.5" y2="118" opacity="0.8"/>
+<line class="ln" x1="18" y1="36" x2="154.0" y2="118" opacity="0.8"/>
+<line class="ln" x1="18" y1="36" x2="313.5" y2="118" opacity="0.8"/>
+<line class="ln" x1="18" y1="50" x2="125.0" y2="118" opacity="0.8"/>
+<line class="ln" x1="18" y1="50" x2="241.0" y2="118" opacity="0.8"/>
+<line class="ln" x1="18" y1="64" x2="197.5" y2="118" opacity="0.8"/>
+<line class="ln" x1="18" y1="64" x2="125.0" y2="118" opacity="0.8"/>
+<line class="ln" x1="18" y1="78" x2="313.5" y2="118" opacity="0.8"/>
+<line class="ln" x1="18" y1="78" x2="154.0" y2="118" opacity="0.8"/>
+<line class="ln" x1="18" y1="92" x2="212.0" y2="118" opacity="0.8"/>
+<line class="ln" x1="18" y1="92" x2="270.0" y2="118" opacity="0.8"/>
+<line class="ln" x1="18" y1="106" x2="125.0" y2="118" opacity="0.8"/>
+<line class="ln" x1="18" y1="106" x2="241.0" y2="118" opacity="0.8"/>
+<line class="ln" x1="18" y1="120" x2="197.5" y2="118" opacity="0.8"/>
+<line class="ln" x1="18" y1="120" x2="313.5" y2="118" opacity="0.8"/>
+<circle cx="14" cy="22" r="3.5" class="fill-ink"/>
+<circle cx="14" cy="36" r="3.5" class="fill-ink"/>
+<circle cx="14" cy="50" r="3.5" class="fill-ink"/>
+<circle cx="14" cy="64" r="3.5" class="fill-ink"/>
+<circle cx="14" cy="78" r="3.5" class="fill-ink"/>
+<circle cx="14" cy="92" r="3.5" class="fill-ink"/>
+<circle cx="14" cy="106" r="3.5" class="fill-ink"/>
+<circle cx="14" cy="120" r="3.5" class="fill-ink"/>
+<rect class="fill-wash" x="120.0" y="64" width="10" height="54"/>
+<rect class="k" x="120.0" y="64" width="10" height="54"/>
+<rect class="fill-wash" x="134.5" y="64" width="10" height="54"/>
+<rect class="k" x="134.5" y="100" width="10" height="18"/>
+<rect class="fill-wash" x="149.0" y="64" width="10" height="54"/>
+<rect class="k" x="149.0" y="82" width="10" height="36"/>
+<rect class="fill-wash" x="163.5" y="64" width="10" height="54"/>
+<rect class="k" x="163.5" y="109" width="10" height="9"/>
+<rect class="fill-wash" x="178.0" y="64" width="10" height="54"/>
+<rect class="fill-wash" x="192.5" y="64" width="10" height="54"/>
+<rect class="k" x="192.5" y="73" width="10" height="45"/>
+<rect class="fill-wash" x="207.0" y="64" width="10" height="54"/>
+<rect class="k" x="207.0" y="91" width="10" height="27"/>
+<rect class="fill-wash" x="221.5" y="64" width="10" height="54"/>
+<rect class="k" x="221.5" y="100" width="10" height="18"/>
+<rect class="fill-wash" x="236.0" y="64" width="10" height="54"/>
+<rect class="k" x="236.0" y="82" width="10" height="36"/>
+<rect class="fill-wash" x="250.5" y="64" width="10" height="54"/>
+<rect class="k" x="250.5" y="109" width="10" height="9"/>
+<rect class="fill-wash" x="265.0" y="64" width="10" height="54"/>
+<rect class="k" x="265.0" y="91" width="10" height="27"/>
+<rect class="fill-wash" x="279.5" y="64" width="10" height="54"/>
+<rect class="fill-wash" x="294.0" y="64" width="10" height="54"/>
+<rect class="k" x="294.0" y="100" width="10" height="18"/>
+<rect class="fill-wash" x="308.5" y="64" width="10" height="54"/>
+<rect class="k" x="308.5" y="73" width="10" height="45"/>
+<rect class="fill-wash" x="323.0" y="64" width="10" height="54"/>
+<rect class="k" x="323.0" y="109" width="10" height="9"/>
+<rect class="fill-wash" x="337.5" y="64" width="10" height="54"/>
+<rect class="k" x="337.5" y="91" width="10" height="27"/>
+<text x="4" y="12" font-size="10.5" class="t-mute">tokens</text>
+<text x="120" y="56" font-size="10.5" class="t-mute">16 experts: ragged, changing sizes</text>
+<text x="4" y="140" font-size="10.5" class="t-mute">top-2 routing: each token picks two experts every update</text></svg>
+            <figcaption>The token count differs between experts and changes at every update.</figcaption>
+          </figure>
+          <div class="facts">
+
+            <p>Conventional execution uses many small kernels to route tokens and compute expert outputs and gradients. Kernel boundaries can account for much of the time at small batches. Variable expert sizes also complicate CUDA-graph capture. The standard TinyMoE control uses compiled layers. The looped model has a separate control that captures forward and backward in a CUDA graph.</p>
+
+            <p>Latch combines routing, expert products and gradient scatter in one program. These operations no longer need separate launches or host calls.</p>
+
+            <p>Latch’s grouped products are slower than cuBLAS and CUTLASS grouped GEMMs. Deterministic gradient scatter is expensive when each token visits many experts. The overall advantage shrinks as batches grow.</p>
+
+            <p>TinyMoE-200M complete training update with the current compiler: 2 × 1024 tokens, 13.63–13.77 ms versus 37.50–38.42 ms for the conventional trunk-graph control, <strong>about 2.75× faster</strong>; 32 × 1024 tokens, 68.27–68.61 versus 114.02–114.77 ms, <strong>about 1.67× faster</strong>. These are same-session clocks at fresh, mid and late states, repeated on two H100s. <a href="methodology.html#execution">Scope and numerical checks</a>.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" role="tabpanel" id="wp-3" aria-labelledby="wt-3" tabindex="0">
+        <h3 class="panel-head">Sequential predict-and-learn</h3>
+        <div class="split">
+          <figure class="fig" style="margin:0">
+            <svg viewBox="0 0 360 150" role="img" aria-label="Schematic: a long chain of tiny predict, score and update steps; each depends on the previous one"><title>Sequential predict-and-learn, schematic</title>
+<rect class="k" x="4" y="60" width="8" height="22"/>
+<rect class="k-soft" x="13" y="60" width="8" height="22"/>
+<rect class="fill-cost" x="22" y="60" width="8" height="22"/>
+<line class="ln-ink" x1="32" y1="71" x2="44" y2="71"/><polygon class="fill-ink" points="48,71 42,67.5 42,74.5"/>
+<text x="4" y="98" font-size="10" class="t-faint t-mono">t=1</text>
+<rect class="k" x="50" y="60" width="8" height="22"/>
+<rect class="k-soft" x="59" y="60" width="8" height="22"/>
+<rect class="fill-cost" x="68" y="60" width="8" height="22"/>
+<line class="ln-ink" x1="78" y1="71" x2="90" y2="71"/><polygon class="fill-ink" points="94,71 88,67.5 88,74.5"/>
+<text x="50" y="98" font-size="10" class="t-faint t-mono">t=2</text>
+<rect class="k" x="96" y="60" width="8" height="22"/>
+<rect class="k-soft" x="105" y="60" width="8" height="22"/>
+<rect class="fill-cost" x="114" y="60" width="8" height="22"/>
+<line class="ln-ink" x1="124" y1="71" x2="136" y2="71"/><polygon class="fill-ink" points="140,71 134,67.5 134,74.5"/>
+<text x="96" y="98" font-size="10" class="t-faint t-mono">t=3</text>
+<rect class="k" x="142" y="60" width="8" height="22"/>
+<rect class="k-soft" x="151" y="60" width="8" height="22"/>
+<rect class="fill-cost" x="160" y="60" width="8" height="22"/>
+<line class="ln-ink" x1="170" y1="71" x2="182" y2="71"/><polygon class="fill-ink" points="186,71 180,67.5 180,74.5"/>
+<text x="142" y="98" font-size="10" class="t-faint t-mono">t=4</text>
+<rect class="k" x="188" y="60" width="8" height="22"/>
+<rect class="k-soft" x="197" y="60" width="8" height="22"/>
+<rect class="fill-cost" x="206" y="60" width="8" height="22"/>
+<line class="ln-ink" x1="216" y1="71" x2="228" y2="71"/><polygon class="fill-ink" points="232,71 226,67.5 226,74.5"/>
+<text x="188" y="98" font-size="10" class="t-faint t-mono">t=5</text>
+<rect class="k" x="234" y="60" width="8" height="22"/>
+<rect class="k-soft" x="243" y="60" width="8" height="22"/>
+<rect class="fill-cost" x="252" y="60" width="8" height="22"/>
+<line class="ln-ink" x1="262" y1="71" x2="274" y2="71"/><polygon class="fill-ink" points="278,71 272,67.5 272,74.5"/>
+<text x="234" y="98" font-size="10" class="t-faint t-mono">t=6</text>
+<rect class="k" x="280" y="60" width="8" height="22"/>
+<rect class="k-soft" x="289" y="60" width="8" height="22"/>
+<rect class="fill-cost" x="298" y="60" width="8" height="22"/>
+<text x="280" y="98" font-size="10" class="t-faint t-mono">t=7</text>
+<text x="4" y="34" font-size="10.5" class="t-mute">predict · score · update, then the next token</text>
+<rect class="k" x="4" y="112" width="8" height="8"/><text x="16" y="120" font-size="10" class="t-mute">predict</text>
+<rect class="k-soft" x="70" y="112" width="8" height="8"/><text x="82" y="120" font-size="10" class="t-mute">score</text>
+<rect class="fill-cost" x="128" y="112" width="8" height="8"/><text x="140" y="120" font-size="10" class="t-mute">update fast state</text>
+<text x="4" y="142" font-size="10.5" class="t-mute">each step is tiny and must wait for the one before it</text></svg>
+            <figcaption>Test-time learning updates a small "fast" state after every token.</figcaption>
+          </figure>
+          <div class="facts">
+
+            <p>These learning steps must run in order. The conventional GradLev implementation uses about eighteen kernels per step even with CUDA graphs. The changing state passes through GPU memory between them.</p>
+
+            <p>A small changing state can be divided across SMs and kept in shared memory for the whole sequence. All learning steps then run in one launch.</p>
+
+            <p>Each step still needs grid barriers. The output head is too large to stay on chip and must be read from GPU memory at every token. Larger adapted blocks also exceed on-chip capacity.</p>
+
+            <p>GradLev on GPT-2 small, a complete block of 1,024 adaptation steps: 54.0 ms versus 189.5 ms for the strongest CUDA-graph control, <strong>3.5× faster</strong> <span class="tag hist">Measured on 0.9.0rc1</span>; runnable example included. Online adaptation of TinyMoE's last two expert blocks: <strong>1.26–1.67× slower</strong> than a compiled, CUDA-graph-replayed control <span class="tag research">Research branch</span>.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6 ─────────────────────────────────────────────────────────── -->
+    <section id="results" class="chapter" aria-labelledby="ev-h">
+      <div class="prose">
+
+        <h2 id="ev-h">Where the measurements are</h2>
+        <p>The <a href="methodology.html">results page</a> covers complete-update timing and training to a target quality. <a href="https://github.com/DeepakSingh98/latch">Get started with the included examples</a>.</p>
+        <p class="moved" aria-hidden="true"><span id="case-tinymoe"></span><span id="case-smelt"></span><span id="case-gradlev"></span><span id="case-e2ttt"></span><span id="headline-scope"></span><span id="run-it"></span><span id="what-to-change"></span></p>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>Latch · Research preview</span>
+    <a data-repo-link hidden aria-disabled="true" href="https://github.com/DeepakSingh98/latch">Repository</a>
+  </div>
+</footer>
+</body>
+</html>

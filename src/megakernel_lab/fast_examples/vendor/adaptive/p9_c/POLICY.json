@@ -1,0 +1,13 @@
+{
+ "schema": "p9-c-policy-v1",
+ "written": "2026-10-05, before any P9-C build, GPU execution or validation",
+ "owner": "P9-C (Opus)",
+ "base": "P8-C closure aaa159e3f354f05f62b632755f6d8e79fd4e78a5 (codex/p8-c); donor checkout /private/tmp/megakernel-p8-c",
+ "workload": "unchanged from p8_c/POLICY.json: adaptive-memory m8k (examples/adaptive_memory.py RECIPES['m8k']), 4,787,456 parameters, 2 x 8192 bytes per update, 64 causal score-before-write chunks, exact second-order outer derivatives through every write, Muon + AdamW, clip, runtime schedule input; transfer m2k (16 writes), m8k_c64 (128 writes), w32, small (and tiny)",
+ "declared_precision": "unchanged: p8_c/POLICY.json declared_precision mixed_bf16 (exact attention rounding points; FP32 association may differ). mixed_bf16_online stays unqualified (both P8-C gate failures retained); any repaired online arithmetic must be declared here before its first build and pass the unchanged gates independently before its timing may count",
+ "native_gates": "unchanged: p8_c/POLICY.json native_gates_mixed (loss, gradients, optimizer, causality, bitwise repeat, counts 0/1/half/full, fresh and trained states) on m8k, m2k, m8k_c64, w32, small, tiny",
+ "learning_gates": "unchanged: p8_c/POLICY.json learning_gates (practical 1024-update gate; original gate reported separately; the historical FP32-comparator arithmetic-screen failure from integration3 is retained as a separate failed comparison, never converted)",
+ "controls": "unchanged practical BF16 control (S106B engine bf16: autocast, torch.compile default, FlexAttention, CUDA graph) is the denominator unless a faster control is tested and learning-valid; bf16_ma failed learning in integration3 and is a labelled diagnostic only",
+ "score": "native generated complete-update ms / fastest tested learning-valid conventional complete-update ms on m8k; CUDA events around one native launch / one graph replay; changing state (4 staged batches cycled); candidate and control paired in fresh processes on the same H100, >= 2 rounds with reversed order, median of round medians; finalist replicated on a second H100. Success: <= 1.00 with all gates and the practical learning gate passing on the final commit",
+ "prohibitions": "unchanged from p8_c/POLICY.json: no benchmark-name dispatch, donor monkeypatches, whole-model handwritten replacement or external-kernel graph; one generated cooperative kernel per complete update; rejected V4 group rules stay off; failures preserved; gates never loosened"
+}

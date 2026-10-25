@@ -1,0 +1,236 @@
+{
+  "additional_terms": "https://commoncrawl.org/terms-of-use",
+  "batch": 32,
+  "complete": true,
+  "context_policy": "all arms reset attention context and adaptive state at every 2048-token window; no cross-window carry even within one document",
+  "files": {
+    "dataset-tree.json": {
+      "bytes": 4423,
+      "sha256": "2822faa0607d3823c93a3398481d7622183820fac96b9ac7494f85559c9ed6b2"
+    },
+    "documents.jsonl": {
+      "bytes": 331999867,
+      "sha256": "1dc5da0cbf63c99ea90fc254395c863bd5795f810ef9dd0fede5c921acbac874"
+    },
+    "gpt2-tokenizer.json": {
+      "bytes": 1355256,
+      "sha256": "8414cab924d8b9b33013f0d221c5862f365ee9be39c5c2bfae8a5a9e970478a6"
+    },
+    "test.coordinates.u64": {
+      "bytes": 131072,
+      "sha256": "2d6ab6dfc1452f5ecf26b4d551633ab1fdf5f785095e63c81bd9f70e207bb37c"
+    },
+    "test.u16": {
+      "bytes": 33570816,
+      "sha256": "6dfb142e309d03022013cea897cc367d535564c3e005262abba7cfe12a05897f"
+    },
+    "train.coordinates.u64": {
+      "bytes": 15625216,
+      "sha256": "2f78011ce6b7a6fbe091a35452c99ae25129f6db9dd4343b56d45708bf5bcc3c"
+    },
+    "train.order.i64": {
+      "bytes": 7812608,
+      "sha256": "640e517f0f626ee89d486007eb5b774f0139522d160fade880b72a76c719309c"
+    },
+    "train.u16": {
+      "bytes": 4002008448,
+      "sha256": "b3279c1c013fda32b3b21a116422e402492c2ba4c41fbd5ab076d2caedbb9c8c"
+    },
+    "validation.coordinates.u64": {
+      "bytes": 32768,
+      "sha256": "e82bc2f3ebe1f9c46d333f1b22c18cdff6ac59f19b8a8eecaed67f37ffaf0651"
+    },
+    "validation.u16": {
+      "bytes": 8392704,
+      "sha256": "0b840cbccc06ec1591eb5fa9613d1f3ba22e086f9f71a59bca5cd213066aaaf8"
+    }
+  },
+  "license": "ODC-By 1.0",
+  "order_policy": "train PCG64(data_seed) permutation without replacement; fixed source-order validation/test; identical across seeds/arms",
+  "order_sha256": "640e517f0f626ee89d486007eb5b774f0139522d160fade880b72a76c719309c",
+  "preparation": {
+    "allocated_cpus": 32,
+    "elapsed_seconds": 3287.3994394759998,
+    "numpy": "2.2.6",
+    "pyarrow": "20.0.0",
+    "threads_per_worker": 1,
+    "tokenizers": "0.22.1",
+    "workers": 31
+  },
+  "preparation_source": {
+    "commit": "4f98705ed3902b6dd4ed2dbd1ec4c634bbe3c1e7",
+    "path": "research/omni_l1/data.py"
+  },
+  "schema": "learning-scaling-fineweb-gpt2-2048-v1",
+  "scope": "Deterministic hash-ordered shard-prefix sample; no near-duplicate or benchmark decontamination claim",
+  "sequence": 2048,
+  "settings": {
+    "actual_train_target_tokens": 2000027648,
+    "allocated_cpus": 32,
+    "batch": 32,
+    "data_seed": 620261006,
+    "max_document_bytes": 1048576,
+    "max_documents": 20000000,
+    "max_download_bytes": 64424509440,
+    "max_text_bytes": 107374182400,
+    "sequence": 2048,
+    "steps": 30518,
+    "test_windows": 8192,
+    "train_target_tokens": 2000000000,
+    "train_windows": 976576,
+    "validation_windows": 2048,
+    "workers": 31
+  },
+  "source": {
+    "repo": "HuggingFaceFW/fineweb-edu",
+    "revision": "87f09149ef4734204d70ed1d046ddc9ca3f2b8f9",
+    "scanned_shards": [
+      {
+        "bytes": 2152689867,
+        "full_shard_sha256_verified": true,
+        "git_blob_sha1": "fb75f6c578c1f731b79ec5982e462e75931a6954",
+        "path": "sample/10BT/006_00000.parquet",
+        "sha256": "554fa2613c9261d6c9c396caab881de3160175794c6c3e1856bf28a0e9cb9b76",
+        "url": "https://huggingface.co/datasets/HuggingFaceFW/fineweb-edu/resolve/87f09149ef4734204d70ed1d046ddc9ca3f2b8f9/sample/10BT/006_00000.parquet"
+      },
+      {
+        "bytes": 2151274846,
+        "full_shard_sha256_verified": true,
+        "git_blob_sha1": "2535d7e76c7972978eb48a8a8ca4d8b6a718fea1",
+        "path": "sample/10BT/008_00000.parquet",
+        "sha256": "a6d9dcc0c72ecd7c7f0173c2d06b3a4249a2ccaa94961469d1a522ca689bbf1a",
+        "url": "https://huggingface.co/datasets/HuggingFaceFW/fineweb-edu/resolve/87f09149ef4734204d70ed1d046ddc9ca3f2b8f9/sample/10BT/008_00000.parquet"
+      },
+      {
+        "bytes": 2150686637,
+        "full_shard_sha256_verified": true,
+        "git_blob_sha1": "a9d5d796ea550171f13e71995dfd30a77c766437",
+        "path": "sample/10BT/007_00000.parquet",
+        "sha256": "4b7d1f697d4afff7f5f65cb7aa4d83acc6db716da4d46ea23399d0c50608c6e3",
+        "url": "https://huggingface.co/datasets/HuggingFaceFW/fineweb-edu/resolve/87f09149ef4734204d70ed1d046ddc9ca3f2b8f9/sample/10BT/007_00000.parquet"
+      },
+      {
+        "bytes": 2152222432,
+        "full_shard_sha256_verified": true,
+        "git_blob_sha1": "c2021c8c564a8a3fca7ba114afc9069bd0bcd2d2",
+        "path": "sample/10BT/001_00000.parquet",
+        "sha256": "3fcf2dc69cd52503986276d3d2d26a8c356d0f2ea28a0de4fdbda8cf87755693",
+        "url": "https://huggingface.co/datasets/HuggingFaceFW/fineweb-edu/resolve/87f09149ef4734204d70ed1d046ddc9ca3f2b8f9/sample/10BT/001_00000.parquet"
+      },
+      {
+        "bytes": 2152323681,
+        "full_shard_sha256_verified": true,
+        "git_blob_sha1": "7f557356b7446c6209ed4e51eb97d65324d75b77",
+        "path": "sample/10BT/011_00000.parquet",
+        "sha256": "db71cf0425bb3d1813a09f12ff1acd6dabdfb91a2e4f141960254ee5a7f036e7",
+        "url": "https://huggingface.co/datasets/HuggingFaceFW/fineweb-edu/resolve/87f09149ef4734204d70ed1d046ddc9ca3f2b8f9/sample/10BT/011_00000.parquet"
+      },
+      {
+        "bytes": 2152069689,
+        "full_shard_sha256_verified": true,
+        "git_blob_sha1": "08bc10f931c49d4f5e2e832af85c88d19f9a30e9",
+        "path": "sample/10BT/012_00000.parquet",
+        "sha256": "08b47a3e1c25161f796d2f8dbf99ccf60affdebdcea4910833d0d5783315551f",
+        "url": "https://huggingface.co/datasets/HuggingFaceFW/fineweb-edu/resolve/87f09149ef4734204d70ed1d046ddc9ca3f2b8f9/sample/10BT/012_00000.parquet"
+      },
+      {
+        "bytes": 2152798864,
+        "full_shard_sha256_verified": true,
+        "git_blob_sha1": "2c1203939e5139226910db563e21fdf754974e65",
+        "path": "sample/10BT/010_00000.parquet",
+        "sha256": "e5a2eae25f057f0856a10bfae314c6ca8ea8bb08456d2131e9e89b2b8305e2f6",
+        "url": "https://huggingface.co/datasets/HuggingFaceFW/fineweb-edu/resolve/87f09149ef4734204d70ed1d046ddc9ca3f2b8f9/sample/10BT/010_00000.parquet"
+      },
+      {
+        "bytes": 2152819114,
+        "full_shard_sha256_verified": true,
+        "git_blob_sha1": "2df63e03a865d1045dcb477fcdd68635faf226ef",
+        "path": "sample/10BT/000_00000.parquet",
+        "sha256": "b1ba7b2ce4cb5ea6ef42dca40263eabb85f37700d01693a68e9b30a31d78e871",
+        "url": "https://huggingface.co/datasets/HuggingFaceFW/fineweb-edu/resolve/87f09149ef4734204d70ed1d046ddc9ca3f2b8f9/sample/10BT/000_00000.parquet"
+      },
+      {
+        "bytes": 2152437524,
+        "full_shard_sha256_verified": true,
+        "git_blob_sha1": "2c9b4a5357740163228979d4887b6639977b650f",
+        "path": "sample/10BT/003_00000.parquet",
+        "sha256": "22184e6eb25759ddd97783751ffc73e1705dfa2542e630dae1f2a8bac8ee6ddb",
+        "url": "https://huggingface.co/datasets/HuggingFaceFW/fineweb-edu/resolve/87f09149ef4734204d70ed1d046ddc9ca3f2b8f9/sample/10BT/003_00000.parquet"
+      },
+      {
+        "bytes": 540632672,
+        "full_shard_sha256_verified": true,
+        "git_blob_sha1": "3f659cc279c926e8baeda616b688b4e704b7fa09",
+        "path": "sample/10BT/013_00000.parquet",
+        "sha256": "b393f51fefab26cd6f4c8f65707c1924f6666c4961a0ebebe04bb57f7ec832de",
+        "url": "https://huggingface.co/datasets/HuggingFaceFW/fineweb-edu/resolve/87f09149ef4734204d70ed1d046ddc9ca3f2b8f9/sample/10BT/013_00000.parquet"
+      }
+    ],
+    "shard_order": {
+      "context_policy": "all arms reset attention context and adaptive state at every 2048-token window; no cross-window carry even within one document",
+      "order": [
+        "sample/10BT/006_00000.parquet",
+        "sample/10BT/008_00000.parquet",
+        "sample/10BT/007_00000.parquet",
+        "sample/10BT/001_00000.parquet",
+        "sample/10BT/011_00000.parquet",
+        "sample/10BT/012_00000.parquet",
+        "sample/10BT/010_00000.parquet",
+        "sample/10BT/000_00000.parquet",
+        "sample/10BT/003_00000.parquet",
+        "sample/10BT/013_00000.parquet",
+        "sample/10BT/005_00000.parquet",
+        "sample/10BT/002_00000.parquet",
+        "sample/10BT/004_00000.parquet",
+        "sample/10BT/009_00000.parquet"
+      ],
+      "order_policy": "ascending SHA256(data_seed:source_path), before looking at text or losses",
+      "preparation_source": {
+        "commit": "4f98705ed3902b6dd4ed2dbd1ec4c634bbe3c1e7",
+        "path": "research/omni_l1/data.py"
+      },
+      "sha256": "2822faa0607d3823c93a3398481d7622183820fac96b9ac7494f85559c9ed6b2",
+      "url": "https://huggingface.co/api/datasets/HuggingFaceFW/fineweb-edu/tree/87f09149ef4734204d70ed1d046ddc9ca3f2b8f9/sample/10BT?limit=1000"
+    },
+    "subset": "sample-10BT"
+  },
+  "source_attribution": "FineWeb-Edu: Lozhkov, Ben Allal, von Werra, Wolf (2024), Hugging Face; underlying web authors/Common Crawl",
+  "source_card": "https://huggingface.co/datasets/HuggingFaceFW/fineweb-edu/blob/87f09149ef4734204d70ed1d046ddc9ca3f2b8f9/README.md",
+  "split_policy": "SHA256 whitespace-collapsed UTF8 content; first64bits mod10000: <9000train,<9500validation,else test; global exact normalized-content dedup",
+  "splits": {
+    "test": {
+      "documents": 4491,
+      "file": "test.u16",
+      "target_tokens": 16777216,
+      "windows": 8192
+    },
+    "train": {
+      "documents": 526196,
+      "file": "train.u16",
+      "target_tokens": 2000027648,
+      "windows": 976576
+    },
+    "validation": {
+      "documents": 1123,
+      "file": "validation.u16",
+      "target_tokens": 4194304,
+      "windows": 2048
+    }
+  },
+  "steps": 30518,
+  "token_policy": "Exact original text; pinned tokenizer add_special_tokens=False; append EOS50256 once; no BOS/padding",
+  "token_unit": "GPT-2 target-token occurrence",
+  "tokenizer": {
+    "bytes": 1355256,
+    "eos_token_id": 50256,
+    "git_blob_sha1": "4b988bccc9dc5adacd403c00b4704976196548f8",
+    "license": "MIT",
+    "repo": "openai-community/gpt2",
+    "revision": "607a30d783dfa663caf39e06633721c8d4cfcd7e",
+    "sha256": "8414cab924d8b9b33013f0d221c5862f365ee9be39c5c2bfae8a5a9e970478a6",
+    "url": "https://huggingface.co/openai-community/gpt2/resolve/607a30d783dfa663caf39e06633721c8d4cfcd7e/tokenizer.json",
+    "vocab_size": 50257
+  },
+  "vocab_size": 50257,
+  "window_policy": "2049 tokens inside one document; stride2048; no target occurrence reused; short documents and incomplete tails discarded"
+}
