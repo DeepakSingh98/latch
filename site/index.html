@@ -31,9 +31,10 @@
   <article class="wrap">
     <div class="article">
       <p class="meta"><span>October 2026</span></p>
-      <h1>A compiler for training megakernels</h1>
+      <h1>Latch — a compiler for training megakernels</h1>
+      <p class="lede">The stranger the learning idea, the more systems work it takes to try.</p>
 
-      <p class="lede">Suppose you’ve got an idea for a new learning algorithm.</p>
+      <p>Suppose you’ve got an idea for a new learning algorithm.</p>
 
       <p>The further it strays from familiar methods, the more of its implementation you’ll have to build yourself. Conventional methods have earned their place, and an entire ecosystem of kernels, libraries, and compilers has co-evolved with them through a decade of optimization. If your idea is radical enough, you have a systems project to finish before you can test it, let alone iterate on it.</p>
 
@@ -49,17 +50,19 @@
 
       <p><a href="https://hazyresearch.stanford.edu/blog/2025-05-27-no-bubbles">Hazy Research</a> demonstrated this approach for whole-model inference. Cursor’s <a href="https://github.com/cursor/mixture-of-kittens">Mixture-of-Kittens</a> applied it to mixture-of-experts training. <a href="https://www.indexventures.com/perspectives/toward-more-efficient-ai-leading-flapping-airplanes-1b-series-a/">Flapping Airplanes</a> is pursuing megakernels as a route to more data-efficient learning, with early results earning them a $1B Series A.</p>
 
-      <p>Like most people reading this, I don’t have a billion dollars in venture funding. I’m also lazy. A training megakernel has to fit the forward pass, backward pass and optimizer into one program, and every change to the model means reworking it. In order to explore radically different ideas without rewriting a kernel each time, I built Latch.</p>
+      <p>Like most people reading this, I don’t have a billion dollars in venture funding. Maybe I’m also lazy. A training megakernel has to fit the forward pass, backward pass and optimizer into one program, and every change to the model means reworking it. That’s why I built Latch.</p>
 
-      <p>Latch is a compiler for training megakernels on H100s. Give it supported PyTorch training code and it generates one GPU program for the forward pass, loss, backward pass and optimizer update, handling the dependencies, memory reuse, and synchronization between them. When your experiment changes, you regenerate the kernel instead of rewriting it.</p>
+      <h2>Introducing Latch</h2>
 
-      <p>Latch trained TinyMoE-200M to the same validation loss with <strong>40% less training-update time</strong> than compiled PyTorch. Small-batch updates ran <strong>2.75× faster</strong>.</p>
+      <p>Latch is a compiler for training megakernels on H100. Give it supported PyTorch training code and it generates one GPU program for the forward pass, loss, backward pass and optimizer update, handling the dependencies, memory reuse and synchronization between them. When your experiment changes, you regenerate the kernel instead of rewriting it.</p>
 
-      <p>What I’m most interested in are learning procedures that are impractical with today’s tools. In <a href="https://arxiv.org/abs/2609.34174">GradLev</a>, a model updates its weights as it reads, one token at a time. Latch runs all 1,024 adaptation steps for GPT-2 small’s final MLP in a single kernel, keeping the changing weights in shared memory throughout. The complete block ran 3.5× faster than compiled PyTorch replaying a CUDA graph; both use ordinary PyTorch for the rest of GPT-2. The GradLev example is included in this release.</p>
+      <p>To demonstrate, I used Latch to train TinyMoE-200M. Generation and compilation took about five minutes on a 64-vCPU machine. The generated megakernel reached the same validation loss with <strong>40% less training-update time</strong> than compiled PyTorch using the same recipe. At a small batch of 2 × 1024 tokens, complete training updates ran <strong>2.75× faster</strong>.</p>
 
-      <p>This release includes runnable TinyMoE training, selective weight updates, repeated layers, GradLev token-by-token adaptation and smaller fast examples. Earlier compiler work also explored state-space, diffusion and energy-based models; <a href="https://github.com/DeepakSingh98/latch">see the included examples</a>.</p>
+      <p>What I’m most interested in are learning procedures that are impractical with today’s tools. In <a href="https://arxiv.org/abs/2609.34174">GradLev</a>, a model updates its weights as it reads, one token at a time. Latch runs all 1,024 adaptation steps for GPT-2 small’s final MLP in a single kernel, keeping the changing weights in shared memory throughout. The complete block ran <strong>3.5× faster</strong> than compiled PyTorch replaying a CUDA graph; both use ordinary PyTorch for the rest of GPT-2.</p>
 
-      <p>Latch is a research preview and a first step toward an open-source megakernel framework that enables weird new ways to learn. The <a href="https://github.com/DeepakSingh98/latch">source archive, wheel and instructions</a> are available together. The <a href="capabilities.html">open problems</a> are a good place to start, and I’m curious to see what people explore with it.</p>
+      <p>Latch has generated training programs for mixture-of-experts, state-space, diffusion and energy-based models, along with selective weight updates, repeated layers and token-by-token adaptation. <a href="methodology.html">Results</a>.</p>
+
+      <p>It’s a research preview and a first step toward an open-source megakernel framework. Contributions are welcome. The <a href="capabilities.html">open problems</a> are a good place to start, and I’m curious to see what people explore with it.</p>
     </div>
   </article>
 </main>
