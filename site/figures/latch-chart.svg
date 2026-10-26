@@ -1,41 +1,27 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
-<title id="title">Latch on H100</title><desc id="desc">Three separate comparisons against compiled PyTorch. TinyMoE: 857 versus 1432 training-update seconds to validation loss 3.30, one confirmation run. Small-batch updates: 13.63–13.77 versus 37.50–38.42 ms. GradLev: 53.98 versus 189.53 ms per block, with CUDA graphs in the control.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-labelledby="title desc">
+<title id="title">TinyMoE-200M training with Latch</title>
+<desc id="desc">On one H100, Latch took 857 versus 1432 training-update seconds to validation loss 3.30 in one confirmation run at batch 32 × 1024. At batch 2 × 1024, updates took 13.63–13.77 versus 37.50–38.42 milliseconds. Each pair uses the same recipe.</desc>
 <style>:root{--bg:#f8f6f0;--panel:#f0ece2;--ink:#1a1b1a;--mute:#5f615b;--rule:#c9c4b6;--blue:#2c4a80;--gray:#969288;--wash:#e3e8f1}@media(prefers-color-scheme:dark){:root{--bg:#171714;--panel:#201f1b;--ink:#ecebe5;--mute:#aaa89f;--rule:#4a4840;--blue:#a3b9e3;--gray:#77766e;--wash:#1f2738}}text{font-family:Arial,Helvetica,sans-serif;fill:var(--ink)}.muted{fill:var(--mute)}.blue{fill:var(--blue)}</style>
-<rect width="1200" height="675" fill="var(--bg)"/>
-<text x="48" y="65" font-size="34" font-weight="600" class="" text-anchor="start">Latch on H100</text>
-<rect x="760" y="46" width="18" height="18" rx="3" fill="var(--blue)"/>
-<text x="788" y="63" font-size="21" font-weight="400" class="" text-anchor="start">Latch</text>
-<rect x="884" y="46" width="18" height="18" rx="3" fill="var(--gray)"/>
-<text x="912" y="63" font-size="21" font-weight="400" class="" text-anchor="start">Compiled PyTorch</text>
-<rect x="48" y="110" width="356" height="486" rx="10" fill="var(--panel)"/>
-<text x="70" y="165" font-size="32" font-weight="600" class="" text-anchor="start">40% less time</text>
-<text x="70" y="199" font-size="22" font-weight="400" class="" text-anchor="start">update time to loss 3.30</text>
-<text x="70" y="235" font-size="19" font-weight="400" class="muted" text-anchor="start">TinyMoE · batch 32 × 1,024</text>
-<rect x="78" y="410.3379888268156" width="130" height="131.66201117318437" rx="3" fill="var(--blue)"/>
-<text x="143" y="392.3379888268156" font-size="20" font-weight="400" class="" text-anchor="middle">857 s</text>
-<rect x="242" y="322" width="130" height="220" rx="3" fill="var(--gray)"/>
-<text x="307" y="304" font-size="20" font-weight="400" class="" text-anchor="middle">1,432 s</text>
-<text x="143" y="574" font-size="20" font-weight="400" class="muted" text-anchor="middle">Latch</text>
-<text x="307" y="574" font-size="20" font-weight="400" class="muted" text-anchor="middle">PyTorch</text>
-<rect x="422" y="110" width="356" height="486" rx="10" fill="var(--panel)"/>
-<text x="444" y="165" font-size="32" font-weight="600" class="" text-anchor="start">2.75× faster</text>
-<text x="444" y="199" font-size="22" font-weight="400" class="" text-anchor="start">training updates</text>
-<text x="444" y="235" font-size="19" font-weight="400" class="muted" text-anchor="start">TinyMoE · batch 2 × 1,024</text>
-<rect x="452" y="462.6006322444679" width="130" height="79.39936775553214" rx="3" fill="var(--blue)"/>
-<text x="517" y="444.6006322444679" font-size="20" font-weight="400" class="" text-anchor="middle">13.6–13.8 ms</text>
-<rect x="616" y="322" width="130" height="220" rx="3" fill="var(--gray)"/>
-<text x="681" y="304" font-size="20" font-weight="400" class="" text-anchor="middle">37.5–38.4 ms</text>
-<text x="517" y="574" font-size="20" font-weight="400" class="muted" text-anchor="middle">Latch</text>
-<text x="681" y="574" font-size="20" font-weight="400" class="muted" text-anchor="middle">PyTorch</text>
-<rect x="796" y="110" width="356" height="486" rx="10" fill="var(--panel)"/>
-<text x="818" y="165" font-size="32" font-weight="600" class="" text-anchor="start">3.5× faster</text>
-<text x="818" y="199" font-size="22" font-weight="400" class="" text-anchor="start">test-time adaptation</text>
-<text x="818" y="235" font-size="19" font-weight="400" class="muted" text-anchor="start">GradLev · 1,024 steps</text>
-<rect x="826" y="479.341845618108" width="130" height="62.65815438189204" rx="3" fill="var(--blue)"/>
-<text x="891" y="461.341845618108" font-size="20" font-weight="400" class="" text-anchor="middle">54 ms</text>
-<rect x="990" y="322" width="130" height="220" rx="3" fill="var(--gray)"/>
-<text x="1055" y="304" font-size="20" font-weight="400" class="" text-anchor="middle">190 ms</text>
-<text x="891" y="574" font-size="20" font-weight="400" class="muted" text-anchor="middle">Latch</text>
-<text x="1055" y="574" font-size="20" font-weight="400" class="muted" text-anchor="middle">PyTorch</text>
-<text x="48" y="642" font-size="20" font-weight="400" class="muted" text-anchor="start">Time-to-loss: one run. Separate scales. GradLev control uses CUDA graphs.</text>
+<rect width="1200" height="900" fill="var(--bg)"/>
+<text x="60" y="68" font-size="30" font-weight="600" class="" text-anchor="start">TinyMoE-200M</text>
+<text x="1140" y="68" font-size="26" font-weight="400" class="muted" text-anchor="end">One H100</text>
+<path d="M60 105H1140" stroke="var(--rule)" stroke-width="1"/>
+<text x="60" y="188" font-size="46" font-weight="600" class="" text-anchor="start">40% less time to the same loss</text>
+<text x="60" y="232" font-size="27" font-weight="400" class="muted" text-anchor="start">Training-update time · batch 32 × 1,024</text>
+<text x="60" y="312" font-size="28" font-weight="600" class="blue" text-anchor="start">Latch</text>
+<rect x="330" y="283" width="341.12" height="40" rx="2" fill="var(--blue)"/>
+<text x="1140" y="312" font-size="28" font-weight="600" class="" text-anchor="end">14.3 min</text>
+<text x="60" y="387" font-size="28" font-weight="400" class="muted" text-anchor="start">Compiled PyTorch</text>
+<rect x="330" y="358" width="570.00" height="40" rx="2" fill="var(--gray)"/>
+<text x="1140" y="387" font-size="28" font-weight="600" class="" text-anchor="end">23.9 min</text>
+<path d="M60 461H1140" stroke="var(--rule)" stroke-width="1"/>
+<text x="60" y="543" font-size="46" font-weight="600" class="" text-anchor="start">2.75× faster small-batch updates</text>
+<text x="60" y="587" font-size="27" font-weight="400" class="muted" text-anchor="start">Time per update · batch 2 × 1,024</text>
+<text x="60" y="667" font-size="28" font-weight="600" class="blue" text-anchor="start">Latch</text>
+<rect x="330" y="638" width="205.72" height="40" rx="2" fill="var(--blue)"/>
+<text x="1140" y="667" font-size="28" font-weight="600" class="" text-anchor="end">13.6–13.8 ms</text>
+<text x="60" y="742" font-size="28" font-weight="400" class="muted" text-anchor="start">Compiled PyTorch</text>
+<rect x="330" y="713" width="570.00" height="40" rx="2" fill="var(--gray)"/>
+<text x="1140" y="742" font-size="28" font-weight="600" class="" text-anchor="end">37.5–38.4 ms</text>
+<text x="60" y="845" font-size="24" font-weight="400" class="muted" text-anchor="start">Same recipe within each pair. Time-to-loss: one confirmation run.</text>
 </svg>

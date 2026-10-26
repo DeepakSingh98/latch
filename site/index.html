@@ -59,7 +59,7 @@
       <p>To demonstrate, I used Latch to train TinyMoE-200M. Generation and compilation took about five minutes on a 64-vCPU machine. The generated megakernel reached the same validation loss with <strong>40% less training-update time</strong> than compiled PyTorch using the same recipe. At a small batch of 2 × 1024 tokens, complete training updates ran <strong>2.75× faster</strong>.</p>
 
       <figure>
-        <a href="figures/latch-chart.svg" aria-label="Open timing chart full size"><img src="figures/latch-chart.svg" width="1200" height="675" loading="lazy" alt="Latch on H100: 40% less training-update time to the same TinyMoE loss, 2.75× faster small-batch updates, and 3.5× faster GradLev adaptation."></a>
+        <a href="figures/latch-chart.svg" aria-label="Open timing chart full size"><img src="figures/latch-chart.svg" width="1200" height="900" loading="lazy" alt="TinyMoE-200M on H100: 14.3 versus 23.9 minutes of training-update time to the same loss, and 13.6–13.8 versus 37.5–38.4 milliseconds per small-batch update."></a>
         <figcaption>One H100. Time to loss 3.30 is one confirmation run. <a href="methodology.html">Measurements and conditions</a>.</figcaption>
       </figure>
 
