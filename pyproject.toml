@@ -59,3 +59,5 @@ testpaths = ["tests"]
 "share/latch/integration" = ["integration/V0_COMPILER_INTAKE.md", "integration/V0_COMPILER_REGRESSIONS.json", "integration/V0_COMPILER_SOURCE_INVENTORY.json", "integration/V0_PUBLIC_TEST_SCOPE.json", "integration/V0_REGRESSION_TEST_REPAIRS.json", "integration/V0_RESEARCH_TEST_EXCLUSIONS.json"]
 "share/latch/scripts" = ["scripts/check_release.py"]
 "share/latch" = ["README.md", "PROVENANCE.md", "THIRD_PARTY_NOTICES.md", "LICENSE", "NOTICE"]
+
+"share/latch/site/figures" = ["site/figures/latch-chart.svg", "site/figures/latch-diagram.svg", "site/figures/latch-chart.png", "site/figures/latch-diagram.png"]

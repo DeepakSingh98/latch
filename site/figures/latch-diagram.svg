@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+<title id="title">1,024 learning steps. One kernel.</title><desc id="desc">Schematic of GradLev adapting GPT-2 small’s final MLP. Compiled PyTorch with CUDA graphs runs 18,176 kernels. Latch runs the adaptation loop in one kernel and retains the adapted MLP weights in shared memory. Other GPU-memory accesses remain. Not a timing scale.</desc>
+<style>:root{--bg:#f8f6f0;--panel:#f0ece2;--ink:#1a1b1a;--mute:#5f615b;--rule:#c9c4b6;--blue:#2c4a80;--gray:#969288;--wash:#e3e8f1}@media(prefers-color-scheme:dark){:root{--bg:#171714;--panel:#201f1b;--ink:#ecebe5;--mute:#aaa89f;--rule:#4a4840;--blue:#a3b9e3;--gray:#77766e;--wash:#1f2738}}text{font-family:Arial,Helvetica,sans-serif;fill:var(--ink)}.muted{fill:var(--mute)}.blue{fill:var(--blue)}</style>
+<rect width="1200" height="675" fill="var(--bg)"/>
+<text x="48" y="66" font-size="38" font-weight="600" class="" text-anchor="start">1,024 learning steps. One kernel.</text>
+<text x="48" y="143" font-size="25" font-weight="600" class="" text-anchor="start">Compiled PyTorch + CUDA graphs</text>
+<text x="1152" y="143" font-size="25" font-weight="400" class="muted" text-anchor="end">18,176 kernels</text>
+<rect x="48" y="181" width="12" height="79" rx="2" fill="var(--gray)"/>
+<rect x="66" y="181" width="12" height="79" rx="2" fill="var(--gray)"/>
+<rect x="84" y="181" width="12" height="79" rx="2" fill="var(--gray)"/>
+<rect x="102" y="181" width="12" height="79" rx="2" fill="var(--gray)"/>
+<rect x="120" y="181" width="12" height="79" rx="2" fill="var(--gray)"/>
+<rect x="138" y="181" width="12" height="79" rx="2" fill="var(--gray)"/>
+<rect x="156" y="181" width="12" height="79" rx="2" fill="var(--gray)"/>
+<rect x="174" y="181" width="12" height="79" rx="2" fill="var(--gray)"/>
+<rect x="192" y="181" width="12" height="79" rx="2" fill="var(--gray)"/>
+<rect x="210" y="181" width="12" height="79" rx="2" fill="var(--gray)"/>
+<rect x="228" y="181" width="12" height="79" rx="2" fill="var(--gray)"/>
+<rect x="246" y="181" width="12" height="79" rx="2" fill="var(--gray)"/>
+<text x="153" y="297" font-size="23" font-weight="400" class="muted" text-anchor="middle">Token 1</text>
+<rect x="344" y="181" width="12" height="79" rx="2" fill="var(--gray)"/>
+<rect x="362" y="181" width="12" height="79" rx="2" fill="var(--gray)"/>
+<rect x="380" y="181" width="12" height="79" rx="2" fill="var(--gray)"/>
+<rect x="398" y="181" width="12" height="79" rx="2" fill="var(--gray)"/>
+<rect x="416" y="181" width="12" height="79" rx="2" fill="var(--gray)"/>
+<rect x="434" y="181" width="12" height="79" rx="2" fill="var(--gray)"/>
+<rect x="452" y="181" width="12" height="79" rx="2" fill="var(--gray)"/>
+<rect x="470" y="181" width="12" height="79" rx="2" fill="var(--gray)"/>
+<rect x="488" y="181" width="12" height="79" rx="2" fill="var(--gray)"/>
+<rect x="506" y="181" width="12" height="79" rx="2" fill="var(--gray)"/>
+<rect x="524" y="181" width="12" height="79" rx="2" fill="var(--gray)"/>
+<rect x="542" y="181" width="12" height="79" rx="2" fill="var(--gray)"/>
+<text x="449" y="297" font-size="23" font-weight="400" class="muted" text-anchor="middle">Token 2</text>
+<rect x="936" y="181" width="12" height="79" rx="2" fill="var(--gray)"/>
+<rect x="954" y="181" width="12" height="79" rx="2" fill="var(--gray)"/>
+<rect x="972" y="181" width="12" height="79" rx="2" fill="var(--gray)"/>
+<rect x="990" y="181" width="12" height="79" rx="2" fill="var(--gray)"/>
+<rect x="1008" y="181" width="12" height="79" rx="2" fill="var(--gray)"/>
+<rect x="1026" y="181" width="12" height="79" rx="2" fill="var(--gray)"/>
+<rect x="1044" y="181" width="12" height="79" rx="2" fill="var(--gray)"/>
+<rect x="1062" y="181" width="12" height="79" rx="2" fill="var(--gray)"/>
+<rect x="1080" y="181" width="12" height="79" rx="2" fill="var(--gray)"/>
+<rect x="1098" y="181" width="12" height="79" rx="2" fill="var(--gray)"/>
+<rect x="1116" y="181" width="12" height="79" rx="2" fill="var(--gray)"/>
+<rect x="1134" y="181" width="12" height="79" rx="2" fill="var(--gray)"/>
+<text x="1041" y="297" font-size="23" font-weight="400" class="muted" text-anchor="middle">Token 1,024</text>
+<text x="760" y="234" font-size="52" font-weight="400" class="muted" text-anchor="middle">···</text>
+<text x="48" y="380" font-size="25" font-weight="600" class="" text-anchor="start">Latch</text>
+<text x="1152" y="380" font-size="25" font-weight="400" class="blue" text-anchor="end">1 kernel</text>
+<rect x="48" y="412" width="1104" height="94" rx="7" fill="var(--wash)"/>
+<rect x="48" y="412" width="1104" height="94" rx="7" fill="none" stroke="var(--blue)" stroke-width="2"/>
+<text x="153" y="468" font-size="25" font-weight="400" class="blue" text-anchor="middle">Token 1</text>
+<text x="449" y="468" font-size="25" font-weight="400" class="blue" text-anchor="middle">Token 2</text>
+<text x="760" y="468" font-size="25" font-weight="400" class="blue" text-anchor="middle">···</text>
+<text x="1041" y="468" font-size="25" font-weight="400" class="blue" text-anchor="middle">Token 1,024</text>
+<text x="600" y="551" font-size="25" font-weight="400" class="blue" text-anchor="middle">Adapted MLP weights stay on-chip</text>
+<text x="48" y="641" font-size="21" font-weight="400" class="muted" text-anchor="start">GradLev · GPT-2 small’s final MLP · schematic</text>
+<text x="1152" y="641" font-size="29" font-weight="600" class="" text-anchor="end">3.5× faster</text>
+</svg>
