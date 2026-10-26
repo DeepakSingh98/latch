@@ -6,6 +6,8 @@ for NVIDIA H100 GPUs.
 
 [Project page](https://deepaksingh98.github.io/latch/site/) · [v0 release](https://github.com/DeepakSingh98/latch/releases/tag/v0)
 
+Many thanks to [Modal](https://modal.com/) for generously supporting Latch with GPU credits!
+
 ## Install
 
 Use Linux, Python 3.12, CUDA Toolkit 12.8 and an H100 80 GB. Compilation needs a
