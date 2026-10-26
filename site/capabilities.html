@@ -31,7 +31,7 @@
   <div class="wrap">
     <article class="prose" id="contribute">
       <h1>Open problems</h1>
-      <p class="lede">This preview includes runnable examples for a limited set of models and learning rules. <a href="https://github.com/DeepakSingh98/latch">See what is included</a>; the problems below describe the next work, not promised capabilities.</p>
+      <p class="lede">This preview includes runnable examples for a limited set of models and learning rules.</p>
 <h2 id="performance">Performance</h2>
 <ol class="plain">
 <li><strong>Idle time at grid barriers.</strong> Each interval ends at a grid barrier, so every SM waits for the slowest one. A per-SM trace of one TinyMoE update on an H100 shows SMs waiting 13% of the time at 32 × 1024 and 20% at 2 × 1024. At 32 × 1024, each layer’s expert-dispatch gather runs on one SM and its bucket ordering on 16 while the other SMs wait, about 2 ms per update. Starting each task when its own inputs are ready, instead of at the next grid barrier, could recover part of this time.
