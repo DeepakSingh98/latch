@@ -471,3 +471,7 @@ html:not(.js) .stage-detail + .stage-detail { border-top: 1px solid var(--rule);
   .results-page .stack tbody tr { padding: 1rem 0; }
   .result-detail { margin-top: 0.1rem; }
 }
+
+/* Repository links share a compact icon in the navigation and post. */
+.github-link { display: inline-flex; align-items: center; gap: 0.4em; }
+.github-icon { width: 1em; height: 1em; flex: none; }
