@@ -474,4 +474,15 @@ html:not(.js) .stage-detail + .stage-detail { border-top: 1px solid var(--rule);
 
 /* Repository links share a compact icon in the navigation and post. */
 .github-link { display: inline-flex; align-items: center; gap: 0.4em; }
+nav ul { align-items: center; }
+nav li { display: flex; align-items: center; }
 .github-icon { width: 1em; height: 1em; flex: none; }
+
+/* Blog index */
+.posts { list-style: none; padding: 0; margin: 2.4rem 0 0; }
+.posts li { padding: 1.4rem 0; border-top: 1px solid var(--rule); }
+.posts .meta { margin: 0 0 0.35rem; }
+.posts h2 { margin: 0 0 0.4rem; }
+.posts h2 a { color: var(--ink); text-decoration: none; }
+.posts h2 a:hover { text-decoration: underline; text-underline-offset: 0.15em; }
+.posts p { margin: 0; color: var(--ink-2); }
