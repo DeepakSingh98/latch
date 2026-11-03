@@ -35,7 +35,7 @@ WGMMA_ARITHMETIC = ("explicit BF16 operands/output; wgmma FP32 accumulation from
 REDUCTION_SOURCES = {
     "p9_rowblock.py": "bd51603fc7dab1ee778cc7346f8896552562c53673647c439b0712d766be22be",
     "p6d_rules.py": "08c34e48b66c71f3c357e3de240dc711e0c05b6f46999cda290da3f7d7cd0585",
-    "codegen_rules.py": "349be2aedbdcfdfcc4aac85bcfaac64b8b02328f4c94df62449393046936d6b9",
+    "codegen_rules.py": "f32c8f33a18b39689ba09344ade94a459a3173706edb72392bd9cbed1ea5975a",
 }
 
 

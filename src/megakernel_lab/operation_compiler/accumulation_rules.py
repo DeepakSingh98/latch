@@ -70,6 +70,45 @@ never an expression, rounding or reduction order.
 * ``fsspread`` -- (LATCH-TRAIN-SYNC, with fsbatch + fswarp) sum t of a batch is combined by a designated warp of CTA
   t % gridDim.x once all its tickets are in, instead of every combine running on the last-arriving CTA after its own
   partials: same partials, same order, same butterflies, same ticket reset. No CTA waits before its own deposits.
+* ``rilp`` -- exact thread-per-result reductions of 1-16 leaves (e.g. a mean over a few stacked
+  streams, or a sum over a size-1 axis) evaluate 2-8 grid-stride results per thread per round, issuing every leaf
+  load before any store (codegen_rules.batched_results). Each result keeps its leaves, butterfly tree, rounding and
+  single store; with one 256-thread CTA per SM the unbatched loop keeps only its 1-8 leaf loads in flight.
+* ``rinl`` -- an exact reduction of at most 16 leaves whose FP32 summand is a single-reader
+  elementwise value evaluates that value's own expression at each leaf: e.g. ``sum(x * w, size-1 axis)``. The
+  summand is no longer stored and re-read; the program is compiled with --fmad=false, so every moved operation
+  rounds exactly as in its own phase.
+* ``rleaf`` -- a chained row stage (ROW_CHAIN) evaluates a per-element leaf again from its
+  single kept register operand and at most two loads of values the group only reads, instead of keeping every such
+  leaf in its own ck_ register array (e.g. many per-row products r_g * s_k[i] of one row group: one kept r_g instead
+  of one array per product). Same expression and operands (--fmad=false), so bit-identical leaves.
+* ``rhoist2`` -- warp-per-row groups hoist their external reads up to 128 registers per thread
+  (row_fusion.HOIST2_BUDGET) instead of 96; next-row pipelining keeps its 96-register admission. Every element's
+  reads are issued before any compute; values unchanged. It takes effect only where the execution policy's group
+  features include ``rhoist`` (the read hoisting it widens); elsewhere selecting it changes nothing.
+* ``rsum1`` -- a one-leaf exact reduction (e.g. a sum over a size-1 axis of x * w, after rinl)
+  that is read only at its own element index by elementwise bodies and row groups is evaluated in those readers
+  ('(0.0f + leaf)' with the same rounding; --fmad=false) and never stored. Refused for kept results, view readers,
+  other reader kinds or index maps, and whenever an operand root is written between the reduction and a reader.
+* ``rwarp`` -- an exact CTA-per-row last-axis reduction of at least 1024 rows and at most 32 rounds per thread runs one
+  warp per row (ops/vector_bodies.py), replaying the same 8 x 32 tree: the same per-lane partial sums in the same
+  order, the same butterflies and the same final combine.
+* ``rstage`` -- ROW_CHAIN row groups store their per-row results after the last stage, and the leaf loops of up to 4
+  consecutive simple stages are issued before their trees (``leaf{j}_`` register arrays). Same leaves and trees.
+* ``ridx`` -- in warp-per-row bodies with rows * W < 2**32, row-constant index algebra is rewritten in terms of the
+  row index (ops/row_rewrites.py); the same unsigned values, so every address and guard is unchanged.
+* ``rearly`` -- consumers of a row group's prologue values that precede its reduction become epilogue candidates of
+  that group (with a dependency-cycle guard).
+* ``rremat`` -- a row-scaled FP32 row-group value read only at its own element index by later elementwise phases is
+  recomputed there (same expression, --fmad=false) and not stored.
+* ``rslot`` -- slot-axis token-row groups over [T, K, W] tensors (forward phases only, at least 1024 rows and at most
+  32 slots, guarded prologue) run as one warp-per-token-row phase that replays the exact slot-axis and row trees
+  (ops/slot_rows.py). Exact slot-axis reductions also record their structure (``slot_reduction`` phase metadata).
+* ``rnarrow`` -- rows narrower than a warp are packed one row per lane group with 8 unrolled steps
+  (ops/inflight_bodies.py): softmax / log-softmax and their backward under ``wsoftn``, and argmax rows of width
+  <= 16 with at least 256 rows; ROW_CHAIN admits the packed form. Each row keeps its exact tree.
+* ``rmid`` -- softmax rows of width 32 < W <= 256 with W % 32 != 0 and at least 128 rows use the existing exact
+  warp-per-row form.
 * ``dcast`` -- (capture ABI, ops/derived_casts.py) a ``cat_cast`` of FP32 parameters becomes persistent derived state
   read by every reader; a program that leaves those parameters unchanged commits nothing, one that updates them
   commits the cast of the updated values, and the runtime recasts after host writes. Same values every launch.
@@ -82,7 +121,8 @@ from dataclasses import replace
 
 UPDATE_PRESET_RULES = ("fsgather", "fswarp", "wsoftn", "fsdeep", "rorder", "rowchain", "fsmix", "fsfence")
 RULES = ("castview", "fsgather", "fswarp", "wsoftn", "fsdeep", "rorder", "cmulti", "rowchain", "fsmix", "accfuse", "fsfence", "dcast",
-         "fsdeepx", "vec8", "vec4m", "fsmixl", "fsload", "fscast", "fsmix8", "fsspread")
+         "fsdeepx", "vec8", "vec4m", "fsmixl", "fsload", "fscast", "fsmix8", "fsspread", "rilp", "rinl", "rleaf", "rhoist2", "rsum1",
+         "rwarp", "rstage", "ridx", "rearly", "rremat", "rslot", "rnarrow", "rmid")
 # LATCH-B32-TRANSFER: "update" = the rules measured non-regressing on a one-update training program (no
 # accumulator state; TinyMoE recipe Q, B32 x 1024, same idle H100, paired with the program without them). Not in it:
 # castview (+0.34 ms there: the FP32 expert-gradient copy has two readers, AdamW and the clip square sums, and each
@@ -120,6 +160,8 @@ def current():
 
 
 def active(rule):
+    if rule not in RULES:
+        raise ValueError(f"unknown accumulation rule {rule!r}; rules are {RULES}")
     return rule in rules_of(_RULES.get())
 
 
@@ -136,7 +178,7 @@ def features():
     """Extra group-rule features for the standalone flat common planner."""
     chosen = rules_of(_RULES.get())
     return "".join("+" + rule for rule in ("fsgather", "fswarp", "cmulti", "rowchain", "fsmix", "fsfence", "vec8", "vec4m",
-                                           "fsmixl", "fsload", "fscast", "fsmix8", "fsspread")
+                                           "fsmixl", "fsload", "fscast", "fsmix8", "fsspread", "rilp", "rinl", "rleaf", "rhoist2", "rsum1")
                    if rule in chosen)
 
 

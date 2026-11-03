@@ -52,7 +52,9 @@ FEATURES = ('lsink', 'rot', 'defer', 'chains', 'prologue', 'joint', 'jointbig', 
             # LATCH-SELECTIVE-10 (ops.accumulation_rules)
             'fsgather', 'fswarp', 'cmulti', 'rowchain', 'fsmix', 'fsfence', 'vec8', 'vec4m', 'tsplitx',
             # LATCH-TRAIN-SYNC (ops.accumulation_rules)
-            'fsmixl', 'fsload', 'fscast', 'fsmix8', 'fsspread')
+            'fsmixl', 'fsload', 'fscast', 'fsmix8', 'fsspread',
+            # row-group issue rules (ops.accumulation_rules)
+            'rilp', 'rinl', 'rleaf', 'rhoist2', 'rsum1')
 
 
 def features_of(value):
@@ -263,14 +265,44 @@ def split_components(phases, dtypes, *, ctypes, layouts=None, level_split=False,
     return result, records
 
 
+def _topological_dependencies(phases, root):
+    """SSA producers plus ordered effects on repeated writes or explicit mutations.
+
+    Fusion can move an SSA producer after a reader, so those edges must use the
+    global producer table. Mutable roots instead denote successive versions in
+    emitted effect order: reads use the preceding writer, and an overwrite waits
+    for both the preceding writer and intervening readers. Reads before the first
+    write consume the incoming version, as in execution_plan.contracts. Alias
+    names and internal mutations participate at whole-root granularity.
+    """
+    mutations = [{root(n) for n in phase.get('internal_mutations', ())} for phase in phases]
+    reads = [{root(n) for n in phase['reads']} | mutation for phase, mutation in zip(phases, mutations)]
+    writes = [{root(n) for n in phase['writes']} | mutation for phase, mutation in zip(phases, mutations)]
+    writers = {}
+    for k, roots in enumerate(writes):
+        for name in roots:
+            writers.setdefault(name, []).append(k)
+    mutable = {name for name, indices in writers.items() if len(indices) > 1}
+    mutable.update(name for roots in mutations for name in roots)
+    produced_by = {name: indices[0] for name, indices in writers.items() if name not in mutable}
+    deps = [{produced_by[r] for r in roots if r in produced_by and produced_by[r] != k}
+            for k, roots in enumerate(reads)]
+    writer, readers = {}, {}
+    for k, (rd, wr) in enumerate(zip(reads, writes)):
+        rd, wr = rd & mutable, wr & mutable
+        deps[k].update(writer[name] for name in rd | wr if name in writer)
+        deps[k].update(reader for name in wr for reader in readers.get(name, ()))
+        for name in rd - wr:
+            readers.setdefault(name, set()).add(k)
+        for name in wr:
+            writer[name] = k
+            readers[name] = set()
+    return deps
+
+
 def _topological(phases, root):
     import heapq
-    produced_by = {}
-    for k, phase in enumerate(phases):
-        for w in phase['writes']:
-            produced_by[root(w)] = k
-    deps = [{produced_by[root(r)] for r in phase['reads'] if root(r) in produced_by and produced_by[root(r)] != k}
-            for k, phase in enumerate(phases)]
+    deps = _topological_dependencies(phases, root)
     # The old scan selects the smallest currently ready original index. A
     # min-heap makes exactly that selection without rescanning the whole graph
     # once for every emitted phase.
@@ -1343,7 +1375,7 @@ def _constant_address(text):
     return re.fullmatch(r'v_\w+\[\d+(?:LL)?\]', text) is not None
 
 
-def vector_elementwise(phase, numel, texts, unroll=1, bulk=False):
+def vector_elementwise(phase, numel, texts, unroll=1, bulk=False, bf16_texts=None):
     """FP32 elementwise phase as one float4 load per operand and one float4 store per result per 4 elements.
 
     texts maps each identity-addressed read/store text (``v_x[<flat index>]``) to its pointer. Every memory
@@ -1385,16 +1417,22 @@ def vector_elementwise(phase, numel, texts, unroll=1, bulk=False):
         computes.append(head)
         stores.append((name, bool(st), st.group(2) if st else None))
     regs = sorted({f'r_{n}' for n in names}, key=len, reverse=True)
+    from . import vector_bodies                                # elementwise_rules (all default off)
+    hb = vector_bodies.bf16_operands(computes, bf16_texts, pattern)
 
     def block(jv, sfx):
         # One float4 index jv: every load, then the unchanged per-element expressions, then the float4 stores.
         loads_, compute_, stores_ = [], [], []
         loads_ = [f'  const float4 {q}{sfx} = reinterpret_cast<const float4*>({texts[t]})[{jv}];' for t, q in loads.items()]
+        loads_ += [f'  const uint2 {b}{sfx} = reinterpret_cast<const uint2*>({bf16_texts[t]})[{jv}];' for t, b in hb.items()]
         for u, comp in enumerate('xyzw'):
             for head in computes:
                 line = head
                 for t in sorted(loads, key=len, reverse=True):
                     line = line.replace(t, f'{loads[t]}{sfx}.{comp}')
+                for t in sorted(hb, key=len, reverse=True):
+                    line = line.replace(f'__bfloat162float({t})', vector_bodies.bf16_lane(hb[t], sfx, u))
+                line = vector_bodies.lane_invariant_rows(line, jv)
                 line = re.sub(r'\bi\b', f'(4 * {jv} + {u})', line)
                 for reg in regs:
                     line = re.sub(rf'\b{re.escape(reg)}\b', f'{reg}_{u}{sfx}', line)
@@ -1410,6 +1448,9 @@ def vector_elementwise(phase, numel, texts, unroll=1, bulk=False):
             lanes = [f'{loads[acc]}{sfx}.{c} + r_{name}_{u}{sfx}' if acc else f'r_{name}_{u}{sfx}' for u, c in enumerate('xyzw')]
             stores_.append(f'reinterpret_cast<float4*>(v_{name})[{jv}] = make_float4({", ".join(lanes)});')
         return loads_, compute_, stores_
+    if hb and bulk:
+        hb = {}                                                # the bulk path stages float4 operands only
+    unroll = vector_bodies.choose_unroll(unroll, len(loads), len(hb))
     if bulk and 1 <= len(loads) <= 4:
         # P9-B bulk streaming (kernels/p9_bulk.cuh): chunks of every operand land in shared memory through
         # cp.async.bulk (thread 0 issues, a transaction-count mbarrier per stage completes); every thread computes
@@ -1457,6 +1498,9 @@ def vector_elementwise(phase, numel, texts, unroll=1, bulk=False):
             '}'])
     if unroll <= 1:
         loads_, compute_, stores_ = block('j', '')
+        rolled = vector_bodies.rolling(loads_, compute_, stores_, numel // 4)   # elementwise_rules 'rolling'
+        if rolled is not None:
+            return rolled
         body = loads_ + compute_ + ['  ' + x for x in stores_]
         return (f'for (long long j = (long long)blockIdx.x * blockDim.x + threadIdx.x; j < {numel // 4}LL; '
                 f'j += (long long)gridDim.x * blockDim.x) {{\n' + '\n'.join(body) + '\n}')

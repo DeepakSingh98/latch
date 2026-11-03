@@ -7,6 +7,46 @@
 
 namespace latch_ragged {
 
+// Optional executed-work observation. Only the CTA's thread 0 updates exact integer counters, after an actual
+// contraction stage or completed output tile. No counter is reconstructed from a separate pass over offsets.
+__device__ __forceinline__ void work_contraction(int64_t* work, int e) {
+  if (work && threadIdx.x == 0) atomicAdd(reinterpret_cast<unsigned long long*>(work + 4LL * e + 2), 1ULL);
+}
+template<bool OUTER>
+__device__ __forceinline__ void work_tile(int64_t* work, int e, int m0, int n0, int m, int n, int k, int bm, int bn) {
+  if (!work || threadIdx.x != 0) return;
+  const unsigned long long mr = (m - m0 < bm ? m - m0 : bm), nr = (n - n0 < bn ? n - n0 : bn);
+  auto p = reinterpret_cast<unsigned long long*>(work + 4LL * e);
+  if (n0 == 0 && (!OUTER || m0 == 0)) atomicAdd(p, OUTER ? (unsigned long long)k : mr);
+  atomicAdd(p + 1, 1ULL);
+  atomicAdd(p + 3, mr * nr);
+}
+// Claimed bodies count a task's executed 64-k contraction stages in a register (one increment per
+// executed stage, as work_contraction) and add the count with the task's tile record when the task completes, so a
+// claimed task costs thread 0 four atomics instead of one per stage. Totals equal the static bodies' counters.
+template<bool OUTER>
+__device__ __forceinline__ void work_task(int64_t* work, int e, int m0, int n0, int m, int n, int k, int bm, int bn,
+                                          int steps) {
+  if (!work || threadIdx.x != 0) return;
+  if (steps) atomicAdd(reinterpret_cast<unsigned long long*>(work + 4LL * e + 2), (unsigned long long)steps);
+  work_tile<OUTER>(work, e, m0, n0, m, n, k, bm, bn);
+}
+// Zero the 128-byte smem rows >= keep of `chunks` consecutive 64-row (8 KiB) MN-major operand chunks starting at dst
+// (whole rows, so the 128-byte swizzle is irrelevant), then order the generic stores before async-proxy (wgmma) reads.
+// CTA-uniform call; ends with a CTA barrier.
+template<int CHUNKS>
+__device__ __forceinline__ void zero_tail_rows(unsigned dst, int keep) {
+#pragma unroll
+  for (int it = 0; it < (CHUNKS * 512 + 255) / 256; ++it) {
+    const int idx = threadIdx.x + it * 256, chunk = idx / 512, row = (idx % 512) / 8, col = idx % 8;
+    if (chunk < CHUNKS && row >= keep)
+      asm volatile("st.shared.v4.u32 [%0], {%1, %1, %1, %1};" ::"r"(dst + chunk * 8192 + row * 128 + col * 16), "r"(0u)
+                   : "memory");
+  }
+  pops4b::async_fence();
+  __syncthreads();
+}
+
 template<int E>
 __device__ __noinline__ void counts(const int64_t* ids, int64_t* offsets, int rows, float* smem) {
   // LATCH-TINYMOE-25: all 256 threads read disjoint rows and add exact integer counts in shared
@@ -159,10 +199,16 @@ __device__ __noinline__ void product(popsc::BArgs g, const int64_t* offsets, int
 // over the tile's rows (one warp per row, lanes over columns) with its unchanged per-element body epi(i), i the flat
 // index of the [rows, N] result. NoEpi: no consumer.
 struct NoEpi {};
+// Tile readiness (ops/tile_ready.py): a consumer type declaring tile_tag is not an element consumer but a per-tile
+// readiness publisher, called once per stored tile with the tile's first packed row, rows and columns.
+template<class T, class = void> struct epi_tile : std::false_type {};
+template<class T> struct epi_tile<T, std::void_t<typename T::tile_tag>> : std::bool_constant<T::publishes> {};
 template<class EPI>
 __device__ __forceinline__ void tile_consumers(const EPI& epi, int row0, int m0, int n0, int M, int N, long long ldc,
                                                int BM, int BN) {
-  if constexpr (!std::is_same<EPI, NoEpi>::value) {
+  if constexpr (epi_tile<EPI>::value) {
+    epi.tile_done((long long)row0 + m0, M - m0 < BM ? M - m0 : BM, N - n0 < BN ? N - n0 : BN);
+  } else if constexpr (!std::is_same<EPI, NoEpi>::value) {
     // Uniform trip counts and no thread-dependent branch (a divergent path or a call would make ptxas serialize the
     // product's warpgroup MMA): lanes past the tile's last row/column repeat that in-tile element, an idempotent
     // recomputation (the generator admits only consumers that never read their own results from memory).
@@ -193,7 +239,7 @@ struct FlatCfg {
 
 template<int E, int BM, int BN, int WM, bool AK, bool BKC, int NST, bool OUTER, int P, class EPI = NoEpi>
 DEV void flat_impl(const popsc::BArgs* gs, const int64_t* offsets, int rows, float* smem, int rot,
-                   const EPI& epi = EPI{}) {
+                   const EPI& epi = EPI{}, int64_t* work = nullptr) {
   static_assert(std::is_same<EPI, NoEpi>::value || !OUTER, "tile-local consumers follow right products");
   using C = pops4b::Cfg<BM, BN, WM>;
   constexpr int STAGE = FlatCfg<E, BM, BN, WM, NST, P>::STAGE;
@@ -226,14 +272,14 @@ DEV void flat_impl(const popsc::BArgs* gs, const int64_t* offsets, int rows, flo
   const int wg = tid >> 7, lane = tid & 31, warp = (tid >> 5) & 3;
   const int wgm = WM == 2 ? wg : 0, wgn = WM == 2 ? 0 : wg;
   const int kfix = (g.K + 63) / 64;
-  struct Task { const s101h::bf16* A; const s101h::bf16* B[P]; s101h::bf16* Cp[P]; int lo, M, K, m0, n0, nk; };
+  struct Task { const s101h::bf16* A; const s101h::bf16* B[P]; s101h::bf16* Cp[P]; int e, lo, M, K, m0, n0, nk; };
   auto task = [&](int i, Task& t) {
     const int id = me + i * G;
     int e = 0;
 #pragma unroll 1
     while (e < E - 1 && id >= pre[e + 1]) ++e;
     const int local = id - pre[e], lo = off[e], hi = off[e + 1];
-    t.lo = lo;
+    t.e = e; t.lo = lo;
     t.m0 = (local / tn) * BM;
     t.n0 = (local % tn) * BN;
     if (OUTER) {
@@ -289,6 +335,7 @@ DEV void flat_impl(const popsc::BArgs* gs, const int64_t* offsets, int rows, flo
         for (int j = 0; j < C::R; ++j) acc[p][a][j] = 0.f;         // only an empty OUTER segment stores these
 #pragma unroll 1
     for (int kk = 0; kk < t.nk; ++kk, ++q) {
+      work_contraction(work, t.e);
       s101h::cpa_wait<NST - 2>();
       pops4b::async_fence();                                       // cp.async (generic proxy) -> wgmma (async proxy)
       __syncthreads();
@@ -346,14 +393,16 @@ DEV void flat_impl(const popsc::BArgs* gs, const int64_t* offsets, int rows, flo
         }
       }
     tile_consumers(epi, t.lo, t.m0, t.n0, t.M, g.N, g.ldc, BM, BN);
+    work_tile<OUTER>(work, t.e, t.m0, t.n0, t.M, g.N, t.K, BM, BN);
   }
   s101h::cpa_wait<0>();
   __syncthreads();                                                 // every wgmma/cp.async of the phase is done
 }
 
 template<int E, int BM, int BN, int WM, bool AK, bool BKC, int NST, bool OUTER, class EPI = NoEpi>
-DEV void flat(const popsc::BArgs& g, const int64_t* offsets, int rows, float* smem, int rot, const EPI& epi = EPI{}) {
-  flat_impl<E, BM, BN, WM, AK, BKC, NST, OUTER, 1, EPI>(&g, offsets, rows, smem, rot, epi);
+DEV void flat(const popsc::BArgs& g, const int64_t* offsets, int rows, float* smem, int rot,
+              const EPI& epi = EPI{}, int64_t* work = nullptr) {
+  flat_impl<E, BM, BN, WM, AK, BKC, NST, OUTER, 1, EPI>(&g, offsets, rows, smem, rot, epi, work);
 }
 
 // g1 must equal g0 except for B and C (same A view, strides, extents); the generator checks this statically.
@@ -377,7 +426,7 @@ template<typename T> struct Store<T, T> { static __device__ __forceinline__ T at
 template<typename T, int E, bool OUTER, typename O = T>
 __device__ __noinline__ void simt(const T* a, const T* b, const int64_t* offsets, O* out,
     int rows, int m, int n, int k, long long sam, long long sak, long long sbk,
-    long long sbn, long long bsb, long long bsc, float* smem) {
+    long long sbn, long long bsb, long long bsc, float* smem, int64_t* work = nullptr) {
   if (offsets[0] != 0 || offsets[E] != rows) __trap();
   const int tn = (n + 15) / 16;
   int total = 0;
@@ -401,6 +450,7 @@ __device__ __noinline__ void simt(const T* a, const T* b, const int64_t* offsets
     const int r = (local / tn) * 16 + tr, c = (local % tn) * 16 + tc;
     float acc = 0.f;
     for (int z = 0; z < kk; z += 16) {
+      work_contraction(work, e);
       smem[threadIdx.x] = r < mm && z + tc < kk ? widen(aa[(long long)r * sam + (z + tc) * sak]) : 0.f;
       smem[256 + threadIdx.x] = c < n && z + tr < kk ? widen(bb[(long long)(z + tr) * sbk + c * sbn]) : 0.f;
       __syncthreads();
@@ -408,6 +458,7 @@ __device__ __noinline__ void simt(const T* a, const T* b, const int64_t* offsets
       __syncthreads();
     }
     if (r < mm && c < n) cc[(long long)r * n + c] = Store<O, T>::at(acc);
+    work_tile<OUTER>(work, e, (local / tn) * 16, (local % tn) * 16, mm, n, kk, 16, 16);
     __syncthreads();
   }
 }

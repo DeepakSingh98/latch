@@ -9,11 +9,30 @@
 //      results are never stored (stores are masked to the segment), so stored values are unchanged;
 //   B  BKC:  the stacked per-segment matrices as [groups * N, K] K-major, box {64, BN} (a tile's columns past N read
 //            the next segment's rows; never stored);
-//      !BKC: as [groups * K, N] N-major, box {64, 64}; requires K % 64 == 0 so a stage never mixes segments' k rows.
+//      !BKC: as [groups * K, N] N-major, box {64, 64}. When K % 64 != 0 (feature "ktail") a task's last stage
+//            holds the next segment's first k rows past K: after it lands and before any MMA reads it, those rows are
+//            zeroed (whole 128-byte rows) and made visible to the async proxy, so every MMA sees exactly the cp.async
+//            body's operands (absent k rows +0; A's absent k columns are zero-filled by its map).
 // Stage barriers follow the pops4b TMA body (pops4b::tma_bars; POPS4B_PERSIST carries completed phases across calls).
 #pragma once
 #include "pops4b_tma.cuh"
 #include "ragged_experts.cuh"
+
+// m64n160k16 (K-major B) for claimed products whose N is 160 or 480 (segmented_products feature "fit"): one or three
+// exact column tiles instead of 2 x 128 / 4 x 128 padded ones. Same
+// instruction family, operand descriptors, k16 order and FP32 accumulation as the vendored widths.
+namespace s101h {
+#ifndef LATCH_RAGGED_WG160
+#define LATCH_RAGGED_WG160
+template <int TA, int TB> DEV void mme_wg160(float (&d)[80], uint64_t da, uint64_t db, int acc) {
+  asm volatile("{\n.reg .pred p;\nsetp.ne.b32 p, %82, 0;\n"
+               "wgmma.mma_async.sync.aligned.m64n160k16.f32.bf16.bf16 {%0, %1, %2, %3, %4, %5, %6, %7, %8, %9, %10, %11, %12, %13, %14, %15, %16, %17, %18, %19, %20, %21, %22, %23, %24, %25, %26, %27, %28, %29, %30, %31, %32, %33, %34, %35, %36, %37, %38, %39, %40, %41, %42, %43, %44, %45, %46, %47, %48, %49, %50, %51, %52, %53, %54, %55, %56, %57, %58, %59, %60, %61, %62, %63, %64, %65, %66, %67, %68, %69, %70, %71, %72, %73, %74, %75, %76, %77, %78, %79}, %80, %81, p, 1, 1, %83, %84;\n}\n"
+               : "+f"(d[0]), "+f"(d[1]), "+f"(d[2]), "+f"(d[3]), "+f"(d[4]), "+f"(d[5]), "+f"(d[6]), "+f"(d[7]), "+f"(d[8]), "+f"(d[9]), "+f"(d[10]), "+f"(d[11]), "+f"(d[12]), "+f"(d[13]), "+f"(d[14]), "+f"(d[15]), "+f"(d[16]), "+f"(d[17]), "+f"(d[18]), "+f"(d[19]), "+f"(d[20]), "+f"(d[21]), "+f"(d[22]), "+f"(d[23]), "+f"(d[24]), "+f"(d[25]), "+f"(d[26]), "+f"(d[27]), "+f"(d[28]), "+f"(d[29]), "+f"(d[30]), "+f"(d[31]), "+f"(d[32]), "+f"(d[33]), "+f"(d[34]), "+f"(d[35]), "+f"(d[36]), "+f"(d[37]), "+f"(d[38]), "+f"(d[39]), "+f"(d[40]), "+f"(d[41]), "+f"(d[42]), "+f"(d[43]), "+f"(d[44]), "+f"(d[45]), "+f"(d[46]), "+f"(d[47]), "+f"(d[48]), "+f"(d[49]), "+f"(d[50]), "+f"(d[51]), "+f"(d[52]), "+f"(d[53]), "+f"(d[54]), "+f"(d[55]), "+f"(d[56]), "+f"(d[57]), "+f"(d[58]), "+f"(d[59]), "+f"(d[60]), "+f"(d[61]), "+f"(d[62]), "+f"(d[63]), "+f"(d[64]), "+f"(d[65]), "+f"(d[66]), "+f"(d[67]), "+f"(d[68]), "+f"(d[69]), "+f"(d[70]), "+f"(d[71]), "+f"(d[72]), "+f"(d[73]), "+f"(d[74]), "+f"(d[75]), "+f"(d[76]), "+f"(d[77]), "+f"(d[78]), "+f"(d[79])
+               : "l"(da), "l"(db), "r"(acc), "n"(TA), "n"(TB));
+}
+template <> struct MmeWg<160> { template <int TA, int TB> DEV static void run(float (&d)[80], uint64_t da, uint64_t db, int acc) { mme_wg160<TA, TB>(d, da, db, acc); } };
+#endif
+}  // namespace s101h
 
 namespace latch_ragged {
 
@@ -21,7 +40,7 @@ namespace latch_ragged {
 // rounding of the result); operands, task enumeration and accumulation order are unchanged. No tile consumers.
 template<int E, int BM, int BN, int WM, bool BKC, int NST, int P, class EPI = NoEpi, bool RAW = false>
 DEV void tflat_impl(const void* tA, const void* tB0, const void* tB1, const popsc::BArgs* gs, const int64_t* offsets,
-                    int rows, float* smem, int rot, const EPI& epi = EPI{}) {
+                    int rows, float* smem, int rot, const EPI& epi = EPI{}, int64_t* work = nullptr) {
   using C = pops4b::Cfg<BM, BN, WM>;
   constexpr int STAGE = C::A_BYTES + P * C::B_BYTES;
   static_assert(NST >= 2 && NST <= 8 && (P == 1 || P == 2), "stages / products");
@@ -118,8 +137,13 @@ DEV void tflat_impl(const void* tA, const void* tB0, const void* tB1, const pops
     task(i, t);
 #pragma unroll 1
     for (int kk = 0; kk < nk; ++kk, ++q) {
+      work_contraction(work, t.e);
       const int st = q % NST;
       pops4b::bar_wait(bar0 + 8 * st, (uses0[st] + (unsigned)(q / NST)) & 1u);
+      if constexpr (!BKC) {
+        if ((g.K & 63) && kk == nk - 1)                            // CTA-uniform: N-major B k tail (see header)
+          zero_tail_rows<P * (BN / 64)>(base + st * STAGE + C::A_BYTES, g.K & 63);
+      }
 #pragma unroll
       for (int p = 0; p < P; ++p)
 #pragma unroll
@@ -180,6 +204,7 @@ DEV void tflat_impl(const void* tA, const void* tB0, const void* tB1, const pops
       }
     }
     tile_consumers(epi, t.lo, t.m0, t.n0, t.M, g.N, g.ldc, BM, BN);
+    work_tile<false>(work, t.e, t.m0, t.n0, t.M, g.N, g.K, BM, BN);
   }
   __syncthreads();                                                 // every wgmma read of the stages is complete
   if (tid == 0) {
@@ -201,7 +226,7 @@ DEV void tflat_impl(const void* tA, const void* tB0, const void* tB1, const pops
 // scale-d = 0, rounding and masked stores as latch_ragged::flat with OUTER; an empty segment stores +0.
 template<int E, int BM, int BN, int WM, int NST>
 DEV void touter(const void* tA, const void* tB, const popsc::BArgs& g, const int64_t* offsets, int rows, float* smem,
-                int rot) {
+                int rot, int64_t* work = nullptr) {
   using C = pops4b::Cfg<BM, BN, WM>;
   constexpr int STAGE = C::A_BYTES + C::B_BYTES;
   static_assert(NST >= 2 && NST <= 8, "stages");
@@ -275,6 +300,7 @@ DEV void touter(const void* tA, const void* tB, const popsc::BArgs& g, const int
       for (int j = 0; j < C::R; ++j) acc[a][j] = 0.f;              // an empty segment stores these
 #pragma unroll 1
     for (int kk = 0; kk < t.nk; ++kk, ++q) {
+      work_contraction(work, t.e);
       const int st = q % NST;
       pops4b::bar_wait(bar0 + 8 * st, (uses0[st] + (unsigned)(q / NST)) & 1u);
       const unsigned sA = base + st * STAGE, sB = sA + C::A_BYTES;
@@ -330,6 +356,7 @@ DEV void touter(const void* tA, const void* tB, const popsc::BArgs& g, const int
         }
       }
     }
+    work_tile<true>(work, t.e, t.m0, t.n0, g.M, g.N, t.K, BM, BN);
   }
   __syncthreads();
   if (tid == 0) {
@@ -344,8 +371,8 @@ DEV void touter(const void* tA, const void* tB, const popsc::BArgs& g, const int
 
 template<int E, int BM, int BN, int WM, bool BKC, int NST, class EPI = NoEpi>
 DEV void tflat(const void* tA, const void* tB, const popsc::BArgs& g, const int64_t* offsets, int rows, float* smem,
-               int rot, const EPI& epi = EPI{}) {
-  tflat_impl<E, BM, BN, WM, BKC, NST, 1, EPI>(tA, tB, tB, &g, offsets, rows, smem, rot, epi);
+               int rot, const EPI& epi = EPI{}, int64_t* work = nullptr) {
+  tflat_impl<E, BM, BN, WM, BKC, NST, 1, EPI>(tA, tB, tB, &g, offsets, rows, smem, rot, epi, work);
 }
 
 // Paired form (one A map shared by both products; g1 differs from g0 only in B and C).

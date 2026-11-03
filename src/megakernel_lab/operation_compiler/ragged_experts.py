@@ -23,7 +23,10 @@ OUTER_WIDE = "latch_ops.ragged_outer_widened.default"
 OUTER_ACC = "latch_ops.ragged_outer_acc"
 # LATCH-TRAIN-PRECISION: BF16 operands, FP32 accumulation, unrounded FP32 result (opt-in training precision policies).
 MM_RAW = "latch_ops.ragged_mm_raw.default"
-TARGETS = (ORDER, MM, MM_RAW, OUTER, OUTER_WIDE, OUTER_ACC)
+MM_OBSERVED = "latch_ops.ragged_mm_observed.default"
+OUTER_OBSERVED = "latch_ops.ragged_outer_observed.default"
+WORK_COLUMNS = ("valid_rows", "output_tiles", "contraction_tiles", "output_elements")
+TARGETS = (ORDER, MM, MM_RAW, OUTER, OUTER_WIDE, OUTER_ACC, MM_OBSERVED, OUTER_OBSERVED)
 
 
 def _segments(offsets, rows):
@@ -174,6 +177,61 @@ class _RaggedMM(torch.autograd.Function):
 def ragged_mm(x, weight, offsets):
     """Differentiable packed segmented right product; first-order AD supported."""
     return _RaggedMM.apply(x, weight, offsets)
+
+
+@torch.library.custom_op("latch_ops::ragged_mm_observed", mutates_args=())
+def _mm_observed(x: torch.Tensor, weight: torch.Tensor, offsets: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+    # Eager has no native tile instrumentation. -1 is deliberately not an inferred measurement.
+    result = _mm(x, weight, offsets)
+    work = offsets.new_full((offsets.numel() - 1, len(WORK_COLUMNS)), -1)
+    return result, work
+
+
+@_mm_observed.register_fake
+def _mm_observed_fake(x, weight, offsets):
+    return _mm_fake(x, weight, offsets), offsets.new_empty((offsets.numel() - 1, len(WORK_COLUMNS)))
+
+
+@torch.library.custom_op("latch_ops::ragged_outer_observed", mutates_args=())
+def _outer_observed(x: torch.Tensor, dy: torch.Tensor, offsets: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+    return _outer(x, dy, offsets), offsets.new_full((offsets.numel() - 1, len(WORK_COLUMNS)), -1)
+
+
+@_outer_observed.register_fake
+def _outer_observed_fake(x, dy, offsets):
+    return _outer_fake(x, dy, offsets), offsets.new_empty((offsets.numel() - 1, len(WORK_COLUMNS)))
+
+
+class _ObservedRaggedMM(torch.autograd.Function):
+    @staticmethod
+    def forward(x, weight, offsets):
+        return _mm_observed(x, weight, offsets)
+
+    @staticmethod
+    def setup_context(ctx, inputs, output):
+        ctx.save_for_backward(*inputs)
+        ctx.mark_non_differentiable(output[1])
+
+    @staticmethod
+    def backward(ctx, dy, _dwork):
+        x, weight, offsets = ctx.saved_tensors
+        with torch.no_grad():
+            dx, _dx_work = _mm_observed(dy.contiguous(), weight.transpose(1, 2), offsets)
+            dw, _dw_work = _outer_observed(x, dy.contiguous(), offsets)
+        return dx, dw, None
+
+
+def ragged_mm_observed(x, weight, offsets):
+    """The same segmented product plus native executed-work counters (and counters for both VJP products).
+
+    Work is int64 [groups,4]: valid packed rows (counted once), executed output tiles, executed contraction
+    tiles, and valid output elements. The contraction tile size is in lowering metadata (64 WGMMA, 16 SIMT).
+    Outer-product VJPs count their segment's contracted rows once, including zero for empty segments.
+    Native counters are incremented at completed tasks. Eager implementations return -1 (not instrumented).
+    Observation uses unpaired static assignment of the existing arithmetic bodies; it is a separate artifact
+    from unobserved claimed/paired products and its instrumentation overhead belongs in any measured clock.
+    """
+    return _ObservedRaggedMM.apply(x, weight, offsets)
 
 
 def token_topk(scores, k=2):

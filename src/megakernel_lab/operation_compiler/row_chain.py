@@ -71,6 +71,12 @@ def _form(phase, code):
         return "elementwise", None
     if _FORBIDDEN.search(code):
         return None
+    if kind == "softmax" and engine == "exact_cta_tree_per_warp_narrow" and phase.get("narrow_rows"):
+        from . import inflight_bodies as _inflight     # accumulation_rules 'rnarrow': packed narrow rows
+        m = _inflight.PACK_HEAD.search(code)
+        if m and code.count("blockIdx.x") == 1 and code.count("gridDim.x") == 1:
+            return "warp_pack", int(m[1])
+        return None
     if kind == "softmax" and engine == "exact_cta_tree_per_warp_narrow":
         m = _WARP_ROW_HEAD.search(code)
         if m and code.count("blockIdx.x") == 1 and code.count("gridDim.x") == 1:
@@ -145,7 +151,7 @@ def plan_runs(intervals, phases, layouts, phase_code):
                 forms = None
                 break
             R, per_row = rows
-            if form[0] == "warp_row" and (form[1] != R or per_row >= 32):
+            if form[0] in ("warp_row", "warp_pack") and (form[1] != R or per_row >= 32):
                 forms = None
                 break
             if form[0] == "lane_row" and form[1] * 32 != R:
@@ -242,6 +248,9 @@ def restrict(phase, form, code, per_row):
     if name == "warp_row":
         return _WARP_ROW_HEAD.sub(lambda m: ("for (long long row = latch_rc_r0 + (threadIdx.x >> 5); row < latch_rc_r1; "
                                              "row += blockDim.x >> 5) {"), code, count=1)
+    if name == "warp_pack":
+        from . import inflight_bodies as _inflight
+        return _inflight.pack_restrict(code)
     if name == "lane_row":
         return _LANE_ROW_HEAD.sub(lambda m: ("for (long long latch_rc_q = latch_rc_r0 + threadIdx.x; latch_rc_q < latch_rc_r1; "
                                              "latch_rc_q += blockDim.x) {\n  const long long g = latch_rc_q >> 5;\n"

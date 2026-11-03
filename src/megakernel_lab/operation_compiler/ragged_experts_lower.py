@@ -16,7 +16,8 @@ from contextlib import contextmanager
 from contextvars import ContextVar
 import math
 
-from .ragged_experts import ORDER, MM, MM_RAW, OUTER, OUTER_WIDE, OUTER_ACC, TARGETS
+from .ragged_experts import (ORDER, MM, MM_RAW, OUTER, OUTER_WIDE, OUTER_ACC, TARGETS,
+                             MM_OBSERVED, OUTER_OBSERVED, WORK_COLUMNS)
 
 # Option value -> features of the flattened body. "flat" pairs products sharing A ("pair"); "flat_single" does not.
 # Further "+"-joined features: "tma" (TMA-fed right products), "prefetch" (L2 prefetch of a product's older operands
@@ -38,8 +39,28 @@ _BASES = {"flat": ("pair",), "flat_single": ()}
 # stored tile, no tile walk); their generated per-element bodies are unchanged. Unlike "consume" (tile-local re-read).
 # "sepi" (with "claim"): claimed right products stage each warpgroup's BF16 tile in shared memory and store whole
 # 16-byte row chunks (kernels/ragged_claim.cuh LATCH_CLAIM_SEPI); paired products take 3 stages to fit the staging.
-_EXTRA = ("tma", "prefetch", "rotate", "consume", "narrow", "claim", "repi", "sepi")
+# Further opt-in features (all off unless named; see ops/claimed_products.py and ops/kcat_products.py):
+# "ktail" (needs "tma"): right products with N-major stacked B and K % 64 != 0 take the TMA (and claimed) bodies; the
+#   last stage's k rows past K are zeroed in shared memory and fenced before any MMA reads them. Bitwise.
+# "fit" (needs "claim", "tma"): claimed tiles fit the product extents by padded area (K-major right products: BN in
+#   CLAIM_FIT_BN; task-starved weight-gradient products: CLAIM_NARROW_OUTER_TILE; weight-gradient products: the
+#   smallest padded area among claimed_products.OUTER_TILES; with "bsearch", narrow N-major right products). Every
+#   element keeps its whole k chain in one task, so results are bitwise unchanged.
+# "bsearch" (needs "claim", "tma"): claimed right products find a ticket's segment by binary search over a one-warp
+#   prefix table (kernels/claim_tasks.cuh); N-major B tiles with BN % 64 != 0 are staged as whole 64-column chunks.
+# "scatter" (needs "claim", "tma"): a right product read only by a bijective row unpack stores each row at its unpacked
+#   row with the unpack's bijection check (ops/pack_fusion.py).
+# "route": routing counts and the stable order run on every CTA (kernels/bucketing.cuh); identical integers.
+# "packsum": an FP32 elementwise sum read only by a routing-pack permutation fixed-k sum is evaluated in that sum's
+#   gathered load and not stored. Bitwise.
+# "kcat" (needs "bsearch"; practical precision only): sibling claimed products that are summed become one
+#   K-concatenated claimed product with one BF16 rounding. Not bitwise.
+_EXTRA = ("tma", "prefetch", "rotate", "consume", "narrow", "claim", "repi", "sepi",
+          "ktail", "fit", "bsearch", "scatter", "route", "packsum", "kcat")
 _ALIASES = {"flat_tma": "flat+tma", "flat_pf": "flat+prefetch", "flat_tma_pf": "flat+tma+prefetch"}
+# Features that need others in the same value (checked only for these features).
+_REQUIRES = {"ktail": ("tma",), "fit": ("claim", "tma"), "bsearch": ("claim", "tma"), "scatter": ("claim", "tma"),
+             "kcat": ("bsearch",)}
 
 
 def _features(value):
@@ -48,6 +69,10 @@ def _features(value):
     base, *extra = _ALIASES.get(value, value).split("+")
     if base not in _BASES or any(e not in _EXTRA for e in extra) or len(set(extra)) != len(extra):
         raise ValueError(f"segmented_products must be None or flat|flat_single with optional +{'/+'.join(_EXTRA)}")
+    for e in extra:
+        missing = [r for r in _REQUIRES.get(e, ()) if r not in extra]
+        if missing:
+            raise ValueError(f"segmented_products feature '{e}' requires {' and '.join(repr(r) for r in missing)}")
     return _BASES[base] + tuple(extra)
 
 
@@ -111,6 +136,44 @@ CLAIM_WIDE = 1                        # wide claimed tiles (128 x 256 for K 384,
 CLAIM_MERGE = 1                       # one queue for the two claimed dW products of an interval: measured
                                       # 74.64 -> 74.19 ms bitwise (LATCH_CLAIM_MERGE=0 screens it off)
 CLAIM_HOT_TILE = (128, 64, 2, 6)
+# Observed products (executed-work counters) take the claimed bodies; their counters are recorded per claimed task.
+OBSERVED_CLAIM = True
+# Feature "fit": claimed right products with K-major B take the column tile among CLAIM_FIT_BN that stores the fewest
+# padded columns (ties: the wider tile), e.g. N 160 -> one 160-wide tile instead of 2 x 128, 96 -> 96, 480 -> 3 x 160;
+# widths 384/768 keep 128. A claimed weight-gradient product with fewer than CLAIM_NARROW_OUTER_TASKS tasks at
+# 128 x 128 takes CLAIM_NARROW_OUTER_TILE: twice the tasks, each with the same per-element k chain (rows of its
+# segment), so the longest chains end sooner. Per-element k chains are unchanged in both rules.
+CLAIM_NARROW_OUTER_TASKS = 128
+CLAIM_NARROW_OUTER_TILE = (128, 64, 2, 6)
+CLAIM_FIT_BN = (64, 96, 128, 160)
+
+
+def claim_min_rows():
+    """Average packed rows per segment for a claimed product (the environment override is for screening only)."""
+    import os
+    return int(os.environ.get("LATCH_CLAIM_MIN_ROWS", CLAIM_MIN_ROWS))
+
+
+def _pair_ok(bn):
+    """Paired (flat2) products may take column tile bn (claimed_products.pair_bn_limit; None: no limit)."""
+    from . import claimed_products
+    limit = claimed_products.pair_bn_limit()
+    return limit is None or bn <= limit
+
+
+def fit_bn(n, current):
+    """Column tile for a claimed K-major-B right product of width n (structural; extent only)."""
+    best = current
+    for bn in CLAIM_FIT_BN:
+        if (-(-n // bn) * bn, -bn) < (-(-n // best) * best, -best):
+            best = bn
+    return best
+
+
+def sepi_fits(groups, bm, bn, stages, products):
+    """Mirror of ragged_claim.cuh's constexpr SEPI_ admission (staged epilogue only when it fits in 220 KiB)."""
+    stage = (bm + products * bn) * 128
+    return stages * stage + 128 + ((8 * (groups + 2) + 127) & ~127) + 2 * products * (bm // 2) * (bn * 2 + 16) <= 220 * 1024
 CLAIM_HEADER = "ragged_claim.cuh"     # added only to programs that emit a claimed product (feature "claim")
 CLAIM_SLOT = "/*XCLAIM*/nullptr"       # replaced by the phase's counter pointer when its interval is emitted
 CLAIM_STATIC0 = "/*XCLAIM_S0*/true"    # true: static first task (first claimed product of its interval)
@@ -461,6 +524,9 @@ def emit(op, *, values, layouts, dtypes, names, ref, field, ident, define, targe
          operations=None):
     from .lower import LoweringError
     target = str(field(op, "target")).removeprefix("torch.ops.")
+    original_target = target
+    observed = target in (MM_OBSERVED, OUTER_OBSERVED)
+    target = {MM_OBSERVED: MM, OUTER_OBSERVED: OUTER}.get(target, target)
     args = list(field(op, "args", ()))
     outputs = tuple(field(op, "outputs", ()))
     if not outputs:
@@ -476,7 +542,7 @@ def emit(op, *, values, layouts, dtypes, names, ref, field, ident, define, targe
         return f"({ident(layout.root)} + {layout.offset}LL)"
 
     def phase(kind, code, writes, inputs, **metadata):
-        return dict(kind=kind, names=list(writes), targets=[target], reads=list(inputs),
+        return dict(kind=kind, names=list(writes), targets=[original_target], reads=list(inputs),
                     writes=list(writes), code=code, threads=256,
                     requires_full_grid=True, **metadata)
 
@@ -506,6 +572,11 @@ def emit(op, *, values, layouts, dtypes, names, ref, field, ident, define, targe
     if target == OUTER_ACC:
         return [_emit_outer_acc(args, outputs, layouts=layouts, dtypes=dtypes, names=names, ref=ref, ptr=ptr,
                                 phase=phase, target_arch=target_arch, LoweringError=LoweringError)]
+    work = None
+    if observed:
+        if len(outputs) != 2:
+            raise LoweringError("observed ragged product needs result and executed-work outputs")
+        work, outputs = outputs[1], outputs[:1]
     if target not in (MM, MM_RAW, OUTER, OUTER_WIDE) or len(args) != 3 or len(outputs) != 1:
         raise LoweringError("unknown ragged product ABI")
     # LATCH-TRAIN-PRECISION: ragged_mm_raw = BF16 operands, FP32 accumulation, UNROUNDED FP32 result (opt-in training
@@ -523,6 +594,14 @@ def emit(op, *, values, layouts, dtypes, names, ref, field, ident, define, targe
     groups = ls.shape[0] - 1
     if len(ls.shape) != 1 or dtypes[offsets] != "int64" or not ls.contiguous or not 1 <= groups <= 256:
         raise LoweringError("ragged product needs contiguous group offsets")
+    if observed and (layouts[work].shape != (groups, len(WORK_COLUMNS)) or dtypes[work] != "int64"):
+        raise LoweringError("observed ragged work requires int64 [groups,4]")
+    # Zeroing is its own dependency phase; task counters are written only by the native executed body.
+    work_init = [] if not observed else [phase("ragged_work_init", f"""for (int i = blockIdx.x * blockDim.x + threadIdx.x;
+  i < {groups * len(WORK_COLUMNS)}; i += gridDim.x * blockDim.x) {ptr(work)}[i] = 0;""",
+        [work], [], work_items=1, shared_bytes=0, engine="executed_ragged_work_init")]
+    work_suffix = f", latch_ragged::NoEpi{{}}, {ptr(work)}" if observed else ""
+    work_plain = f", {ptr(work)}" if observed else ""
     dtype = "bfloat16" if (wide or raw) else dtypes[name]
     if (wide or raw) and dtypes[name] != "float32":
         raise LoweringError("widened ragged_outer / ragged_mm_raw store FP32")
@@ -553,13 +632,13 @@ def emit(op, *, values, layouts, dtypes, names, ref, field, ident, define, targe
     flat_meta, prefetch = {}, []
     if raw and not (dtype == "bfloat16" and aligned and target_arch == "sm_90" and _PRODUCTS.get() is not None):
         raise LoweringError("ragged_mm_raw needs aligned BF16 operands on sm_90 with segmented_products enabled")
-    if dtype == "bfloat16" and aligned and target_arch == "sm_90" and _PRODUCTS.get() is not None and not wide:
+    if dtype == "bfloat16" and aligned and target_arch == "sm_90" and (_PRODUCTS.get() is not None or observed) and not wide:
         bm, bn, wm, stages = flat_tile(outer, m, n, k)
         import os
-        claim_min_rows = int(os.environ.get("LATCH_CLAIM_MIN_ROWS", CLAIM_MIN_ROWS))   # screening override only
+        min_rows = claim_min_rows()
         if (_feature("claim") and int(os.environ.get("LATCH_CLAIM_WIDE", CLAIM_WIDE)) and not outer
                 and (sbk != 1 or not _feature("pair"))
-                and rows >= claim_min_rows * groups and k % 64 == 0):
+                and rows >= min_rows * groups and k % 64 == 0):
             # Claimed input-gradient products (N-major stacked weights, never paired with the forward products): wide
             # tiles halve the operand re-reads per output (measured: K 384 x N 768 at 128 x 256, K 768 x N 384 at
             # 256 x 128). Per-element k chains are unchanged.
@@ -571,11 +650,12 @@ def emit(op, *, values, layouts, dtypes, names, ref, field, ident, define, targe
         ak, bkc = str(sak == 1).lower(), str(sbk == 1).lower()
         prefetch = _prefetch_phase(phase, ptr, layouts, phases, producers, (a, b)) if _feature("prefetch") else []
         # flat_tma: right products whose operands are 2D tensor-map views (A K-major rows; stacked B as one 2D
-        # matrix, N-major B only with whole k stages per segment); 16-byte aligned addresses and row strides.
+        # matrix); 16-byte aligned addresses and row strides. N-major B with K % 64 != 0 only with feature "ktail":
+        # the body zeroes the last stage's k rows past K before any MMA reads them.
         tma = (_feature("tma") and not outer and sak == 1 and (sam * 2) % 16 == 0
                and (la.offset * 2) % 16 == 0 and (lb.offset * 2) % 16 == 0
                and ((sbk == 1 and bsb == n * sbn and (sbn * 2) % 16 == 0)
-                    or (sbn == 1 and bsb == k * sbk and (sbk * 2) % 16 == 0 and k % 64 == 0)))
+                    or (sbn == 1 and bsb == k * sbk and (sbk * 2) % 16 == 0 and (k % 64 == 0 or _feature("ktail")))))
         # Outer products: A [rows, M] and B [rows, N] both row-major (M-/N-contiguous) 2D maps over the packed rows.
         tma_outer = (_feature("tma") and outer and sam == 1 and sbn == 1 and (sak * 2) % 16 == 0
                      and (sbk * 2) % 16 == 0 and (la.offset * 2) % 16 == 0 and (lb.offset * 2) % 16 == 0)
@@ -588,11 +668,26 @@ def emit(op, *, values, layouts, dtypes, names, ref, field, ident, define, targe
         # Structural admission: claiming pays where tasks are long (>= CLAIM_MIN_ROWS packed rows per segment on
         # average; B32 x 1024 TinyMoE: 4,096); short products (B1/B2: 128-256 rows per expert) keep the static round
         # robin, whose first tasks need no counter round trip. Outer results must be contiguous [M, N] per segment.
-        claim = (tma and not raw and _feature("claim") and stages >= 3 and rows >= claim_min_rows * groups
+        # Observed products (executed-work counters) are claimed as well (OBSERVED_CLAIM); their bodies count each
+        # task's executed stages and tiles at task completion (kernels/ragged_claim.cuh).
+        claim = ((not observed or OBSERVED_CLAIM) and tma and not raw and _feature("claim") and stages >= 3
+                 and rows >= min_rows * groups
                  and (not outer or (layouts[name].contiguous and layouts[name].offset % 2 == 0)))
         import os
-        # Screening only: LATCH_CLAIM_HOT overrides CLAIM_HOT (recorded in the generated source's template arguments).
-        claim_hot = int(os.environ.get("LATCH_CLAIM_HOT", CLAIM_HOT))
+        if (claim and not outer and sbk == 1 and _feature("fit")
+                and (bm, bn, wm) == (128, 128, 2)):
+            bn = fit_bn(n, bn)
+        # Screening only: the environment overrides CLAIM_HOT (recorded in the generated source's template arguments).
+        # Observed products keep one tile class (their counters record BM x BN tiles).
+        claim_hot = 0 if observed else int(os.environ.get("LATCH_CLAIM_HOT", CLAIM_HOT))
+        if (_feature("fit") and claim and tma_outer and (bm, bn, wm) == (128, 128, 2) and not claim_hot
+                and groups * math.ceil(m / 128) * math.ceil(n / 128) < CLAIM_NARROW_OUTER_TASKS):
+            bm, bn, wm, stages = CLAIM_NARROW_OUTER_TILE
+        if claim and not claim_hot:
+            # Feature "fit" (ops/claimed_products.py): padded-area tile fit of claimed products (same k chains).
+            from . import claimed_products as _claimed
+            bm, bn, wm, stages = _claimed.claimed_tile(outer=tma_outer, kmajor=sbk == 1, m=m, n=n,
+                                                       current=(bm, bn, wm, stages), rows=rows, groups=groups)
         hbm, hbn, hwm, hst = CLAIM_HOT_TILE
         hot_args = f",{claim_hot},{hbm},{hbn},{hwm},{hst}" if claim_hot else ""
         hot_ring = hst * (hbm + hbn) * 128 if claim_hot else 0
@@ -614,7 +709,8 @@ def emit(op, *, values, layouts, dtypes, names, ref, field, ident, define, targe
         # Paired products (flat2): the same A value, offsets, extents, strides and tile, differing only in B and C.
         key = [target, _canonical(a, values, field, ref, names, operations), offsets, list(la.shape),
                list(la.strides), list(lb.shape), list(lb.strides), lb.offset % 8, list(expected), dtype, tmpl, tma]
-        pairing = phases is not None and _feature("pair") and not tma_outer
+        pairing = (not observed and phases is not None and _feature("pair") and not tma_outer
+                   and _pair_ok(bn))
         pending = _pending(phases) if pairing else {}
         slot = repr(key)
         if slot in pending:
@@ -645,35 +741,37 @@ def emit(op, *, values, layouts, dtypes, names, ref, field, ident, define, targe
             return prefetch + [first]
         code = (f"""{{
   popsc::BArgs g{init};
-  latch_ragged::touter_claim<{groups},{bm},{bn},{wm},{stages},{CLAIM_STATIC0}{hot_args}>({map_a}, {map_b}, g, {ptr(offsets)}, {rows}, smem, /*XMAT_ROT*/0, {CLAIM_SLOT});
+  latch_ragged::touter_claim<{groups},{bm},{bn},{wm},{stages},{CLAIM_STATIC0}{hot_args}>({map_a}, {map_b}, g, {ptr(offsets)}, {rows}, smem, /*XMAT_ROT*/0, {CLAIM_SLOT}{work_plain});
 }}""" if tma_outer and claim else f"""{{
   popsc::BArgs g{init};
-  latch_ragged::touter<{groups},{bm},{bn},{wm},{stages}>({map_a}, {map_b}, g, {ptr(offsets)}, {rows}, smem, /*XMAT_ROT*/0);
+  latch_ragged::touter<{groups},{bm},{bn},{wm},{stages}>({map_a}, {map_b}, g, {ptr(offsets)}, {rows}, smem, /*XMAT_ROT*/0{work_plain});
 }}""" if tma_outer else f"""{{
   popsc::BArgs g{init};
-  latch_ragged::tflat_claim<{groups},{bm},{bn},{wm},{bkc},{stages},{CLAIM_STATIC0}>({map_a}, {map_b}, g, {ptr(offsets)}, {rows}, smem, /*XMAT_ROT*/0, {CLAIM_SLOT});
+  latch_ragged::tflat_claim<{groups},{bm},{bn},{wm},{bkc},{stages},{CLAIM_STATIC0}>({map_a}, {map_b}, g, {ptr(offsets)}, {rows}, smem, /*XMAT_ROT*/0, {CLAIM_SLOT}{work_suffix});
 }}""" if tma and claim else f"""{{
   popsc::BArgs g{init};
-  latch_ragged::tflat{suffix}<{groups},{bm},{bn},{wm},{bkc},{stages}>({map_a}, {map_b}, g, {ptr(offsets)}, {rows}, smem, /*XMAT_ROT*/0);
+  latch_ragged::tflat{suffix}<{groups},{bm},{bn},{wm},{bkc},{stages}>({map_a}, {map_b}, g, {ptr(offsets)}, {rows}, smem, /*XMAT_ROT*/0{work_suffix});
 }}""" if tma else f"""{{
   popsc::BArgs g{init};
-  latch_ragged::flat<{tmpl}>(g, {ptr(offsets)}, {rows}, smem, /*XMAT_ROT*/0);
+  latch_ragged::flat<{tmpl}>(g, {ptr(offsets)}, {rows}, smem, /*XMAT_ROT*/0{work_suffix});
 }}""")
         flat_meta = dict(flat_pair_key=key, flat_init=init, **({"flat_map_b": map_b, "tma_operands": True} if tma else {}),
                          **({"flat_claim": True} if tma and claim else {}),
                          **({"claim_outer": dict(key=repr([offsets, m, n, rows, list(la.strides), list(lb.strides), la.offset % 8,
-                                                          lb.offset % 8, groups, bm, bn, wm, stages]),
+                                                          lb.offset % 8, groups, bm, bn, wm, stages, observed]),
                                                  tmpl=f"{groups},{bm},{bn},{wm},{stages}", map_a=map_a, map_b=map_b,
-                                                 init=init, offsets=ptr(offsets), rows=rows, hot=hot_args)}
+                                                 init=init, offsets=ptr(offsets), rows=rows, hot=hot_args,
+                                                 work=ptr(work) if observed else None)}
                             if tma_outer and claim else {}),
                          **({"tma_outer": True} if tma_outer else {}),
                          flat_tasks=f"latch_ragged::tasks<{groups},{bm},{bn},{str(outer).lower()}>({ptr(offsets)}, {m}, {n})",
                          flat_offsets=ptr(offsets),
-                         **({"flat_consumable": True, "flat_numel": rows * n} if not outer and bsc == 0 and not raw
+                         **({"flat_consumable": True, "flat_numel": rows * n} if not observed and not outer and bsc == 0 and not raw
                             else {}))
         shared = max(stages * (bm + bn) * 128,
                      hot_ring if tma_outer and claim else 0) + 1024 + 8 * (groups + 2) + (
-            sepi_bytes(groups, bn, 1, bm) if tma and claim and not outer and _feature("sepi") else 0)
+            sepi_bytes(groups, bn, 1, bm) if tma and claim and not outer and _feature("sepi")
+            and (not _feature("fit") or (wm == 2 and sepi_fits(groups, bm, bn, stages, 1))) else 0)
         engine = ("ragged_flat_tma_outer_claim_wgmma" if tma_outer and claim else
                   "ragged_flat_tma_claim_wgmma" if tma and claim else
                   ("ragged_flat_tma_outer_wgmma" if tma_outer else "ragged_flat_tma_wgmma" if tma else "ragged_flat_wgmma")
@@ -701,25 +799,35 @@ def emit(op, *, values, layouts, dtypes, names, ref, field, ident, define, targe
         scalar = "s101h::bf16" if dtype == "bfloat16" else "float"
         code = f"""latch_ragged::simt<{scalar},{groups},{str(outer).lower()}{",float" if wide else ""}>(
   {ptr(a)}, {ptr(b)}, {ptr(offsets)}, {ptr(name)}, {rows}, {m}, {n}, {k},
-  {sam}LL, {sak}LL, {sbk}LL, {sbn}LL, {bsb}LL, {bsc}LL, smem);"""
+  {sam}LL, {sak}LL, {sbk}LL, {sbn}LL, {bsb}LL, {bsc}LL, smem{work_plain});"""
         shared, engine = 2048, "ragged_simt16"
         arithmetic = "ascending-K FP32 fmaf; BF16 operands exactly widened and result rounded once when applicable"
     if wide:
         arithmetic += "; stored exactly widened to FP32 (the bits of a separate BF16 -> FP32 cast)"
     # A bound, not padded runtime work: actual tile counts use the segment sizes.
     tiles = groups * math.ceil(m / bm) * math.ceil(n / bn) if outer else (math.ceil(rows / bm) + groups - 1) * math.ceil(n / bn)
-    result = phase("gemm", code, [name], reads, work_items=max(1, tiles), tiles=max(1, tiles),
+    work_meta = {} if not observed else dict(ragged_work_counters=work, work_counter_columns=list(WORK_COLUMNS),
+        work_contraction_tile=16 if engine == "ragged_simt16" else 64, work_output_tile=[bm, bn],
+        work_offsets=offsets, work_product="outer" if outer else "right", work_output=name,
+        work_instrumentation=("inside native executed claimed task loops: each task's executed 64-k stages counted in "
+                              "a register and added with its tile record at task completion; unpaired claimed "
+                              "assignment" if flat_meta.get("flat_claim") or flat_meta.get("claim_outer") else
+                              "inside native executed task/contraction loops; unpaired static assignment"))
+    result = phase("gemm", code, [name, work] if observed else [name], reads + ([work] if observed else []),
+                   work_items=max(1, tiles), tiles=max(1, tiles),
                    shared_bytes=shared, engine=engine, matrix_shape=[m, n, k],
                    groups=groups, packed_rows=rows, variable_extent="K" if outer else "M",
                    empty_segment="zero weight gradient" if outer else "no row tasks",
-                   arithmetic=arithmetic, runtime_rows="exact segment lengths; no per-expert capacity", **flat_meta)
+                   arithmetic=arithmetic, runtime_rows="exact segment lengths; no per-expert capacity", **flat_meta,
+                   **work_meta)
     # Pairing defers the first product to its partner's position (its inputs stay available; nothing in between
     # reads its result), so the pair is emitted where both B operands exist.
-    if flat_meta and phases is not None and _feature("pair") and not flat_meta.get("tma_outer") and _partner_ahead(
+    if (not observed and flat_meta and phases is not None and _feature("pair") and not flat_meta.get("tma_outer")
+            and _pair_ok(bn)) and _partner_ahead(
             op, operations, field, ref, names, values, flat_meta["flat_pair_key"][1], offsets, b, name):
         _pending(phases)[repr(flat_meta["flat_pair_key"])] = result
         return prefetch
-    return prefetch + [result]
+    return work_init + prefetch + [result]
 
 
 def merge_claimed_outer(phases, members):
@@ -740,10 +848,12 @@ def merge_claimed_outer(phases, members):
             pending[info["key"]] = i
             continue
         a, b = phases[j]["claim_outer"], info
+        # Observed pairs (same key: both observed) pass both executed-work counters (kernels/ragged_claim.cuh).
+        works = f", {a['work']}, {b['work']}" if a.get("work") else ""
         phases[j]["code"] = (f"""{{
   popsc::BArgs g0{a["init"]};
   popsc::BArgs g1{b["init"]};
-  latch_ragged::touter2_claim<{a["tmpl"]},{CLAIM_STATIC0}{a["hot"]}>({a["map_a"]}, {a["map_b"]}, {b["map_a"]}, {b["map_b"]}, g0, g1, {a["offsets"]}, {a["rows"]}, smem, /*XMAT_ROT*/0, {CLAIM_SLOT});
+  latch_ragged::touter2_claim<{a["tmpl"]},{CLAIM_STATIC0}{a["hot"]}>({a["map_a"]}, {a["map_b"]}, {b["map_a"]}, {b["map_b"]}, g0, g1, {a["offsets"]}, {a["rows"]}, smem, /*XMAT_ROT*/0, {CLAIM_SLOT}{works});
 }}""")
         phases[j]["names"] = phases[j]["names"]          # writes stay with their own phase records
         phases[j]["claim_merged_with"] = phases[i]["names"][0]

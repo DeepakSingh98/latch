@@ -205,6 +205,13 @@ def emit(a, b, out, la, lb, shape, split_grid=0):
         tiles = batch * mt * nt
         parts = _split_parts(tiles, k, split_grid)
         if P9E_SKINNY and not batched and k <= 16 and k * n * 4 <= 16384:
+            from . import skinny_backward as skinny
+            if skinny.enabled() and skinny.outer_ok(m, n, k, sbk, sbn, lb):
+                return skinny.outer(a, b, out, m, n, k, sam, sak, sbk, sbn, _ident), {
+                    'tiles': tiles, 'engine': 'skinny_k_vec', 'batch': batch, 'shared_bytes': max(2048, k * n * 4),
+                    'skinny_outer': dict(m=m, n=n, k=k, sam=sam, sak=sak, sbk=sbk, sbn=sbn, a=_ident(a), b=_ident(b), out=out),
+                    'arithmetic': 'explicit BF16 operands/output; FP32 ascending-K fmaf from +0 per element; one rounding '
+                                  '(the generic tile arithmetic; P9-E skinny-K values, 16-byte output vectors)'}
             return _skinny_k(a, b, out, m, n, k, sam, sak, sbk, sbn, _ident), {
                 'tiles': tiles, 'engine': 'p9e_skinny_k', 'batch': batch, 'shared_bytes': max(2048, k * n * 4),
                 'arithmetic': 'explicit BF16 operands/output; FP32 ascending-K fmaf from +0 per element; one rounding '
@@ -224,6 +231,21 @@ def emit(a, b, out, la, lb, shape, split_grid=0):
             if P9E_SKINNY_PARTS and split_grid:
                 parts = max(parts, min(-(-k // SPLIT_PART_K), split_grid // chunks))
                 kp = -(-k // parts)
+            from . import skinny_backward as skinny
+            skinny_plan = skinny.split_plan(m, n, k, sam, sak, sbk, sbn, la, lb, parts, kp) if skinny.enabled() else None
+            if skinny_plan is not None:
+                code = skinny.split(a, b, out, m, n, k, parts, kp, skinny_plan, _ident)
+                chunks = skinny_plan['chunks']
+                skinny_info = dict(skinny_plan, m=m, n=n, k=k, parts=parts, kp=kp, out=out,
+                                   big=_ident(a if skinny_plan['small_n'] else b),
+                                   small=_ident(b if skinny_plan['small_n'] else a))
+                return code, {'tiles': chunks * parts, 'engine': 'skinny_split_ring', 'batch': batch,
+                              'skinny_split': skinny_info,
+                              'shared_bytes': skinny_plan['shared_bytes'], 'work_items': chunks * parts,
+                              'p2_split': {'counter_words': arena_plan.a64(chunks), 'partial_words': arena_plan.a64(parts * m * n)},
+                              'arithmetic': f'explicit BF16 operands/output; FP32 ascending-K fmaf from +0 per K part ({parts} parts '
+                                            f'of {kp}, as the generic split); fixed-order part sum; one rounding to BF16 '
+                                            f'(P9-E skinny split values; cp.async K ring)'}
             code = _skinny_split(a, b, out, m, n, k, sam, sak, sbk, sbn, parts, kp, _ident)
             return code, {'tiles': chunks * parts, 'engine': 'p9e_skinny_split', 'batch': batch,
                           'shared_bytes': 2 * SKINNY_KC * (256 // sp) * 2 + 2 * SKINNY_KC * sp * 4,

@@ -191,7 +191,9 @@ def _encode(obj):
 
 MULTI_RESULT_TARGETS = {"latch_ops.selective_scan_fwd.default", "latch_ops.selective_scan_bwd.default",
                         "latch_ops.ragged_order.default",
+                        "latch_ops.ragged_mm_observed.default", "latch_ops.ragged_outer_observed.default",
                         "latch_ops.bf16_sdpa_fwd.default", "latch_ops.bf16_sdpa_bwd.default",
+                        "latch_ops.segmented_sdpa_fwd.default", "latch_ops.segmented_sdpa_bwd.default",
                         # P8-C window attention (ops/window_attention.py)
                         "latch_ops.mattn_fwd.default", "latch_ops.mattn_bwd.default",
                         # P9-C absorbed window attention (ops/window_fusion.py)

@@ -106,7 +106,9 @@ class CapturedModule:
               device_unit_inline='wgmma', device_unit_cache=None, device_unit_jobs=None, device_unit_split=None,
               device_unit_shared_pool=False, static_shared_reserve_bytes=0, update_schedule=None,
               segmented_products=None, norm_fusion=None, attention_rules=None, matrix_schedule=None,
-              accumulation_rules=None, memory_rules=None, matrix_bodies=None, exact_bf16_products=None):
+              accumulation_rules=None, memory_rules=None, matrix_bodies=None, exact_bf16_products=None,
+              segmented_attention=None, tile_readiness=None, vocab_rules=None, elementwise_rules=None,
+              graph_rules=None, device_unit_max_registers=None):
         """Write a bound native artifact; calls nvcc only on the build worker.
 
         explain=True additionally writes ``<directory>/explain/report.{json,md}`` (plus the captured IR
@@ -128,6 +130,10 @@ class CapturedModule:
         device_units=K compiles whole publication intervals as separately compiled device
         functions in K concurrent relocatable units behind the one entry (runtime.build);
         changed binaries need numerical and runtime qualification.
+        device_unit_inline='isolate_all' isolates, beyond 'isolate', every entry-resident warpgroup-MMA
+        engine form the program emits and accepts offset-view preludes (ops.unit_isolation).
+        device_unit_max_registers=R (255, or a multiple of 8 from 64 through 248; requires device_units)
+        compiles every device unit with -maxrregcount=R; None leaves the unit commands unchanged.
         static_shared_reserve_bytes reserves part of the common-compose shared-memory
         budget for linked static storage; zero preserves the existing planner.
         recurrent_gradients='deferred' opts into the measured loop speed/memory tradeoff.
@@ -138,6 +144,11 @@ class CapturedModule:
         tiny independent prologue phases (optimizer scalars, reduction-counter resets).
         segmented_products='flat' opts into the flattened segmented (expert) product body of
         ops.ragged_experts_lower (bitwise the default body's results); None leaves lowering unchanged.
+        Further '+'-joined tokens (ops.claimed_products, ops.kcat_products): ktail (requires tma; N-major
+        stacked B with K % 64 != 0 takes the TMA and claimed bodies), fit, bsearch and scatter (each require
+        claim and tma), route (routing counts and order on every CTA), packsum (an FP32 sum read only by a
+        routing-pack sum is evaluated in that sum's gathered load), all bitwise, and kcat (requires bsearch and
+        precision_policy='practical'; not bitwise).
         norm_fusion='rows' opts into ops.norm_fusion's structural normalization/activation/residual
         rules for flat common compose programs (coalesced exact norm-weight column sums, recomputed
         normalized rows and gated activations, residual-addend row prologues); None leaves lowering
@@ -148,10 +159,11 @@ class CapturedModule:
         matrix_schedule='underfilled' opts into ops.matrix_schedule's rules for underfilled long-K
         TMA products (deeper operand rings; under practical precision, deterministic split-K with an
         ascending FP32 slice sum); None leaves lowering unchanged.
-        matrix_bodies='exact' (or a '+'-joined subset of tailrot, taildeep, fill, p5c, isolate) opts into
-        ops.matrix_bodies' bitwise non-expert matrix body rules (rotated placement and deeper rings of mma.sync
-        tail products, idle-CTA fill, same-class P5C bodies for short wide and long-K partition products); None
-        leaves lowering unchanged.
+        matrix_bodies='exact' (or a '+'-joined subset of tailrot, taildeep, fill, p5c, isolate, skinny,
+        skinnybatch, shortk, splitctr, in which the preset may appear) opts into ops.matrix_bodies' bitwise
+        non-expert matrix body rules (rotated placement and deeper rings of mma.sync tail products, idle-CTA fill,
+        same-class P5C bodies for short wide and long-K partition products, skinny bodies, entry-zeroed split-K
+        counters; skinnybatch and shortk require skinny); None leaves lowering unchanged.
         accumulation_rules='castview' opts into ops.accumulation_rules' gradient-traffic rules (exact
         widening casts read per view are evaluated per view instead of stored); None leaves lowering unchanged.
         memory_rules='sink' opts into ops.memory_rules' activation lifetime rules (bodies move later, never
@@ -159,6 +171,23 @@ class CapturedModule:
         exact_bf16_products='tensor' runs FP32 products of exact BF16 -> FP32 operand widenings (e.g. the FP32-result
         split products of an opt-in training precision policy) on the masked TMA wgmma body from the BF16 sources with
         FP32 accumulation and an unrounded FP32 result, outside the compose planner too; None leaves lowering unchanged.
+        segmented_attention='claim+rotary' (a '+'-joined subset of folded_forward, fused_backward, claim, rotary)
+        opts into ops.segmented_attention_rules' width-32 segmented-attention rules; folded_forward and
+        fused_backward require precision_policy='practical'. None leaves lowering unchanged.
+        tile_readiness='attention' replaces grid barriers behind publishing segmented-attention phases by
+        per-row-block readiness waits (ops.tile_readiness); None leaves lowering unchanged.
+        vocab_rules='stream+views' (a '+'-joined subset of stream, views, rows) opts into ops.vocab_rules'
+        vocabulary-head rules; rows requires precision_policy='practical'. stream applies only to K <= 512 and
+        rows only to vocabularies of at most 112,000 padded BF16 columns (one row per CTA in shared memory);
+        both assume static_shared_reserve_bytes <= 8192, and larger heads keep their default bodies.
+        None leaves lowering unchanged.
+        elementwise_rules='bf16vec+rolling' (a '+'-joined subset of lanecse, bf16vec, rolling, divc, indexed,
+        permrows, embunroll, rowcopy, acopy) opts into ops.elementwise_rules' bitwise elementwise, gather and
+        copy body rules; None leaves lowering unchanged. divc rewrites only divisions by the literals in
+        ops.row_rewrites.VERIFIED_DIVISORS (the ones verified so far: 3, 5, 6, 7, 480, sqrt(480), 16380);
+        every other literal keeps its IEEE division.
+        graph_rules='cse' (a '+'-joined subset of cse, depth_reads, castshare) opts into ops.graph_rules' exact
+        rewrites of the captured graph; None leaves it unchanged.
         Omitted execution (or 'auto') chooses a compatible common or retained
         implementation. 'legacy' and 'compose' remain diagnostic overrides;
         compose_selection='common' disables retained-schedule selection.
@@ -196,7 +225,15 @@ class CapturedModule:
                               **({'memory_rules': memory_rules} if memory_rules is not None else {}),
                               **({'matrix_bodies': matrix_bodies} if matrix_bodies is not None else {}),
                               **({'exact_bf16_products': exact_bf16_products} if exact_bf16_products is not None
-                                 else {}))
+                                 else {}),
+                              **({'segmented_attention': segmented_attention} if segmented_attention is not None
+                                 else {}),
+                              **({'tile_readiness': tile_readiness} if tile_readiness is not None else {}),
+                              **({'vocab_rules': vocab_rules} if vocab_rules is not None else {}),
+                              **({'elementwise_rules': elementwise_rules} if elementwise_rules is not None else {}),
+                              **({'graph_rules': graph_rules} if graph_rules is not None else {}),
+                              **({'device_unit_max_registers': device_unit_max_registers}
+                                 if device_unit_max_registers is not None else {}))
 
 
 def capture_module(model, loss_fn, inputs, targets=(), *, optimizer=None,
@@ -404,7 +441,9 @@ def prepare_module(captured, directory, *, cache_dir, arch='sm_90', retain_all=F
                    device_unit_cache=None, device_unit_jobs=None, device_unit_split=None,
                    device_unit_shared_pool=False, static_shared_reserve_bytes=0, update_schedule=None,
                    segmented_products=None, norm_fusion=None, attention_rules=None, matrix_schedule=None,
-                   accumulation_rules=None, memory_rules=None, matrix_bodies=None, exact_bf16_products=None):
+                   accumulation_rules=None, memory_rules=None, matrix_bodies=None, exact_bf16_products=None,
+                   segmented_attention=None, tile_readiness=None, vocab_rules=None, elementwise_rules=None,
+                   graph_rules=None, device_unit_max_registers=None):
     """Persist source, metadata and initial bindings with exact library identity.
 
     The receipt binds the recorded library path and toolchain. This is not a
@@ -455,6 +494,42 @@ def prepare_module(captured, directory, *, cache_dir, arch='sm_90', retain_all=F
     matrix_body_sets.validate(matrix_bodies)
     if matrix_bodies is not None and tuning is not None:
         raise ValueError("matrix_bodies is not yet supported with matrix tuning")
+    from . import segmented_attention_rules as segmented_attention_rule_sets
+    segmented_attention_rule_sets.validate(segmented_attention)
+    if segmented_attention is not None and tuning is not None:
+        raise ValueError("segmented_attention is not yet supported with matrix tuning")
+    from . import tile_readiness as tile_readiness_rule_sets
+    tile_readiness_rule_sets.validate(tile_readiness)
+    if tile_readiness is not None and tuning is not None:
+        raise ValueError("tile_readiness is not yet supported with matrix tuning")
+    from . import vocab_rules as vocab_rule_sets
+    vocab_rule_sets.validate(vocab_rules)
+    if vocab_rules is not None and tuning is not None:
+        raise ValueError("vocab_rules is not yet supported with matrix tuning")
+    from . import elementwise_rules as elementwise_rule_sets
+    elementwise_rule_sets.validate(elementwise_rules)
+    if elementwise_rules is not None and tuning is not None:
+        raise ValueError("elementwise_rules is not yet supported with matrix tuning")
+    from . import graph_rules as graph_rule_sets
+    graph_rule_sets.validate(graph_rules)
+    if graph_rules is not None and tuning is not None:
+        raise ValueError("graph_rules is not yet supported with matrix tuning")
+    # Rules that reassociate FP32 arithmetic or make an addition order timing-dependent need practical precision.
+    practical_only = [*(f"segmented_products '{rule}'" for rule in ("kcat",)
+                        if rule in (ragged_experts_lower._features(segmented_products) or ())),
+                      *(f"segmented_attention '{rule}'" for rule in segmented_attention_rule_sets.PRACTICAL_ONLY
+                        if rule in segmented_attention_rule_sets.rules_of(segmented_attention)),
+                      *(f"vocab_rules '{rule}'" for rule in vocab_rule_sets.PRACTICAL_ONLY
+                        if rule in vocab_rule_sets.rules_of(vocab_rules))]
+    if practical_only and precision_policy != 'practical':
+        raise ValueError(f"{', '.join(practical_only)} requires precision_policy='practical'")
+    if device_unit_max_registers is not None:
+        if device_units is None:
+            raise ValueError("device_unit_max_registers requires device_units")
+        if (type(device_unit_max_registers) is not int
+                or not (device_unit_max_registers == 255
+                        or (64 <= device_unit_max_registers < 255 and device_unit_max_registers % 8 == 0))):
+            raise ValueError("device_unit_max_registers must be None, 255 or a multiple of 8 from 64 through 248")
     if type(static_shared_reserve_bytes) is not int or static_shared_reserve_bytes < 0:
         raise ValueError("static_shared_reserve_bytes must be a nonnegative integer")
     if static_shared_reserve_bytes and tuning is not None:
@@ -526,6 +601,10 @@ def prepare_module(captured, directory, *, cache_dir, arch='sm_90', retain_all=F
     if 'dcast' in accumulation_rule_sets.rules_of(accumulation_rules):
         from . import derived_casts
         native_ir, example_args, derived_state = derived_casts.apply(native_ir, example_args)
+    # graph_rules 'cse' (ops.exact_cse): identical pure operations merge before lowering.
+    if 'cse' in graph_rule_sets.rules_of(graph_rules):
+        from . import exact_cse
+        native_ir, _ = exact_cse.apply(native_ir)
     if explain:
         from .explain import collect as _explain_collect
         explain_scope = _explain_collect()
@@ -539,7 +618,12 @@ def prepare_module(captured, directory, *, cache_dir, arch='sm_90', retain_all=F
             matrix_body_sets.scope(matrix_bodies), \
             accumulation_rule_sets.scope(accumulation_rules), \
             memory_rule_sets.scope(memory_rules), \
-            exact_bf16_products_scope(exact_bf16_products):
+            exact_bf16_products_scope(exact_bf16_products), \
+            segmented_attention_rule_sets.scope(segmented_attention), \
+            tile_readiness_rule_sets.scope(tile_readiness), \
+            vocab_rule_sets.scope(vocab_rules), \
+            elementwise_rule_sets.scope(elementwise_rules), \
+            graph_rule_sets.scope(graph_rules):
         program = lower(native_ir, retain_all=retain_all, policy=policy, target_arch=arch,
                         precision_policy=precision_policy, compact_codegen=compact_codegen,
                         execution=execution, compose_selection=compose_selection,
@@ -563,7 +647,9 @@ def prepare_module(captured, directory, *, cache_dir, arch='sm_90', retain_all=F
                     **({'step17': 'qualified'} if fast_build else {}),
                     **({'device_units': device_units, 'device_unit_inline': device_unit_inline,
                         'device_unit_cache': device_unit_cache, 'device_unit_jobs': device_unit_jobs,
-                        'device_unit_split': device_unit_split, 'device_unit_shared_pool': device_unit_shared_pool}
+                        'device_unit_split': device_unit_split, 'device_unit_shared_pool': device_unit_shared_pool,
+                        **({'device_unit_max_registers': device_unit_max_registers}
+                           if device_unit_max_registers is not None else {})}
                        if device_units is not None else {}))
     build_seconds = time.perf_counter() - started_build
     files = {path.name: _hash(path) for path in sorted(directory.iterdir()) if path.is_file()}
@@ -587,7 +673,9 @@ def prepare_module(captured, directory, *, cache_dir, arch='sm_90', retain_all=F
         receipt['ptxas_optimization_level'] = ptxas_optimization_level
     if device_units is not None:
         receipt['device_units'] = dict(units=device_units, inline=device_unit_inline, split=device_unit_split,
-                                       shared_pool=bool(device_unit_shared_pool))
+                                       shared_pool=bool(device_unit_shared_pool),
+                                       **({'max_registers': device_unit_max_registers}
+                                          if device_unit_max_registers is not None else {}))
     if 'execution_selection' in program.manifest:
         receipt['execution_selection'] = program.manifest['execution_selection']
     receipt['immutable_bindings_sha256'] = _immutable_identity(

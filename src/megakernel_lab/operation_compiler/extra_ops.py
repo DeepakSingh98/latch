@@ -288,6 +288,15 @@ const uint32_t c2_ = {scalar(c2)}, c3_ = {scalar(c3)};
             if scalar is not None:
                 aligned = " && ".join(f"((reinterpret_cast<uintptr_t>({p_}) & 15u) == 0)" for p_ in pointers)
                 return kind, f"if ({aligned}) {{\n{code}\n}} else {{\n{scalar[1]}\n}}", {"vector_copy": True}, ""
+    if (base in ("cat", "slice_backward") and not kwargs.get("_p8c_scalar") and numel >= ASSEMBLED_MIN_ELEMENTS
+            and _elementwise_rule("acopy")):
+        assembled = _assembled_copy(base, args, kwargs, name, shape, layouts, dtypes, names)
+        if assembled is not None:
+            scalar = emit(target, args, {**kwargs, "_p8c_scalar": True}, name, shape, layouts, dtypes, names, read,
+                          input_names)
+            if scalar is not None:
+                aligned = f"((reinterpret_cast<uintptr_t>({out}) & 15u) == 0)"
+                return base, f"if ({aligned}) {{\n{assembled}\n}} else {{\n{scalar[1]}\n}}", {"assembled_copy": True}, ""
     kwargs = {k: v for k, v in kwargs.items() if k != "_p8c_scalar"}
     if base not in INDEXED:
         return None
@@ -485,6 +494,142 @@ def _piecewise_flat_cat(args, kwargs, name, shape, layouts, dtypes, names):
                      f"      }}\n    }}\n  }}")
     lines.append("}")
     return "\n".join(lines)
+
+
+# elementwise_rules 'acopy' (opt-in): cat / slice_backward results that the 16-byte form above declines (runs not
+# 16-byte aligned, e.g. odd-width head rows, rotary halves and narrow pads) are assembled one 16-byte result vector at
+# a time from raw-bit scalar loads with 32-bit index arithmetic, then stored with one vector store. Every element is
+# the same source element (or the same +0.0 bits) as the scalar form; storage bits are copied as integers, so signed
+# zero and NaN payloads are preserved. The result pointer is checked at run time (else the scalar form runs).
+# Smaller results keep the scalar form: they are latency-bound either way, and the dependency schedule elides the
+# barrier between some tiny copies and their producer only for that form.
+ASSEMBLED_MIN_ELEMENTS = 1 << 20
+
+
+def _elementwise_rule(name):
+    from .elementwise_rules import active
+    return active(name)
+
+
+def _merged_runs(extents, strides):
+    """(extent, stride) runs of a row-major index space over these dims; nested adjacent dims merge."""
+    runs = []
+    for extent, stride in zip(extents, strides):
+        if extent == 1:
+            continue
+        if runs and runs[-1][1] == stride * extent:
+            runs[-1] = (runs[-1][0] * extent, stride)
+        else:
+            runs.append((extent, stride))
+    return runs
+
+
+def _run_offset(var, runs):
+    terms, rest = [], var
+    for k in range(len(runs) - 1, -1, -1):
+        extent, stride = runs[k]
+        coord = rest if k == 0 else f"({rest} % {extent}u)"
+        if stride:
+            terms.append(f"{coord} * {stride}u")
+        rest = f"({rest} / {extent}u)"
+    return " + ".join(terms) or "0u"
+
+
+def _assembled_copy(base, args, kwargs, name, shape, layouts, dtypes, names):
+    from .lower import _ident, _ref
+    dtype = dtypes[name]
+    if dtype not in ("float32", "bfloat16") or len(shape) < 1:
+        return None
+    lanes = 4 if dtype == "float32" else 8
+    numel = math.prod(shape)
+    if numel == 0 or numel % lanes or numel >= 2**31:
+        return None
+    out_layout = layouts.get(name)
+    if out_layout is not None and (not out_layout.contiguous or out_layout.offset % lanes):
+        return None
+    if base == "cat":
+        dim = int(args[1] if len(args) > 1 else kwargs.get("dim", 0)) % len(shape)
+        sources = [_ref(a, names) for a in args[0]]
+        if any(s is None or dtypes[s] != dtype for s in sources):
+            return None
+        pieces, start = [], 0
+        for s in sources:
+            ls = layouts[s]
+            if len(ls.shape) != len(shape) or any(ls.shape[d] != shape[d] for d in range(len(shape)) if d != dim):
+                return None
+            if ls.shape[dim]:
+                pieces.append((s, start, start + ls.shape[dim], 1))
+            start += ls.shape[dim]
+        if start != shape[dim] or not pieces:
+            return None
+    else:
+        grad = _ref(args[0], names)
+        sizes, dim, start, end, step = list(args[1]), int(args[2]), int(args[3]), int(args[4]), int(args[5])
+        dim %= len(shape)
+        if tuple(sizes) != tuple(shape) or step < 1 or grad is None or dtypes[grad] != dtype:
+            return None
+        start = start + shape[dim] if start < 0 else start
+        start = max(0, min(start, shape[dim]))
+        lg = layouts[grad]
+        if len(lg.shape) != len(shape) or lg.shape[dim] == 0:
+            return None
+        pieces = [(grad, start, None, step)]
+    terms = []
+    for s, lo, hi, step in pieces:
+        ls = layouts[s]
+        if any(st < 0 for st in ls.strides):
+            return None
+        if sum((e - 1) * st for e, st in zip(ls.shape, ls.strides)) >= 2**31:
+            return None
+        outer = _run_offset("o_", _merged_runs(ls.shape[:dim], ls.strides[:dim]))
+        inner = _run_offset("w_", _merged_runs(ls.shape[dim + 1:], ls.strides[dim + 1:]))
+        local = "(c_ - {lo}u)".format(lo=lo) if step == 1 else f"((c_ - {lo}u) / {step}u)"
+        offset = " + ".join(t for t in (outer, f"{local} * {ls.strides[dim]}u" if ls.strides[dim] else "",
+                                       inner) if t and t != "0u") or "0u"
+        terms.append((s, lo, hi, step, offset, ls.shape[dim]))
+    raw = "unsigned" if dtype == "float32" else "unsigned short"
+    inner_extent, extent = math.prod(shape[dim + 1:]), shape[dim]
+
+    def value():
+        load = lambda s, off: f"reinterpret_cast<const {raw}*>({_ident(s)})[{off}]"
+        if base == "slice_backward":
+            s, lo, _, step, off, count = terms[0]
+            rel = f"(c_ - {lo}u)" if lo else "c_"
+            cond = " && ".join(([f"c_ >= {lo}u"] if lo else []) + ([f"{rel} % {step}u == 0u"] if step != 1 else [])
+                               + [f"{rel if step == 1 else f'{rel} / {step}u'} < {count}u"])
+            return f"(({cond}) ? (unsigned){load(s, off)} : 0u)"
+        expr = f"(unsigned){load(terms[-1][0], terms[-1][4])}"
+        for s, lo, hi, _, off, _ in reversed(terms[:-1]):
+            expr = f"(c_ < {hi}u ? (unsigned){load(s, off)} : {expr})"
+        return expr
+
+    advance = (f"if (++c_ == {extent}u) {{ c_ = 0u; ++o_; }}" if inner_extent == 1 else
+               f"if (++w_ == {inner_extent}u) {{ w_ = 0u; if (++c_ == {extent}u) {{ c_ = 0u; ++o_; }} }}")
+    unroll = 2 if dtype == "float32" else 1
+    nv = numel // lanes
+    blocks = []
+    for u in range(unroll):
+        lines = [f"    const unsigned f_ = (av_ + {u}u * as_) * {lanes}u;",
+                 f"    unsigned o_ = f_ / {extent * inner_extent}u, c_ = (f_ / {inner_extent}u) % {extent}u, "
+                 f"w_ = f_ % {inner_extent}u; (void)w_;"]
+        for k in range(lanes):
+            lines.append(f"    e{u}_[{k}] = {value()};")
+            if k + 1 < lanes:
+                lines.append(f"    {advance}")
+        guard = f"  if (av_ + {u}u * as_ < {nv}u) {{" if u else "  {"
+        blocks.append(guard + "\n" + "\n".join(lines) + "\n  }")
+    if dtype == "bfloat16":
+        pack = lambda u: (f"make_uint4(e{u}_[0] | (e{u}_[1] << 16), e{u}_[2] | (e{u}_[3] << 16), "
+                          f"e{u}_[4] | (e{u}_[5] << 16), e{u}_[6] | (e{u}_[7] << 16))")
+    else:
+        pack = lambda u: f"make_uint4(e{u}_[0], e{u}_[1], e{u}_[2], e{u}_[3])"
+    stores = [f"  {'if (av_ + %du * as_ < %du) ' % (u, nv) if u else ''}ao_[av_ + {u}u * as_] = {pack(u)};"
+              for u in range(unroll)]
+    decl = " ".join(f"unsigned e{u}_[{lanes}];" for u in range(unroll))
+    return (f"{{ uint4* ao_ = reinterpret_cast<uint4*>({_ident(name)});\n"
+            f"const unsigned as_ = gridDim.x * blockDim.x;\n"
+            f"for (unsigned av_ = blockIdx.x * blockDim.x + threadIdx.x; av_ < {nv}u; av_ += {unroll}u * as_) {{\n"
+            f"  {decl}\n" + "\n".join(blocks) + "\n" + "\n".join(stores) + "\n}\n}")
 
 
 def _vector_copy(base, args, kwargs, name, shape, layouts, dtypes, names):

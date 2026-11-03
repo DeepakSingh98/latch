@@ -1,8 +1,9 @@
 """Opt-in non-expert matrix body rules (LATCH-TRAIN-MATMUL).
 
 Selected through the normal build API: ``CapturedModule.build(..., matrix_bodies="tailrot+taildeep")`` (a '+'-joined
-subset of RULES, or the preset "exact" = tailrot+taildeep+fill+p5c; "isolate" is opt-in only). Omitting it (None) leaves lowering and generated source
-unchanged. Independent of ``matrix_schedule`` (both may be given). Every rule is structural: it reads product shapes,
+subset of RULES, or the preset "exact" = tailrot+taildeep+fill+p5c; "isolate" is opt-in only). A preset may also appear
+inside a '+'-joined list ("exact+skinny"); names must stay distinct after expansion. Omitting it (None) leaves lowering
+and generated source unchanged. Independent of ``matrix_schedule`` (both may be given). Every rule is structural: it reads product shapes,
 layouts, tile counts and the program's shared-memory limit, never a model, module or parameter name.
 
 * ``tailrot``: native mma.sync tail products (``popsc::bmm_tail``: M, N, K multiples of 16 but not all of 32, e.g. a
@@ -48,16 +49,32 @@ layouts, tile counts and the program's shared-memory limit, never a model, modul
   splittable: those statements are the same pure pointer re-derivations each piece repeats. Function boundaries
   only; generated arithmetic unchanged (bitwise). The release build serialized the readout dW/dX interval and every
   router-gradient interval this way.
+* ``skinny``: explicit-BF16 skinny products use the bitwise skinny bodies of ops/skinny_backward.py (results bit for
+  bit those of the P9-E skinny bodies). Split-K products (at most 16 parts of at least 64 rows each) stream their
+  operands through an 8-stage x 256-row cp.async ring; skinny-K products (K <= 16) compute 8 outputs per item with
+  16-byte stores, issuing every load of an item before its stores.
+* ``skinnybatch`` (requires ``skinny``): same-geometry skinny split products of one dependency interval run up to 8 per
+  body (128-row x 4-stage rings). Batches of at most 5 products (or fewer when the shared ring does not fit) run on
+  128 threads and carry the interval's skinny-K products on warps 4-7. Same parts, same part order (bitwise).
+* ``shortk`` (requires ``skinny``): a skinny-K BF16 product with K <= 2 and exactly one reader, which reads it at its
+  own element index, is evaluated at that reader (``latch_out_col``; float4 bodies load 8-byte B columns) and is not
+  stored. The same products and roundings (bitwise).
+* ``splitctr``: generic split-K bodies in flat dependency-scheduled compose programs take their arrival counters from
+  entry-zeroed per-launch counter words past the arena (zeroed at kernel entry, ordered by the first grid barrier,
+  restored to zero by each last arriver) and their partials from a private ``gsk_<name>`` root, instead of an arena
+  counter root zeroed by its own phase. That zero phase also waited for the product's operands, so it delayed the
+  product by one dependency interval. Partials, part order and the FP32 sum are unchanged (bitwise).
 """
 from __future__ import annotations
 
 from contextlib import contextmanager
 from contextvars import ContextVar
 
-RULES = ("tailrot", "taildeep", "fill", "p5c", "isolate")
+RULES = ("tailrot", "taildeep", "fill", "p5c", "isolate", "skinny", "skinnybatch", "shortk", "splitctr")
 # "isolate" (device-unit outlining of the P5C/p8ws phases) stays opt-in: it removed the ptxas serialization record
 # but did not shorten the measured update (mb6b vs mb6a).
 PRESETS = {"exact": "tailrot+taildeep+fill+p5c"}
+REQUIRES = {"skinnybatch": "skinny", "shortk": "skinny"}
 _BODIES = ContextVar("latch_matrix_bodies", default=frozenset())
 VERSION = 1
 
@@ -67,12 +84,14 @@ def rules_of(value):
         return frozenset()
     if not isinstance(value, str) or not value:
         raise ValueError("matrix_bodies must be None, a preset or a '+'-joined rule string")
-    value = PRESETS.get(value, value)
-    names = value.split("+")
+    names = [rule for part in value.split("+") for rule in PRESETS.get(part, part).split("+")]
     unknown = [n for n in names if n not in RULES]
     if unknown or len(set(names)) != len(names):
         raise ValueError(f"matrix_bodies rules must be distinct names from {RULES} (or a preset {sorted(PRESETS)}); "
                          f"got {value!r}")
+    missing = [f"{rule} requires {need}" for rule, need in REQUIRES.items() if rule in names and need not in names]
+    if missing:
+        raise ValueError(f"matrix_bodies {value!r}: {'; '.join(missing)}")
     return frozenset(names)
 
 

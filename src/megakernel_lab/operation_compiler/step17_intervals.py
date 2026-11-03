@@ -58,11 +58,21 @@ WGMMA_INLINE = (r'pflatlong::(?:forward_item6|kv_item6|dq_item6|forward_item|kv_
 RAGGED_FLAT = r'latch_ragged::(?:t?flat2?|touter)<'
 # LATCH-TRAIN-EXPERTS: claimed segmented products (feature "claim"); likewise added only for programs that emit them.
 RAGGED_CLAIM = r'latch_ragged::(?:tflat2?|touter)_claim<'
+# Segmented attention item bodies and the streamed vocabulary-head product issue wgmma inside the entry; each is
+# added only for programs that emit it.
+SEGMENTED_ATTENTION = r'latch_segmented::run_(?:forward|dq|kv)\b'
+VOCAB_STREAM = r'latch_vocab_stream::forward<'   # streamed vocabulary-head logits product (vocab_rules 'stream')
+# Claimed right products with a task-prefix binary search (segmented_products 'bsearch') keep the outlining of the
+# claimed bodies they replace (kept inline like RAGGED_CLAIM); added only for programs that emit them.
+GRP_CLAIM = r'latch_grp::tflat2?_claim_h<'
 
 
 def wgmma_inline(source):
-    return (WGMMA_INLINE + ((RAGGED_FLAT,) if re.search(RAGGED_FLAT, source) else ())
-            + ((RAGGED_CLAIM,) if re.search(RAGGED_CLAIM, source) else ()))
+    return (WGMMA_INLINE + ((VOCAB_STREAM,) if re.search(VOCAB_STREAM, source) else ())
+            + ((RAGGED_FLAT,) if re.search(RAGGED_FLAT, source) else ())
+            + ((RAGGED_CLAIM,) if re.search(RAGGED_CLAIM, source) else ())
+            + ((GRP_CLAIM,) if re.search(GRP_CLAIM, source) else ())
+            + ((SEGMENTED_ATTENTION,) if re.search(SEGMENTED_ATTENTION, source) else ()))
 
 
 class Refusal(Exception):
@@ -236,6 +246,9 @@ PRELUDE_STATEMENTS = (
 # view at a constant element offset from an arena/argument view is the same pure re-derivation.
 OFFSET_VIEW = re.compile(r'(?:const )?[\w:]+(?: ?\*)+ ?v_\w+ = reinterpret_cast<[\w:]+(?: ?\*)+>\('
                          r'(?:latch_pr(?: \+ \d+LL)+|latch_pa\[\d+\])\) \+ \d+LL;')
+# device_unit_inline 'isolate_all' (signalled by unit_isolation's sentinel): `float* v_x = latch_pa[i] + C;`, an
+# argument tensor's view at a constant element offset, is the same pure re-derivation.
+ARG_OFFSET_VIEW = re.compile(r'(?:const )?[\w:]+(?: ?\*)+ ?v_\w+ = latch_pa\[\d+\] \+ \d+LL;')
 
 
 def split_interval(name, block, limit, isolate=()):
@@ -261,6 +274,8 @@ def split_interval(name, block, limit, isolate=()):
     except Refusal:
         return None
     accepted = PRELUDE_STATEMENTS + ((OFFSET_VIEW,) if any('matrix_bodies_offset_views' in p for p in isolate) else ())
+    # Opt-in sentinel: constant-offset views of an argument pointer without a cast.
+    accepted += ((ARG_OFFSET_VIEW,) if any('arg_offset_views' in p for p in isolate) else ())
     if not all(any(p.fullmatch(st) for p in accepted) for st in statements):
         return None
     # Phases: the maximal run of sub-blocks separated only by __syncthreads(); anything after (the closing
@@ -461,7 +476,7 @@ def unit_state(ptx_text):
     return dict(allowed=sorted(set(allowed)), refused=sorted(set(refused)))
 
 
-RENEW_A_VERSION = 'pflatlong-renew-a-v1 (LATCH-COLD-PREP megakernel-lab a495c1b730)'
+RENEW_A_VERSION = 'pflatlong-renew-a-v2-include-closure (LATCH-COLD-PREP megakernel-lab a495c1b730)'
 _RENEW_A = """// LATCH-TINYMOE-BUILD unit copy: LATCH-COLD-PREP's PFLATLONG_RENEW_A (megakernel-lab a495c1b730). CUDA 12.8 ptxas
 // can reuse the registers of a loop-invariant register A fragment of wgmma for other values later in the loop body
 // when the attention item is compiled in a small context (separately compiled interval functions); each wrapper call
@@ -487,15 +502,43 @@ _WG_NT6 = ("PFLATLONG_DEV void wg_nt6(float (&acc)[8][4], const uint32_t (&a)[4]
 _ANCHOR = '// acc (64 rows x 64) (+)= A (64 x 64, registers, 4 k16 steps) * B where B[k][n] = tile[n][k] (K-major tile).\n'
 
 
+def _unit_header_copies(headers, replacements):
+    """Stage transformed headers and their unchanged quoted-include ancestors.
+
+    A nested quoted include searches its including header's directory first. A
+    transformed leaf beside a unit is therefore ineffective if its wrapper is
+    still read from the original build directory. Copy every ancestor along a
+    path to that leaf, including shared/recursive paths, without changing its
+    bytes. Only names already in the compiler's resolved header closure enter
+    this graph; unrelated headers stay in the original build directory.
+    """
+    parents = {}
+    for name, text in headers.items():
+        for child in re.findall(r'#include "([\w.]+\.cuh)"', text):
+            if child in headers:
+                parents.setdefault(child, set()).add(name)
+    copies = dict(replacements)
+    pending = list(copies)
+    while pending:
+        for parent in sorted(parents.get(pending.pop(), ())):
+            if parent not in copies:
+                copies[parent] = headers[parent]
+                pending.append(parent)
+    return copies
+
+
 def unit_headers(prefix, header_names):
     """{header: text} copies placed beside the unit sources (quoted includes find them first).
 
-    Only attention_long_flat.cuh is patched (renew_a before its register-A wgmma wrappers); the program's
-    manifest, header identities and every other header are unchanged. Refuses a header whose exact
-    wrapper text differs from the audited form.
+    Only attention_long_flat.cuh is transformed (renew_a before its register-A
+    wgmma wrappers). Its quoted-include ancestors are copied byte for byte so
+    nested includes resolve that transformed leaf. The program's manifest and
+    installed headers are unchanged. Refuses a header whose exact wrapper text
+    differs from the audited form.
     """
     rows = {}
-    for name, text in _header_names(prefix, header_names):
+    headers = dict(_header_names(prefix, header_names))
+    for name, text in headers.items():
         if name != 'attention_long_flat.cuh':
             continue
         for old, _ in (_WG_NT, _WG_NT6):
@@ -505,7 +548,7 @@ def unit_headers(prefix, header_names):
             raise Refusal('attention_long_flat.cuh renew_a anchor differs from the audited form')
         text = text.replace(_ANCHOR, _RENEW_A + _ANCHOR).replace(*_WG_NT).replace(*_WG_NT6)
         rows[name] = text
-    return rows
+    return _unit_header_copies(headers, rows)
 
 
 POOL = 'latch_s17_pool'
@@ -530,7 +573,10 @@ def pool_shared_flags(functions):
         if not found:
             out.append((name, text, weight))
             continue
-        if '_p' not in name.rsplit('block_', 1)[-1] and 'grid.sync();' not in _strip(text):
+        # tile_readiness (ops.tile_ready): an interval whose closing grid barrier became a readiness boundary still
+        # ends with a CTA barrier (latch_tr::elided_barrier), which is all the pooled block-scope flags need.
+        if ('_p' not in name.rsplit('block_', 1)[-1] and 'grid.sync();' not in _strip(text)
+                and 'latch_tr::elided_barrier();' not in _strip(text)):
             raise Refusal('pooled interval function lacks its closing grid barrier: ' + name)
         counter = iter(range(len(found)))
 
