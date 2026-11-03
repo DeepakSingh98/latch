@@ -72,6 +72,19 @@
         <figcaption>One H100, complete training updates. Means of balanced paired rounds from fresh and trained weights.</figcaption>
       </figure>
 
+      <h2>Nestor and MoE</h2>
+
+      <p>The Nestor paper compares models at equal compute. At 100M parameters, Nestor reaches the same loss as a mixture-of-experts transformer with about 17% less compute, and it stays ahead up to 1B.</p>
+
+      <p>Compute and GPU time aren’t the same thing, though. Nestor’s routed operations are small, and GPUs run them slowly. I timed the paper’s dense and MoE baselines on the same H100 and tuned them the same way as Nestor’s PyTorch version.</p>
+
+      <figure>
+        <a href="figures/nestor-baselines.svg" aria-label="Open GPU hours chart full size"><img src="figures/nestor-baselines.svg" width="1200" height="675" loading="lazy" alt="Hours on one H100 to train each 100M model on 5 billion tokens. Dense transformer: 9.2 hours with the authors' code, 4.2 tuned, loss 3.578. MoE: 10.5 authors' code, 5.1 tuned, loss 3.386. Nestor: 17.0 authors' code, 10.2 tuned, 8.2 with Latch, loss 3.356."></a>
+        <figcaption>One H100, 5 billion tokens, measured from initialization. Held-out losses from the Nestor paper (Table 3).</figcaption>
+      </figure>
+
+      <p>A tuned Nestor step in PyTorch takes 2× as long as a tuned MoE step, and Latch gets it to 1.6×. At this size, Nestor’s advantage per FLOP doesn’t show up in GPU time yet. Closing the rest of that gap is what I’m working on next.</p>
+
       <h2>Where the time went</h2>
 
       <p>The biggest improvement came from giving each warp more memory loads to work on at once. Nestor does a lot of gathers, copies and small reductions. When a warp waits for each load to finish before issuing the next, most of the GPU’s memory bandwidth sits idle. Generating code that keeps more loads in flight saved about 180 milliseconds per update.</p>
