@@ -13,6 +13,7 @@ release root. Compile on CPU with CUDA 12.8; run generated programs on H100
 | [GradLev](gradlev/README.md) | Adapt GPT-2's final MLP after each token | `gradlev` |
 | [Editable learning program](researcher/README.md) | Byte transformer, intermediate supervision and recurrence | `gpu` |
 | [Direct compiler API](operations/README.md) | Smaller operation examples | `gpu` |
+| [Nestor](nestor/README.md) | Build the full training update of a routed-column language model | `gpu` |
 | [Fast examples](../docs/FAST_EXAMPLES.md) | Compare complete updates and audit numerical results | `gpu` |
 
 MLP and the default editable learning program use synthetic data. Other guides

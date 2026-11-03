@@ -41,7 +41,7 @@ def lowered(captured, monkeypatch, bodies):
 
 def test_option_validation_and_presets():
     assert mb.rules_of(None) == frozenset()
-    assert mb.rules_of('exact') == frozenset(mb.RULES) - {'isolate'}
+    assert mb.rules_of('exact') == {'tailrot', 'taildeep', 'fill', 'p5c'}
     assert mb.rules_of('tailrot+taildeep') == {'tailrot', 'taildeep'}
     for bad in ('bogus', 'tailrot+tailrot', '', 'exact+p5c'):
         with pytest.raises(ValueError):

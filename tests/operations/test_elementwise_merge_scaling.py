@@ -1,4 +1,4 @@
-"""Byte-identical greedy scheduling against the frozen donor implementation."""
+"""Donor-identical SSA scheduling, plus explicit ordered mutable-storage semantics."""
 import copy
 import importlib.util
 from pathlib import Path
@@ -82,10 +82,27 @@ def test_topological_heap_retains_smallest_ready_index_with_aliases(seed):
     assert _topological(phases, root) == donor._topological(phases, root)
 
 
-def test_topological_heap_retains_last_writer_and_cycle_refusal():
-    phases = [dict(writes=["x"], reads=[]), dict(writes=["y"], reads=["x"]),
+def test_topological_orders_mutable_versions_and_retains_cycle_refusal():
+    phases = [dict(writes=["x"], reads=[], value=1), dict(writes=["y"], reads=["x"]),
               dict(writes=["x"], reads=["external"])]
-    assert _topological(phases, str) == donor._topological(phases, str)
+    # The frozen donor uses the final writer for every read. That convention is
+    # valid for SSA, but changes which value this reader sees when x is mutable.
+    # Preserve the donor as historical evidence; the new RAW/WAR/WAW contract
+    # must keep the intervening reader before the overwrite.
+    historical = donor._topological(phases, str)
+    current = _topological(phases, str)
+    assert historical == [phases[0], phases[2], phases[1]]
+    assert current == phases
+
+    def replay(schedule):
+        values = {"external": 2}
+        for phase in schedule:
+            value = phase["value"] if "value" in phase else values[phase["reads"][0]]
+            values[phase["writes"][0]] = value
+        return values
+
+    assert replay(current) == {"external": 2, "x": 2, "y": 1}
+    assert replay(historical) == {"external": 2, "x": 2, "y": 2}
     phases = [dict(writes=["x"], reads=["y"]), dict(writes=["y"], reads=["x"])]
     for function in (_topological, donor._topological):
         with pytest.raises(ValueError, match="dependency cycle"):

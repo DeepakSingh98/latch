@@ -18,6 +18,12 @@
 // barrier that precedes their first read (the issuer runs NST - 1 >= 2 stages ahead; every task has >= 1 stage).
 // Counter: one zeroed word per product phase per launch (generator: arena words past the planned arena, zeroed at
 // kernel entry and ordered by the first grid barrier).
+// Observed products (executed-work counters, latch_ops.ragged_*_observed) are claimed too. Thread 0
+// counts each task's executed 64-k stages in a register and adds them with the task's tile record when the task
+// completes (latch_ragged::work_task); weight-gradient experts without rows record their +0 tiles where they are
+// stored. Counter totals equal the static bodies' (same tiles, stages, rows and output elements per segment).
+// N-major (!BKC) right products admit K % 64 != 0 (segmented_products feature "ktail"): the last stage's k rows past K
+// are zeroed before any MMA reads it (see ragged_tma.cuh), so every product keeps the cp.async body's operands.
 #pragma once
 #include "ragged_tma.cuh"
 
@@ -31,13 +37,17 @@ __shared__ volatile int xclaim_ring[16];
 // Register consumers (segmented_products "repi"): the consumer functor declares reg_tag and takes (flat index, BF16 result of
 // product 0, of product 1); it runs in the store loop instead of latch_ragged::tile_consumers.
 template<class T, class = void> struct epi_reg : std::false_type {};
+// Tile readiness (ops/tile_ready.py): a consumer type declaring wait_tag waits for its A operand rows (wait_a).
+template<class T, class = void> struct epi_wait : std::false_type {};
+template<class T> struct epi_wait<T, std::void_t<typename T::wait_tag>> : std::bool_constant<T::waits> {};
 template<class T> struct epi_reg<T, std::void_t<typename T::reg_tag>> : std::true_type {};   // local classes: no statics
 
 // KS (1 or 2): 64-wide k boxes per stage. KS 2 stages 128 k per CTA barrier and issue round (the generator admits it
 // only for K % 128 == 0, so no stage holds absent k terms); every element keeps its ascending k16 chain.
 template<int E, int BM, int BN, int WM, bool BKC, int NST, int P, bool STATIC0, class EPI = NoEpi, int KS = 1>
 DEV void tclaim_impl(const void* tA, const void* tB0, const void* tB1, const popsc::BArgs* gs, const int64_t* offsets,
-                     int rows, float* smem, unsigned* claim, const EPI& epi = EPI{}) {
+                     int rows, float* smem, unsigned* claim, const EPI& epi = EPI{}, int64_t* work0 = nullptr,
+                     int64_t* work1 = nullptr) {
   using C = pops4b::Cfg<BM, BN, WM>;
   constexpr int SUB = C::A_BYTES + P * C::B_BYTES, STAGE = KS * SUB;
   static_assert(NST >= 3 && NST <= 8 && (P == 1 || P == 2) && (KS == 1 || KS == 2), "stages / products / k boxes");
@@ -114,6 +124,10 @@ DEV void tclaim_impl(const void* tA, const void* tB0, const void* tB1, const pop
       task(id, lt);
       nxt = atomicAdd(claim, 1u) + (STATIC0 ? (unsigned)G : 0u);
     }
+    if constexpr (epi_wait<EPI>::value) {
+      // Tile readiness (ops/tile_ready.py): the task's A rows are complete before its first operand stage is issued.
+      if (lk == 0) epi.wait_a((long long)lt.lo + lt.m0, lt.M - lt.m0 < BM ? lt.M - lt.m0 : BM, (long long)rows);
+    }
     const int st = lq % NST;
     const unsigned bar = bar0 + 8 * st;
     pops4b::bar_expect(bar, STAGE);
@@ -154,10 +168,16 @@ DEV void tclaim_impl(const void* tA, const void* tB0, const void* tB1, const pop
     if (id < 0) break;                                             // CTA-uniform (written before a CTA barrier)
     Task t;
     task(id, t);
+    int steps = 0;                                                 // executed 64-k stages (work counters)
 #pragma unroll 1
     for (int kk = 0; kk < nk; ++kk, ++q) {
       const int st = q % NST;
+      steps += KS;
       pops4b::bar_wait(bar0 + 8 * st, (uses0[st] + (unsigned)(q / NST)) & 1u);
+      if constexpr (!BKC && KS == 1) {
+        if ((g.K & 63) && kk == nk - 1)                            // CTA-uniform: N-major B k tail
+          zero_tail_rows<P * (BN / 64)>(base + st * STAGE + C::A_BYTES, g.K & 63);
+      }
 #pragma unroll
       for (int p = 0; p < P; ++p)
 #pragma unroll
@@ -275,9 +295,22 @@ DEV void tclaim_impl(const void* tA, const void* tB0, const void* tB1, const pop
           }
         }
       }
+    } else if constexpr (epi_tile<EPI>::value) {
+      // Tile readiness (ops/tile_ready.py): per-warpgroup publication. The warpgroup's 128 threads finished their
+      // stores of this task (rows wgm * WTM.., columns wgn * WTN.. of the tile, for every product of the pair); after
+      // their named barrier one thread publishes exactly that element count (release: fence + atomic adds). No CTA
+      // barrier.
+      asm volatile("bar.sync %0, 128;" ::"r"(13 + wg) : "memory");
+      if ((tid & 127) == 0) {
+        const int r_lo = t.m0 + wgm * C::WTM, c_lo = t.n0 + wgn * C::WTN;
+        const int r_hi = r_lo + C::WTM < t.M ? r_lo + C::WTM : t.M, c_hi = c_lo + C::WTN < g.N ? c_lo + C::WTN : g.N;
+        if (r_hi > r_lo && c_hi > c_lo) epi.publish_rows((long long)t.lo + r_lo, r_hi - r_lo, c_hi - c_lo);
+      }
     } else {
       tile_consumers(epi, t.lo, t.m0, t.n0, t.M, g.N, g.ldc, BM, BN);
     }
+    work_task<false>(work0, t.e, t.m0, t.n0, t.M, g.N, g.K, BM, BN, steps);
+    if (P == 2) work_task<false>(work1, t.e, t.m0, t.n0, t.M, g.N, g.K, BM, BN, steps);
   }
   __syncthreads();                                                 // every wgmma read of the stages is complete
   if (tid == 0) {
@@ -292,16 +325,17 @@ DEV void tclaim_impl(const void* tA, const void* tB0, const void* tB1, const pop
 
 template<int E, int BM, int BN, int WM, bool BKC, int NST, bool STATIC0, int KS = 1, class EPI = NoEpi>
 DEV void tflat_claim(const void* tA, const void* tB, const popsc::BArgs& g, const int64_t* offsets, int rows,
-                     float* smem, int /*rot: unused with claims*/, unsigned* claim, const EPI& epi = EPI{}) {
-  tclaim_impl<E, BM, BN, WM, BKC, NST, 1, STATIC0, EPI, KS>(tA, tB, tB, &g, offsets, rows, smem, claim, epi);
+                     float* smem, int /*rot: unused with claims*/, unsigned* claim, const EPI& epi = EPI{},
+                     int64_t* work = nullptr) {
+  tclaim_impl<E, BM, BN, WM, BKC, NST, 1, STATIC0, EPI, KS>(tA, tB, tB, &g, offsets, rows, smem, claim, epi, work);
 }
 
 template<int E, int BM, int BN, int WM, bool BKC, int NST, bool STATIC0, class EPI = NoEpi>
 DEV void tflat2_claim(const void* tA, const void* tB0, const void* tB1, const popsc::BArgs& g0, const popsc::BArgs& g1,
                       const int64_t* offsets, int rows, float* smem, int /*rot*/, unsigned* claim,
-                      const EPI& epi = EPI{}) {
+                      const EPI& epi = EPI{}, int64_t* work0 = nullptr, int64_t* work1 = nullptr) {
   const popsc::BArgs gs[2] = {g0, g1};
-  tclaim_impl<E, BM, BN, WM, BKC, NST, 2, STATIC0, EPI>(tA, tB0, tB1, gs, offsets, rows, smem, claim, epi);
+  tclaim_impl<E, BM, BN, WM, BKC, NST, 2, STATIC0, EPI>(tA, tB0, tB1, gs, offsets, rows, smem, claim, epi, work0, work1);
 }
 
 // Claimed segmented outer products (ragged_outer, C[e] = A[lo:hi]^T B[lo:hi]); see touter for staging and the tail
@@ -312,9 +346,14 @@ DEV void tflat2_claim(const void* tA, const void* tB0, const void* tB1, const po
 // Shared memory after the larger stage ring: off[E + 1], ord[E], cnt[4] (nonempty, hot, carried ticket).
 // Q (1 or 2) products with the same segments and extents (e.g. the gate and up weight gradients) share one queue: an
 // expert's tiles of every product are consecutive tickets, so each product's largest-expert tiles are claimed first.
-template<int E, int BM, int BN, int WM, int NST, bool STATIC0, int Q = 1>
+// SW: optional per-task segment wait of claimed weight-gradient products (a functor with wait(p, lo, n) called by the
+// issuing thread before a task's first operand stage); NoSegWait (the only form emitted) waits for nothing.
+struct NoSegWait {};
+
+template<int E, int BM, int BN, int WM, int NST, bool STATIC0, int Q = 1, class SW = NoSegWait>
 DEV int touter_claim_range(const void* const* tAs, const void* const* tBs, const popsc::BArgs* gs, float* smem,
-                           const int* off, const int* ord, int e0, int tlo, int thi, int first, unsigned* claim) {
+                           const int* off, const int* ord, int e0, int tlo, int thi, int first, unsigned* claim,
+                           int64_t* const* works = nullptr, const SW* sw = nullptr) {
   const popsc::BArgs& g = gs[0];
   using C = pops4b::Cfg<BM, BN, WM>;
   constexpr int STAGE = C::A_BYTES + C::B_BYTES;
@@ -366,6 +405,9 @@ DEV int touter_claim_range(const void* const* tAs, const void* const* tBs, const
       task(id, lt);
       nxt = atomicAdd(claim, 1u) + (STATIC0 ? (unsigned)G : 0u);
     }
+    if constexpr (!std::is_same<SW, NoSegWait>::value) {
+      if (lk == 0) sw->wait(lt.p, (long long)lt.lo, (long long)lt.K);   // the whole segment is ready
+    }
     const int kk = lk * 64, st = lq % NST;
     const unsigned dA = base + st * STAGE, dB = dA + C::A_BYTES, bar = bar0 + 8 * st;
     pops4b::bar_expect(bar, STAGE);
@@ -392,9 +434,11 @@ DEV int touter_claim_range(const void* const* tAs, const void* const* tBs, const
     for (int a = 0; a < C::MT; ++a)
 #pragma unroll
       for (int j = 0; j < C::R; ++j) acc[a][j] = 0.f;
+    int steps = 0;                                                 // executed 64-k stages (work counters)
 #pragma unroll 1
     for (int kk = 0; kk < t.nk; ++kk, ++q) {
       const int st = q % NST;
+      ++steps;
       pops4b::bar_wait(bar0 + 8 * st, (uses0[st] + (unsigned)(q / NST)) & 1u);
       const unsigned sA = base + st * STAGE, sB = sA + C::A_BYTES;
       const int keep_rows = t.K - kk * 64 < 64 ? t.K - kk * 64 : 64;
@@ -447,6 +491,7 @@ DEV int touter_claim_range(const void* const* tAs, const void* const* tBs, const
         }
       }
     }
+    if (works) work_task<true>(works[t.p], t.e, t.m0, t.n0, g.M, g.N, t.K, BM, BN, steps);
   }
   __syncthreads();
   if (tid == 0) {
@@ -460,9 +505,10 @@ DEV int touter_claim_range(const void* const* tAs, const void* const* tBs, const
   return carry;                                                    // meaningful in thread 0
 }
 
-template<int E, int BM, int BN, int WM, int NST, bool STATIC0, int HOT, int HBM, int HBN, int HWM, int HNST, int Q>
+template<int E, int BM, int BN, int WM, int NST, bool STATIC0, int HOT, int HBM, int HBN, int HWM, int HNST, int Q,
+         class SW = NoSegWait>
 DEV void touter_claim_q(const void* const* tAs, const void* const* tBs, const popsc::BArgs* gs, const int64_t* offsets,
-                        int rows, float* smem, unsigned* claim) {
+                        int rows, float* smem, unsigned* claim, int64_t* const* works = nullptr, const SW* sw = nullptr) {
   const popsc::BArgs& g = gs[0];
   constexpr int RING = NST * (pops4b::Cfg<BM, BN, WM>::A_BYTES + pops4b::Cfg<BM, BN, WM>::B_BYTES);
   constexpr int HRING = HOT ? HNST * (pops4b::Cfg<HBM, HBN, HWM>::A_BYTES + pops4b::Cfg<HBM, HBN, HWM>::B_BYTES) : 0;
@@ -516,28 +562,45 @@ DEV void touter_claim_q(const void* const* tAs, const void* const* tBs, const po
 #pragma unroll 1
         for (int w = (int)blockIdx.x * (int)blockDim.x + tid; w < words; w += stride) out[w] = 0u;
       }
+    // Observed products: the static body's records for these experts' tasks (every BM x BN tile stored, no k stage,
+    // no rows), once per launch by CTA 0.
+    if (works && HOT == 0 && blockIdx.x == 0 && tid == 0) {
+      const unsigned long long tiles = (unsigned long long)((g.M + BM - 1) / BM) * ((g.N + BN - 1) / BN);
+#pragma unroll 1
+      for (int j = NE; j < E; ++j)
+#pragma unroll 1
+        for (int p = 0; p < Q; ++p)
+          if (works[p]) {
+            auto c = reinterpret_cast<unsigned long long*>(works[p] + 4LL * ord[j]);
+            atomicAdd(c + 1, tiles);
+            atomicAdd(c + 3, (unsigned long long)g.M * (unsigned long long)g.N);
+          }
+    }
   }
+  if (works && HOT != 0) __trap();                                 // observed products are claimed without a hot class
   if (tid == 0) cnt[2] = STATIC0 ? (int)blockIdx.x : (int)atomicAdd(claim, 1u);
   __syncthreads();
   int first = cnt[2];
   if (HOT && TH > 0) {
     // Outer operand maps hold 64 x 64 boxes for every tile shape, so the hot range reuses them.
-    const int carry = touter_claim_range<E, HBM, HBN, HWM, HNST, STATIC0, Q>(tAs, tBs, gs, smem, off, ord, 0, 0, TH,
-                                                                            first, claim);
+    const int carry = touter_claim_range<E, HBM, HBN, HWM, HNST, STATIC0, Q, SW>(tAs, tBs, gs, smem, off, ord, 0, 0, TH,
+                                                                                first, claim, works, sw);
     if (tid == 0) cnt[2] = carry;
     __syncthreads();
     first = cnt[2];
   }
-  touter_claim_range<E, BM, BN, WM, NST, STATIC0, Q>(tAs, tBs, gs, smem, off, ord, NH, TH, T, first, claim);
+  touter_claim_range<E, BM, BN, WM, NST, STATIC0, Q, SW>(tAs, tBs, gs, smem, off, ord, NH, TH, T, first, claim, works, sw);
 }
 
 template<int E, int BM, int BN, int WM, int NST, bool STATIC0, int HOT = 0, int HBM = 128, int HBN = 64, int HWM = 2,
          int HNST = 6>
 DEV void touter_claim(const void* tA, const void* tB, const popsc::BArgs& g, const int64_t* offsets, int rows,
-                      float* smem, int /*rot*/, unsigned* claim) {
+                      float* smem, int /*rot*/, unsigned* claim, int64_t* work = nullptr) {
   const void* tAs[1] = {tA};
   const void* tBs[1] = {tB};
-  touter_claim_q<E, BM, BN, WM, NST, STATIC0, HOT, HBM, HBN, HWM, HNST, 1>(tAs, tBs, &g, offsets, rows, smem, claim);
+  int64_t* const works[1] = {work};
+  touter_claim_q<E, BM, BN, WM, NST, STATIC0, HOT, HBM, HBN, HWM, HNST, 1>(tAs, tBs, &g, offsets, rows, smem, claim,
+                                                                         work ? works : nullptr);
 }
 
 // Two weight-gradient products with the same segment offsets, row extent, [M, N] results and tile (g1 differs from g0
@@ -546,11 +609,13 @@ template<int E, int BM, int BN, int WM, int NST, bool STATIC0, int HOT = 0, int 
          int HNST = 6>
 DEV void touter2_claim(const void* tA0, const void* tB0, const void* tA1, const void* tB1, const popsc::BArgs& g0,
                        const popsc::BArgs& g1, const int64_t* offsets, int rows, float* smem, int /*rot*/,
-                       unsigned* claim) {
+                       unsigned* claim, int64_t* work0 = nullptr, int64_t* work1 = nullptr) {
   const void* tAs[2] = {tA0, tA1};
   const void* tBs[2] = {tB0, tB1};
   const popsc::BArgs gs[2] = {g0, g1};
-  touter_claim_q<E, BM, BN, WM, NST, STATIC0, HOT, HBM, HBN, HWM, HNST, 2>(tAs, tBs, gs, offsets, rows, smem, claim);
+  int64_t* const works[2] = {work0, work1};
+  touter_claim_q<E, BM, BN, WM, NST, STATIC0, HOT, HBM, HBN, HWM, HNST, 2>(tAs, tBs, gs, offsets, rows, smem, claim,
+                                                                         (work0 || work1) ? works : nullptr);
 }
 
 }  // namespace latch_ragged

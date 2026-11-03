@@ -51,8 +51,21 @@ def _warp_second_stage(live, out, rounded, scale):
   if (lane == 0) {{ const float second = {second}; {out}[o] = {rounded('second' + scale)}; /*RED_EPILOGUE*/ }}'''
 
 
+def batched_results(extent, results, threads=132 * 256):
+    """accumulation_rules 'rilp': results per thread and grid-stride round for the small-extent thread-per-result tree.
+
+    With one 256-thread CTA per SM, a thread that loads only its own result's leaves before storing keeps 1-8 loads
+    in flight (latency-bound). Aim for roughly 16-32 independent leaf loads per round."""
+    if not 0 < extent <= 16:
+        return 1
+    batch = 8 if extent <= 3 else 4 if extent <= 8 else 2
+    while batch > 1 and results < batch * threads:
+        batch //= 2
+    return batch
+
+
 def exact_reduction(*, out, position, extent, results, read, rounded, scale='', wide=False,
-                    coalesced_threads=False, quad_threads=False):
+                    coalesced_threads=False, quad_threads=False, batch=1, vector_read=None):
     if quad_threads and coalesced_threads and 32 < extent <= 256 and results >= 1024 and results % 8 == 0:
         # P6-B: four threads per result (a lane quad). Lane q of the quad evaluates, for each warp partial, the
         # sub-butterfly over the leaves of lanes q, q+4, ..., q+28 (offsets 16, 8, 4 of the frozen butterfly); two
@@ -142,6 +155,63 @@ def exact_reduction(*, out, position, extent, results, read, rounded, scale='', 
         for offset in (16, 8, 4, 2, 1):
             lanes = [a if b is None else b if a is None else f'({a} + {b})'
                      for a, b in zip(lanes, (lanes[i ^ offset] for i in range(32)))]
+        if batch > 1 and vector_read is not None and results % 4 == 0:
+            # accumulation_rules 'rilp' float4 form: lower.py admits it only when four consecutive results read four
+            # consecutive, 16-byte aligned FP32 leaves (unit-stride innermost kept axis of extent % 4 == 0, every other
+            # stride and the offsets multiples of 4) and store to a contiguous aligned FP32 result. Component c of
+            # leaf load r is exactly the scalar leaf r of result o + c; each component evaluates the unchanged tree
+            # and rounding. It avoids the scalar batch's issue cost (64-bit index arithmetic per leaf).
+            groups = max(1, batch // 2)
+            q4 = results // 4
+            pos_of = lambda i: position.replace("(r / ", f"({i}LL / ").replace("(unsigned)(r)", f"(unsigned)({i}LL)")
+            loads = "\n".join(f"    const float4 l{i}_ = {vector_read(pos_of(i))};" for i in range(extent))
+
+            def tree(c):
+                lanes_c = [f'(0.0f + l{i}_.{c})' for i in range(extent)] + [None] * (32 - extent)
+                for offset in (16, 8, 4, 2, 1):
+                    lanes_c = [a if b is None else b if a is None else f'({a} + {b})'
+                               for a, b in zip(lanes_c, (lanes_c[i ^ offset] for i in range(32)))]
+                return lanes_c[0]
+            stores = ", ".join(rounded(f"acc_[u_].{c}" + scale) for c in "xyzw")
+            code = f'''for (long long gb_ = (long long)blockIdx.x * blockDim.x + threadIdx.x; gb_ < {q4}LL; gb_ += {groups}LL * (long long)gridDim.x * blockDim.x) {{
+  const long long s_ = (long long)gridDim.x * blockDim.x;
+  float4 acc_[{groups}];
+#pragma unroll
+  for (int u_ = 0; u_ < {groups}; ++u_) {{
+    const long long o = 4 * (gb_ + u_ * s_ < {q4}LL ? gb_ + u_ * s_ : gb_);
+{loads}
+    acc_[u_] = make_float4({tree("x")}, {tree("y")}, {tree("z")}, {tree("w")});
+  }}
+#pragma unroll
+  for (int u_ = 0; u_ < {groups}; ++u_) {{
+    const long long g_ = gb_ + u_ * s_;
+    if (g_ < {q4}LL) reinterpret_cast<float4*>({out})[g_] = make_float4({stores});
+  }}
+}}'''
+            return code, {'engine': 'exact_cta_tree_per_thread', 'reduction_elements': extent, 'batched_results': 4 * groups,
+                          'vector4': True}
+        if batch > 1:
+            # accumulation_rules 'rilp': each thread evaluates the identical tree for `batch` grid-stride results
+            # (o, o + s, ...) with every leaf load issued before any store. Same leaves, same tree, same rounding and
+            # the same single store per result (bitwise equal). Out-of-range slots recompute a valid result and are
+            # never stored. Loading later results before storing earlier ones requires that no stored element is a
+            # leaf of this phase; lower.py restores the unbatched body for any phase whose result storage root is
+            # also one of its read roots after storage aliasing.
+            code = f'''for (long long ob_ = (long long)blockIdx.x * blockDim.x + threadIdx.x; ob_ < {results}LL; ob_ += {batch}LL * (long long)gridDim.x * blockDim.x) {{
+  const long long s_ = (long long)gridDim.x * blockDim.x;
+  float acc_[{batch}];
+#pragma unroll
+  for (int u_ = 0; u_ < {batch}; ++u_) {{
+    const long long o = ob_ + u_ * s_ < {results}LL ? ob_ + u_ * s_ : ob_;
+    acc_[u_] = {lanes[0]};
+  }}
+#pragma unroll
+  for (int u_ = 0; u_ < {batch}; ++u_) {{
+    const long long o = ob_ + u_ * s_;
+    if (o < {results}LL) {{ const float acc = acc_[u_]; {out}[o] = {rounded('acc' + scale)}; }}
+  }}
+}}'''
+            return code, {'engine': 'exact_cta_tree_per_thread', 'reduction_elements': extent, 'batched_results': batch}
         code = f'''for (long long o = (long long)blockIdx.x * blockDim.x + threadIdx.x; o < {results}LL; o += (long long)gridDim.x * blockDim.x) {{
   const float acc = {lanes[0]};
   {out}[o] = {rounded('acc' + scale)}; /*RED_EPILOGUE*/

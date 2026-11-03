@@ -1246,6 +1246,10 @@ def _rewrite_compose_casts(graph, *, retain_all, policy, target_arch):
         return graph
     from .gather_cast import rewrite as rewrite_gather_casts
     from .widen_cast import rewrite as rewrite_widen_casts
+    # graph_rules 'depth_reads' (ops/depth_read_region.py): depth-read mixture rules (bitwise; identity when off).
+    from .depth_read_region import rewrite as rewrite_depth_reads
+    graph, report = rewrite_depth_reads(graph)
+    _explain_note("cast_rewrite", **{"pass": "depth_reads", "report": report})
     if metadata.get("precision_policy"):
         # LATCH-MOE-EMA-FAST: under a captured precision policy only the two bit-exact storage commutations run:
         # cast(gather(T)) == gather(cast(T)) and op(widen(b), x) == op(b read by exact widening, x). Every stored
@@ -1254,12 +1258,27 @@ def _rewrite_compose_casts(graph, *, retain_all, policy, target_arch):
         if gather_cast_rule.UNDER_PRECISION_POLICY:
             graph, report = rewrite_gather_casts(graph)
             _explain_note("cast_rewrite", **{"pass": "gather_cast", "report": report, "precision_policy": True})
+        # graph_rules 'castshare' / segmented_products 'scatter' (ops/pack_fusion.py): bitwise pack cast sharing and
+        # scattered product rows; identity when both are off.
+        from .pack_fusion import rewrite as rewrite_packs
+        graph, report = rewrite_packs(graph, target_arch=target_arch)
+        _explain_note("cast_rewrite", **{"pass": "pack_fusion", "report": report, "precision_policy": True})
+        # segmented_attention 'rotary' (ops/segmented_rotary.py): segmented-attention rotary operand row passes.
+        from .segmented_rotary import rewrite as rewrite_segmented_rotary
+        graph, report = rewrite_segmented_rotary(graph)
+        _explain_note("cast_rewrite", **{"pass": "segmented_rotary", "report": report, "precision_policy": True})
         if widen_cast_rule.UNDER_PRECISION_POLICY:
             graph, report = rewrite_widen_casts(graph)
             _explain_note("cast_rewrite", **{"pass": "widen_cast", "report": report, "precision_policy": True})
         return graph
     graph, report = rewrite_gather_casts(graph)
     _explain_note("cast_rewrite", **{"pass": "gather_cast", "report": report})
+    from .pack_fusion import rewrite as rewrite_packs
+    graph, report = rewrite_packs(graph, target_arch=target_arch)
+    _explain_note("cast_rewrite", **{"pass": "pack_fusion", "report": report})
+    from .segmented_rotary import rewrite as rewrite_segmented_rotary
+    graph, report = rewrite_segmented_rotary(graph)
+    _explain_note("cast_rewrite", **{"pass": "segmented_rotary", "report": report})
     graph, report = rewrite_widen_casts(graph)
     _explain_note("cast_rewrite", **{"pass": "widen_cast", "report": report})
     from .indexed_reduction import requested_policy as _requested_indexed
@@ -2706,10 +2725,42 @@ def _lower_serial(graph, *, retain_all=False, fuse_elementwise=True, loop_option
             root_ = layouts[r].root if r in layouts else r
             result.extend(virtual_reads[root_] if root_ in virtual_text else [r])
         return list(dict.fromkeys(result))
-    from . import window_attention, window_fusion, ragged_experts_lower
+    from . import window_attention, window_fusion, ragged_experts_lower, segmented_attention_lower
+    from . import segmented_rotary as _seg_rotary
     for op in operations:
         target = str(_field(op, "target", _field(op, "op")))
         target = target.removeprefix("torch.ops.").removeprefix("aten.")
+        if target in segmented_attention_lower.TARGETS:
+            def segmented_attention_define(value, value_shape, value_strides, value_dtype):
+                layouts[value] = TensorLayout(tuple(value_shape), tuple(value_strides or _contiguous(value_shape)), value)
+                dtypes[value] = value_dtype
+                if value not in placement and value not in roots:
+                    roots.append(value)
+            emitted = segmented_attention_lower.emit(op, values=values, layouts=layouts, dtypes=dtypes,
+                names=names, ref=_ref, field=_field, ident=_ident, define=segmented_attention_define,
+                target_arch=target_arch)
+            define_wgmma = '#ifndef PFLATLONG_WGMMA\n#define PFLATLONG_WGMMA 1\n#endif\n'
+            if define_wgmma not in helper_parts:
+                helper_parts.insert(0, define_wgmma)
+            include = '#include "attention_segmented.cuh"\n'
+            if include not in helper_parts:
+                helper_parts.append(include)
+            extra_headers.extend(h for h in segmented_attention_lower.HEADERS if h not in extra_headers)
+            for phase in emitted:
+                phases.append(phase)
+                for value in phase["writes"]:
+                    producers[value] = len(phases) - 1
+            attention_decisions.append({"group": tuple(_field(op, "outputs", ()))[0],
+                "decision": "packed_segmented_native", "arithmetic_contract": segmented_attention_lower.CONTRACT,
+                "half": "forward" if target == segmented_attention_lower.FORWARD else "backward",
+                "op_name": _field(op, "name"),
+                "q_value": _ref(tuple(_field(op, "args", ()))[0], names),
+                "offsets_value": _ref(tuple(_field(op, "args", ()))[-3], names),
+                "work_counters": emitted[-1]["work_counters"],
+                "work_counter_columns": emitted[-1]["work_counter_columns"],
+                "heads": emitted[-1]["heads"], "segments": emitted[-1]["segments"],
+                "packed_rows": emitted[-1]["packed_rows"], "row_capacity_padding": 0})
+            continue
         if target == _norm_fusion.RPACKB_TARGET:
             def rpackb_define(value, value_shape, value_strides, value_dtype):
                 layouts[value] = TensorLayout(tuple(value_shape), tuple(value_strides or _contiguous(value_shape)), value)
@@ -2718,6 +2769,20 @@ def _lower_serial(graph, *, retain_all=False, fuse_elementwise=True, loop_option
                     roots.append(value)
             for phase in _norm_fusion.emit_rotary_unpack(op, values=values, layouts=layouts, dtypes=dtypes,
                     names=names, ref=_ref, field=_field, ident=_ident, define=rpackb_define):
+                phases.append(phase)
+                for value in phase["writes"]:
+                    producers[value] = len(phases) - 1
+            continue
+        if target in _seg_rotary.TARGETS:
+            # segmented_attention 'rotary': one generated row pass per recognized segmented-attention rotary
+            # operand/gradient (ops/segmented_rotary.py).
+            def rotary_define(value, value_shape, value_strides, value_dtype):
+                layouts[value] = TensorLayout(tuple(value_shape), tuple(value_strides or _contiguous(value_shape)), value)
+                dtypes[value] = value_dtype
+                if value not in placement and value not in roots:
+                    roots.append(value)
+            for phase in _seg_rotary.emit(op, values=values, layouts=layouts, dtypes=dtypes,
+                    names=names, ref=_ref, field=_field, ident=_ident, define=rotary_define):
                 phases.append(phase)
                 for value in phase["writes"]:
                     producers[value] = len(phases) - 1
@@ -2754,7 +2819,9 @@ def _lower_serial(graph, *, retain_all=False, fuse_elementwise=True, loop_option
                 dtypes[value] = value_dtype
                 if value not in placement and value not in roots:
                     roots.append(value)
-            emitted = ragged_experts_lower.emit(op, values=values, layouts=layouts, dtypes=dtypes,
+            from . import pack_fusion as _pack_fusion
+            emitted = (_pack_fusion.emit if _pack_fusion.marked(op, _field) else ragged_experts_lower.emit)(
+                op, values=values, layouts=layouts, dtypes=dtypes,
                 names=names, ref=_ref, field=_field, ident=_ident, define=ragged_define, target_arch=target_arch,
                 phases=phases, producers=producers, operations=operations)
             include = '#include "ragged_experts.cuh"\n'
@@ -2788,6 +2855,24 @@ def _lower_serial(graph, *, retain_all=False, fuse_elementwise=True, loop_option
                     helper_parts.append('#include "ragged_claim.cuh"\n')
                 if ragged_experts_lower.CLAIM_HEADER not in extra_headers:
                     extra_headers.append(ragged_experts_lower.CLAIM_HEADER)
+            if any(phase_.get("pack_scatter") for phase_ in emitted):
+                # segmented_products 'scatter' row-scattered product bodies: their own header, so sources without them
+                # are unchanged.
+                if '#include "pack_fusion.cuh"\n' not in helper_parts:
+                    helper_parts.append('#include "pack_fusion.cuh"\n')
+                if _pack_fusion.HEADER not in extra_headers:
+                    extra_headers.append(_pack_fusion.HEADER)
+            # Claimed-product tokens (ops/claimed_products.py; no-op when none is selected).
+            from . import claimed_products as _claimed
+            claimed_headers_ = _claimed.rewrite(emitted)
+            if ("ragged_claim.cuh" in claimed_headers_ and ragged_experts_lower._feature("sepi")
+                    and '#define LATCH_CLAIM_SEPI 1\n' not in helper_parts):
+                helper_parts.append('#define LATCH_CLAIM_SEPI 1\n')   # before any claimed-body header (staged epilogue)
+            for header_ in claimed_headers_:
+                if f'#include "{header_}"\n' not in helper_parts:
+                    helper_parts.append(f'#include "{header_}"\n')
+                if header_ not in extra_headers:
+                    extra_headers.append(header_)
             for phase in emitted:
                 phases.append(phase)
                 for value in phase["writes"]:
@@ -3269,6 +3354,50 @@ def _lower_serial(graph, *, retain_all=False, fuse_elementwise=True, loop_option
             from . import vocab_head as _vocab
             x_ = _ref(args[0], names)
             q_ = producers.get(x_)
+            # vocab_rules 'stream' (ops/vocab_stream.py): the logits product is re-emitted on the streamed body without
+            # statistics work; the statistics phase below is then emitted unchanged (the original online pass).
+            # Where that form is refused, the fused-statistics form writes the statistics itself (no statistics
+            # phase). Bitwise the replaced product + online statistics.
+            from . import vocab_stream as _vstream
+            if (_vstream.enabled() and q_ is not None and phases[q_].get("names") == [x_]
+                    and layouts[x_].root == x_ and phases[q_].get("tma_respec") is not None):
+                try:
+                    code_, bytes_, meta_ = _vstream.forward_code(phases[q_]["tma_respec"], stats="nullptr",
+                                                                 vocab=int(args[1]))
+                    code_ = _vstream.stats_free(code_, layouts[x_])
+                except _vstream.Refused:
+                    code_ = None
+                if code_ is not None:
+                    product_ = phases[q_]
+                    product_["code"] = code_
+                    product_.update(meta_, stats_free=True)
+                    product_["shared_bytes"] = _vstream.stats_free_shared(product_["shared_bytes"])
+                    product_.pop("tma_respec", None)
+                    if _vstream.HEADER not in extra_headers:
+                        extra_headers.append(_vstream.HEADER)
+                    if f'#include "{_vstream.HEADER}"\n' not in helper_parts:
+                        helper_parts.append(f'#include "{_vstream.HEADER}"\n')
+            if (_vstream.enabled() and q_ is not None and phases[q_].get("names") == [x_]
+                    and layouts[x_].root == x_ and phases[q_].get("tma_respec") is not None
+                    and layouts[name].contiguous and not layouts[name].offset):
+                try:
+                    code_, bytes_, meta_ = _vstream.forward_code(phases[q_]["tma_respec"], stats=_ident(name),
+                                                                 vocab=int(args[1]))
+                except _vstream.Refused:
+                    code_ = None
+                if code_ is not None:
+                    product_ = phases[q_]
+                    product_["code"] = code_
+                    product_.update(meta_)
+                    product_["writes"] = [*product_["writes"], name]
+                    product_["targets"] = [*product_.get("targets", []), str(target)]
+                    product_.pop("tma_respec", None)   # re-emitted: later epilogue passes must not re-specify it
+                    producers[name] = q_
+                    if _vstream.HEADER not in extra_headers:
+                        extra_headers.append(_vstream.HEADER)
+                    if f'#include "{_vstream.HEADER}"\n' not in helper_parts:
+                        helper_parts.append(f'#include "{_vstream.HEADER}"\n')
+                    continue
             record_ = (phases[q_].get("tma_respec") if _vocab.EPILOGUE_STATS and q_ is not None
                        and phases[q_].get("names") == [x_] and layouts[x_].root == x_ else None)
             if record_ is not None:
@@ -3314,6 +3443,9 @@ def _lower_serial(graph, *, retain_all=False, fuse_elementwise=True, loop_option
             kind, code, extra, helper = emitted
             if helper and helper not in helper_parts:
                 helper_parts.append(helper)
+            # vocab_rules 'rows' (ops/vocab_rows.py): record the logits gradient's terms; fused before intervals.
+            from . import vocab_rows as _vocab_rows
+            _vocab_rows.annotate(kind, target, name, args, kwargs, refs, names, layouts, dtypes, extra)
             add_phase(kind, op, name, code, refs, **extra)
             continue
         if base in {"mm", "matmul", "bmm", "addmm"}:
@@ -3721,6 +3853,28 @@ def _lower_serial(graph, *, retain_all=False, fuse_elementwise=True, loop_option
                     split_grid = ADMIT_GRID
                 code, extra = emit(a, b, out, la, lb, shape, split_grid=split_grid)
                 p2 = extra.pop("p2_split", None)
+                # matrix_bodies 'splitctr': in the flat dependency-scheduled kernel the split body's arrival counters
+                # take per-launch counter words past the planned arena (zeroed at kernel entry, ordered by the first
+                # grid barrier, never aliased; each last arriver restores its counter to zero) and its partials a
+                # private root, instead of an arena counter root zeroed by its own phase, which also waited for the
+                # product's operands. Partials, part order and the FP32 sum are unchanged.
+                from . import matrix_bodies as _matrix_bodies
+                if p2 and _matrix_bodies.active("splitctr") and not staged and barrier_schedule == "dependency":
+                    part_ = "gsk_" + name
+                    layouts[part_] = TensorLayout((p2["partial_words"],), (1,), part_)
+                    dtypes[part_] = "float32"
+                    roots.append(part_)
+                    words_ = int(p2["counter_words"])
+                    code = (code.replace("/*P2_CNT*/", f"/*GSKC:{words_}*/").replace("/*P2_PART*/", _ident(part_)))
+                    add_phase("gemm", op, name, code, refs, **extra)
+                    phases[-1]["writes"].append(part_)
+                    phases[-1]["internal_mutations"] = [part_]
+                    phases[-1]["private_scratch"] = [part_]
+                    phases[-1]["counter_effects"] = [{"storage": "entry_zeroed_counter_words", "words": words_,
+                        "initialization": "zeroed at kernel entry (first grid barrier orders it)",
+                        "completion": "last arriver restores zero"}]
+                    producers[part_] = len(phases) - 1
+                    continue
                 if p2:
                     # LATCH-STEP10-SPEED: the existing split generic/skinny BF16 bodies (deterministic K parts, fixed
                     # part-order sum by the last arriver) for long-K products the generic tile underfills (e.g. a
@@ -4055,7 +4209,14 @@ def _lower_serial(graph, *, retain_all=False, fuse_elementwise=True, loop_option
                 refs = real_refs(refs)
                 inlined_reductions.append({"reduction": name, "source": source,
                                            "policy": "same expression at each unchanged reduction leaf"})
-            elif (REDUCTION_INLINE and segmented and source in standalone_text and len(value_readers.get(source, [])) == 1
+            elif (REDUCTION_INLINE and (segmented or (
+                        # accumulation_rules 'rinl': the same per-leaf evaluation for the exact small-extent
+                        # thread-per-result reductions of common compose programs (e.g. a sum over a size-1 axis of
+                        # x * w), so the single-reader FP32 summand is never stored and re-read. --fmad=false: every
+                        # operation of the moved expression rounds exactly as in its own phase.
+                        "rinl" in features and compose and not staged and not region_body and not dynamic
+                        and exact_reductions and 0 < _numel(reduction_shape) <= 16 and name not in accumulate))
+                    and source in standalone_text and len(value_readers.get(source, [])) == 1
                     and source not in outputs and source not in set(writes.values()) and source not in placement
                     and layouts[source].root == source and src.contiguous and not src.offset
                     and dtypes[source] == "float32" and source not in accumulate
@@ -4457,9 +4618,51 @@ def _lower_serial(graph, *, retain_all=False, fuse_elementwise=True, loop_option
                 selected = exact_reduction(out=out, position=pos, extent=_numel(reduction_shape),
                                            results=_numel(shape), read=leaf, rounded=result, scale=scale,
                                            wide="wide" in features, coalesced_threads=coalesced)
+                if selected is not None and "rilp" in features and compose and not staged and not region_body \
+                        and not coalesced and selected[1].get("engine") == "exact_cta_tree_per_thread":
+                    # accumulation_rules 'rilp': same tree, several results per thread.
+                    from .codegen_rules import batched_results
+                    batch_ = batched_results(_numel(reduction_shape), _numel(shape))
+                    out_lay_ = layouts[name]
+                    vec4_ = (inline_text is None and dtypes[source] == "float32" and dtypes[name] == "float32"
+                             and name not in accumulate and bool(kept) and src.strides[kept[-1]] == 1
+                             and src.shape[kept[-1]] % 4 == 0 and src.offset % 4 == 0
+                             and all(st % 4 == 0 for ax, st in enumerate(src.strides)
+                                     if ax != kept[-1] and src.shape[ax] != 1)
+                             and out_lay_.contiguous and out_lay_.offset % 4 == 0 and _numel(shape) % 4 == 0)
+                    if batch_ > 1:
+                        batched_ = exact_reduction(out=out, position=pos, extent=_numel(reduction_shape),
+                                                   results=_numel(shape), read=leaf, rounded=result, scale=scale,
+                                                   wide="wide" in features, batch=batch_,
+                                                   vector_read=(lambda p_, s_=_ident(source):
+                                                                f"*reinterpret_cast<const float4*>({s_} + ({p_}))")
+                                                   if vec4_ else None)
+                        selected = (batched_[0], dict(batched_[1], unbatched_code=selected[0]))
                 if selected is not None:
                     code, extra = selected
+                    if ("rsum1" in features and compose and not staged and not region_body and not dynamic
+                            and _numel(reduction_shape) == 1 and name not in accumulate
+                            and extra.get("engine") == "exact_cta_tree_per_thread" and dtypes[name] == "float32"):
+                        # accumulation_rules 'rsum1': the value of a one-leaf exact reduction as an expression of the
+                        # result index o (the unchanged tree '(0.0f + leaf)' and rounding); readers may evaluate it.
+                        same_ = (src.contiguous and not src.offset and _numel(src.shape) == _numel(shape))
+                        if same_ and inline_text is not None:
+                            leaf_text_ = re.sub(r"\bi\b", "(o)", inline_text)
+                        elif same_ and inline_text is None and dtypes[source] == "float32":
+                            leaf_text_ = f"{_ident(source)}[o]"
+                        else:
+                            leaf_text_ = leaf(pos.replace("(r / ", "(0LL / ").replace("(unsigned)(r)", "(unsigned)(0LL)"))
+                        extra = dict(extra, value_expr=rounded(f"(0.0f + {leaf_text_}){scale}", dtypes[name]),
+                                     value_refs=list(refs))
                     add_phase('reduction', op, name, code, refs, **extra)
+                    from . import slot_rows as _slot_rows
+                    if (_slot_rows.enabled() and row_fusion and inline_text is None and name not in accumulate
+                            and extra.get('engine') == 'exact_cta_tree_per_thread' and dims == [1]
+                            and len(src.shape) == 3 and dtypes[name] == 'float32'):
+                        # accumulation_rules 'rslot' (ops/slot_rows.py): structured form of an exact slot-axis
+                        # reduction.
+                        phases[-1]['slot_reduction'] = {'source': source, 'axis': 1,
+                                                        'extent': _numel(reduction_shape), 'scale': scale}
                     if (row_fusion and inline_text is None and extra.get('engine') == 'exact_cta_tree_per_warp'
                             and dims == [len(src.shape) - 1] and src.contiguous and src.shape[-1] % 32 == 0
                             and name not in accumulate and dtypes[source] == dtypes[name] == 'float32'):
@@ -4632,6 +4835,12 @@ def _lower_serial(graph, *, retain_all=False, fuse_elementwise=True, loop_option
   }}
   __syncthreads();
 }}'''
+            from . import vector_bodies                # accumulation_rules 'rwarp': same tree, one warp per row
+            warp_code = vector_bodies.warp_row_reduction(
+                _numel(shape), _numel(reduction_shape), reduction_read,
+                f"{out}[o] = {f'{out}[o] + (acc{scale})' if name in accumulate else rounded('acc' + scale, dtypes[name])};")
+            if warp_code is not None:
+                code = warp_code
             add_phase("reduction", op, name, code, refs, reduction_elements=_numel(reduction_shape))
             continue
         # Each expression is kept in a register inside a shared-shape region.
@@ -4882,8 +5091,8 @@ def _lower_serial(graph, *, retain_all=False, fuse_elementwise=True, loop_option
         # P8-C vprod: values reached through inlined producers are read at mapped (not identity) indices.
         inline_real = real_refs([r for r in refs if r in layouts and layouts[r].root in virtual_text])
         refs = real_refs(refs)
-        if REDUCTION_INLINE and conv_program and compose and not staged and not region_body and dtypes[name] == "float32" \
-                and not inline_real:
+        if REDUCTION_INLINE and (conv_program or "rinl" in features) and compose and not staged and not region_body \
+                and dtypes[name] == "float32" and not inline_real:
             # LATCH-STEP10-SPEED: the value's expression over stored operands, for a reduction that is its only
             # reader (the reduction evaluates it per leaf; the value itself then needs no store). Identity reads of
             # single-use FP32 producers that have such an expression are inlined too (nested), so a chain like
@@ -4931,6 +5140,10 @@ def _lower_serial(graph, *, retain_all=False, fuse_elementwise=True, loop_option
             add_phase("elementwise", op, name, "", refs, shape=shape, dtype=dtypes[name], registers={name: reg}, body=[f"const {_CTYPES[dtypes[name]]} {reg} = {rounded(expression({}), dtypes[name])}; {_padded_store(name, out)} = {f'{out}[i] + ' if name in accumulate else ''}{reg};"])
             if inline_real:
                 phases[-1]["vprod_inline"] = True
+    if compose:
+        # vocab_rules 'views': vocabulary-head operands addressed as unchanged root + offset (identity when off).
+        from . import vocab_stream as _vstream_p
+        _vstream_p.root_views(phases, layouts, _ident)
     # LATCH-TINYMOE-XMAT: a deferred segmented product whose pairing partner did not match is emitted here.
     for phase in ragged_experts_lower.flush(phases):
         if phase.get("tma_operands"):
@@ -5071,6 +5284,33 @@ def _lower_serial(graph, *, retain_all=False, fuse_elementwise=True, loop_option
             changed |= len(phases) != before
         producers = {w: k for k, phase in enumerate(phases) for w in phase["writes"]}
     row_fusions, row_dead = [], set()
+    slot_rows_records, slot_dead_ = [], set()
+    if row_fusion and not retain_all:
+        from . import slot_rows as _slot_rows
+        if _slot_rows.enabled():
+            # accumulation_rules 'rslot' (ops/slot_rows.py): token-row groups of slot-axis chains.
+            kept_roots_ = ({layouts[n].root for n in [*outputs, *writes.values()] if n in layouts}
+                           | set(placement) | set(writes))
+            inplace_roots_ = {r for r, (_, mode) in placement.items() if mode.startswith("inplace:")}
+            def slot_probe_(phases_):
+                import copy as copy_
+                from .row_fusion import fuse_rows as fuse_rows_
+                return fuse_rows_(copy_.deepcopy(phases_), copy_.deepcopy(layouts), dict(dtypes), ident=_ident,
+                                  index=_index, kept=kept_roots_, inplace_roots=inplace_roots_,
+                                  flat=bool(group_rules),
+                                  multi_warp=8 if "wrow" in features else 2 if "wrow2" in features else 0,
+                                  absorb_early="rngel" in features, hoist="rhoist" in features,
+                                  sink="rsink" in features, clamp="rclamp" in features,
+                                  pipe="rpipe" in features, leaf_again="rleaf" in features,
+                                  hoist_wide="rhoist2" in features,
+                                  orders=_gather_orders(phases_, layouts) if GATHER_ORDER else None)[1]
+            phases, slot_rows_records, slot_dead = _slot_rows.fuse_token_rows(
+                phases, layouts, dtypes, ident=_ident, index=_index, kept=kept_roots_, inplace_roots=inplace_roots_,
+                probe=slot_probe_)
+            if slot_dead:
+                roots = [n for n in roots if n not in slot_dead]
+                slot_dead_ = set(slot_dead)
+            producers = {w: k for k, phase in enumerate(phases) for w in phase["writes"]}
     if row_fusion and not retain_all:
         # P-OPS2-D: one warp per row evaluates an exact last-dimension reduction
         # together with its same-row elementwise producers and consumers.
@@ -5084,7 +5324,8 @@ def _lower_serial(graph, *, retain_all=False, fuse_elementwise=True, loop_option
                                                   multi_warp=8 if "wrow" in features else 2 if "wrow2" in features else 0,
                                                   absorb_early="rngel" in features, hoist="rhoist" in features,
                                                   sink="rsink" in features, clamp="rclamp" in features,
-                                                  pipe="rpipe" in features,
+                                                  pipe="rpipe" in features, leaf_again="rleaf" in features,
+                                                  hoist_wide="rhoist2" in features,
                                                   orders=_gather_orders(phases, layouts) if GATHER_ORDER else None)
         if any("latch_row_gather" in (phase.get("code") or "") for phase in phases):
             from .row_fusion import ROW_GATHER_HELPER
@@ -5092,6 +5333,7 @@ def _lower_serial(graph, *, retain_all=False, fuse_elementwise=True, loop_option
                 helper_parts.append(ROW_GATHER_HELPER)
         producers = {w: k for k, phase in enumerate(phases) for w in phase["writes"]}
         roots = [n for n in roots if n not in row_dead]
+        row_dead = set(row_dead) | slot_dead_
     epilogues = []
     if epilogue_fusion and not retain_all:
         # P-OPS2-D: same-index elementwise consumers evaluated in B product stores.
@@ -5269,12 +5511,159 @@ def _lower_serial(graph, *, retain_all=False, fuse_elementwise=True, loop_option
             if layout.root in aliased:
                 layouts[name] = TensorLayout(layout.shape, layout.strides, aliased[layout.root], layout.offset)
         roots = [name for name in roots if name not in aliased]
+    # accumulation_rules 'rilp': a batched thread-per-result reduction loads the leaves of later results before it
+    # stores earlier ones. Keep that body only when, after storage aliasing, no result root is read by the phase and
+    # the result is neither placed nor committed in place (independent live roots never share storage).
+    rilp_records = []
+    for phase in phases:
+        unbatched = phase.pop("unbatched_code", None)
+        if unbatched is None:
+            continue
+        roots_ = lambda names: {layouts[n].root if n in layouts else n for n in names}
+        written, read_ = roots_(phase["writes"]), roots_(phase["reads"])
+        hazard = bool(written & read_) or bool(written & set(placement)) or bool(
+            written & {layouts[s].root for s in writes.values() if s in layouts})
+        if hazard or phase.get("kind") != "reduction":
+            phase["code"] = unbatched
+            phase.pop("batched_results", None)
+        rilp_records.append({"result": phase["names"][0], "batched_results": phase.get("batched_results", 1),
+                             "reduction_elements": phase.get("reduction_elements"), "restored": hazard})
+    if rilp_records:
+        group_records["batched_reductions"] = rilp_records
+    # accumulation_rules 'rsum1': a one-leaf exact reduction read only at its own element index by elementwise
+    # bodies and row groups is evaluated in those readers (same expression, --fmad=false) and never stored.
+    sum1_records, sum1_dead = [], set()
+    sum1_candidates = [k for k, ph_ in enumerate(phases) if ph_.get("value_expr")]
+    if sum1_candidates and not retain_all:
+        kept1 = ({layouts[n].root for n in [*outputs, *writes.values()] if n in layouts} | set(placement)
+                 | {layouts[n].root for n in writes if n in layouts})
+        root1 = lambda n: layouts[n].root if n in layouts else n
+        drop = set()
+        for k in sum1_candidates:
+            ph_ = phases[k]
+            v_ = ph_["names"][0]
+            lay_ = layouts.get(v_)
+            refuse = None
+            if lay_ is None or lay_.root != v_ or not lay_.contiguous or lay_.offset or v_ in kept1:
+                refuse = "kept or non-root result"
+            readers_ = [j for j, q in enumerate(phases) if j != k and any(root1(r) == v_ for r in q["reads"])]
+            ops_ = {root1(r) for r in ph_["value_refs"]}
+            if refuse is None and not readers_:
+                refuse = "no reader"
+            for j in readers_:
+                q = phases[j]
+                if refuse:
+                    break
+                if any(root1(r) == v_ and r != v_ for r in q["reads"]):
+                    refuse = "read through a view"
+                elif q["kind"] not in ("elementwise", "row_fused") or q.get("vprod_inline") or (
+                        q["kind"] == "elementwise" and not q.get("body")):
+                    refuse = "reader kind " + q["kind"]
+                elif q["kind"] == "elementwise" and _numel(q["shape"]) != lay_.numel:
+                    refuse = "elementwise reader of another extent"
+                elif q["kind"] == "row_fused" and int((q.get("row_fusion") or {}).get("rows", 0)) * int(
+                        (q.get("row_fusion") or {}).get("width", 0)) != lay_.numel:
+                    refuse = "row group of another extent"
+                else:
+                    texts_ = ([q["code"]] if isinstance(q.get("code"), str) else []) + list(q.get("body") or [])
+                    idx_ = re.findall(rf"\b{re.escape(_ident(v_))}\[([^\]]*)\]", "\n".join(texts_))
+                    if not idx_ or any(x.strip() not in ("i", "(i)") for x in idx_):
+                        refuse = "non-identity read"
+                    # every operand keeps its value until the reader: no writer of an operand root after the sum
+                    elif any(k < w < j for w, wq in enumerate(phases) for n in wq["writes"] if root1(n) in ops_):
+                        refuse = "operand rewritten before a reader"
+            if refuse:
+                sum1_records.append({"value": v_, "refused": refuse})
+                continue
+            expr_ = re.sub(r"\bo\b", "(i)", ph_["value_expr"])
+            expr_ = re.sub(r"\[\(+i\)+\]", "[i]", expr_)
+            pattern_ = re.compile(rf"\b{re.escape(_ident(v_))}\[\s*\(?i\)?\s*\]")
+
+            def subst_(text):
+                return pattern_.sub(lambda _m: f"({expr_})", text)
+            for j in readers_:
+                q = phases[j]
+                for key_ in ("code", "code_r1"):
+                    if isinstance(q.get(key_), str):
+                        q[key_] = subst_(q[key_])
+                if q.get("body"):
+                    q["body"] = [subst_(line) for line in q["body"]]
+                q["reads"] = list(dict.fromkeys([r for r in q["reads"] if root1(r) != v_] + list(ph_["value_refs"])))
+                q.pop("row_parts", None)
+            drop.add(k)
+            sum1_records.append({"value": v_, "readers": [phases[j]["names"][0] for j in readers_],
+                                 "operands": list(ph_["value_refs"])})
+        if drop:
+            dead_sum1 = {phases[k]["names"][0] for k in drop}
+            phases[:] = [ph_ for k, ph_ in enumerate(phases) if k not in drop]
+            roots = [n for n in roots if n not in dead_sum1]
+            producers = {w: k for k, phase in enumerate(phases) for w in phase["writes"]}
+            sum1_dead = dead_sum1
+            commit = len(phases)   # the state-commit index follows the remaining phases (ticks, lifetimes)
+    # elementwise_rules 'indexed' (ops/indexed_backward.py): select/slice_backward placements read only at their
+    # readers' own element index are evaluated there (same element or the same +0) and never stored expanded.
+    from . import indexed_backward as _indexed_backward
+    if _indexed_backward.enabled() and not retain_all:
+        kept_ib = ({layouts[n].root for n in [*outputs, *writes.values()] if n in layouts} | set(placement)
+                   | {layouts[n].root for n in writes if n in layouts})
+        ib_records, ib_dead, ib_helpers = _indexed_backward.place_at_readers(
+            phases, layouts, kept_roots=kept_ib, numel=_numel, ident=_ident, dtypes=dtypes)
+        if ib_records:
+            group_records["indexed_backward_at_readers"] = ib_records
+        if ib_helpers and ib_helpers not in helper_parts:
+            helper_parts.append(ib_helpers)
+        if ib_dead:
+            roots = [n for n in roots if n not in ib_dead]
+            producers = {w: k for k, phase in enumerate(phases) for w in phase["writes"]}
+            sum1_dead = set(sum1_dead) | ib_dead
+            commit = len(phases)
+    # matrix_bodies 'shortk' (ops/outer_readers.py): short-K BF16 outer products evaluated at their readers.
+    from . import outer_readers as _outer_readers
+    if _outer_readers.enabled() and not retain_all:
+        kept_short_ = ({layouts[n].root for n in [*outputs, *writes.values()] if n in layouts} | set(placement)
+                       | {layouts[n].root for n in writes if n in layouts})
+        short_records_, short_dead_, short_helpers_ = _outer_readers.place_at_readers(
+            phases, layouts, kept_roots=kept_short_, external_roots=set(inputs) | set(placement), numel=_numel,
+            ident=_ident, dtypes=dtypes)
+        if short_records_:
+            group_records["short_k_at_readers"] = short_records_
+        if short_helpers_ and short_helpers_ not in helper_parts:
+            helper_parts.append(short_helpers_)
+        if short_dead_:
+            roots = [n for n in roots if n not in short_dead_]
+            producers = {w: k for k, phase in enumerate(phases) for w in phase["writes"]}
+            sum1_dead = set(sum1_dead) | short_dead_
+            commit = len(phases)
+    # accumulation_rules 'ridx' (ops/row_rewrites.py): row-constant index algebra in warp-per-row bodies (including the
+    # placements substituted above) uses the row index; same unsigned values, so every address/guard is unchanged.
+    from . import row_rewrites as _row_rewrites
+    if _row_rewrites.rowidx():
+        for ph_ in phases:
+            if ph_.get("kind") == "row_fused" and (ph_.get("row_fusion") or {}).get("rows"):
+                for key_ in ("code", "code_r1"):
+                    if isinstance(ph_.get(key_), str):
+                        ph_[key_] = _row_rewrites.row_index_rewrite(ph_[key_], int(ph_["row_fusion"]["rows"]))
+    # accumulation_rules 'rremat': row-scaled group products are recomputed at their elementwise readers.
+    if _row_rewrites.remat() and not retain_all:
+        kept_rm_ = ({layouts[n].root for n in [*outputs, *writes.values()] if n in layouts} | set(placement)
+                    | {layouts[n].root for n in writes if n in layouts})
+        rm_records_, rm_dead_, rm_stored_ = _row_rewrites.remat_products(
+            phases, layouts, kept_roots=kept_rm_, ident=_ident, numel=_numel, dtypes=dtypes)
+        if rm_records_:
+            group_records["row_scale_remat"] = rm_records_
+            row_dead = (set(row_dead) - rm_stored_) | rm_dead_
+            roots = [n for n in roots if n not in rm_dead_] + [n for n in rm_stored_ if n not in roots]
+    for ph_ in phases:
+        ph_.pop("value_expr", None)
+        ph_.pop("value_refs", None)
+    if sum1_records:
+        group_records["size_one_sums_at_readers"] = sum1_records
     if barrier_schedule not in ("phase", "dependency"):
         raise LoweringError(f"unknown barrier schedule {barrier_schedule}")
     # P-OPS-E elide_stores: an elementwise result consumed only through its
     # register inside its own fused phase, and never returned, committed or
     # placed, need not be written to memory or allocated. Values are unchanged.
-    dead = set(row_dead) | copy_dead
+    dead = set(row_dead) | copy_dead | sum1_dead
     taps_dead = conv_taps.unmaterialized()
     if taps_dead:
         stray = sorted({r for phase in phases for r in phase["reads"] if r in layouts and layouts[r].root in taps_dead})
@@ -5346,6 +5735,56 @@ def _lower_serial(graph, *, retain_all=False, fuse_elementwise=True, loop_option
             group_records["ragged_tile_consumers"] = [phases[k_]["names"] for k_ in sorted(_absorbed)]
             phases[:] = [p_ for k_, p_ in enumerate(phases) if k_ not in _absorbed]
             producers = {w: k for k, phase in enumerate(phases) for w in phase["writes"]}
+    if compose and not staged and not region_body and not retain_all:
+        # segmented_products 'packsum' (ops/claimed_products.fuse_pack_sums): routing-pack gradients evaluate their
+        # single-reader input-gradient sums at each gathered row; no-op when not selected.
+        from . import claimed_products as _claimed
+        packsum_fused_, packsum_drop_, packsum_values_ = _claimed.fuse_pack_sums(
+            phases, layouts, dtypes, _ident,
+            {layouts[n_].root for n_ in [*outputs, *writes.values()] if n_ in layouts} | set(placement))
+        if packsum_fused_:
+            group_records["pack_sums"] = packsum_fused_
+            phases[:] = [p_ for k_, p_ in enumerate(phases) if k_ not in packsum_drop_]
+            producers = {w: k for k, phase in enumerate(phases) for w in phase["writes"]}
+            roots = [n_ for n_ in roots if n_ not in packsum_values_]
+            dead |= set(packsum_values_)                 # unmaterialized (elided_stores), like store elision
+            commit = len(phases)   # the state-commit stamp/lifetime index follows the remaining phases (profile decode)
+            for n_ in packsum_values_:
+                padded_operands.pop(n_, None)
+        # segmented_products 'kcat' (ops/kcat_products.py): sibling claimed products whose results are only added
+        # become one K-concatenated claimed product writing the sum; no-op when not selected.
+        from . import kcat_products as _kcat
+        for kcat_name_, kcat_fn_ in (("kcat", _kcat.fuse), ("kcat3", _kcat.fuse_qkv)):
+            kcat_rec_, kcat_drop_, kcat_values_ = kcat_fn_(
+                phases, layouts, dtypes, _ident,
+                {layouts[n_].root for n_ in [*outputs, *writes.values()] if n_ in layouts} | set(placement))
+            if kcat_rec_:
+                group_records[kcat_name_] = kcat_rec_
+            if kcat_drop_:
+                phases[:] = [p_ for k_, p_ in enumerate(phases) if k_ not in kcat_drop_]
+                producers = {w: k for k, phase in enumerate(phases) for w in phase["writes"]}
+                roots = [n_ for n_ in roots if n_ not in kcat_values_]
+                dead |= set(kcat_values_)
+                commit = len(phases)
+                for n_ in kcat_values_:
+                    padded_operands.pop(n_, None)
+    if compose and not staged and not region_body and not retain_all:
+        # vocab_rules 'rows' (ops/vocab_rows.py): vocabulary statistics + logits gradient as one row pass.
+        from . import vocab_rows as _vocab_rows
+        vocab_rows_fused_ = _vocab_rows.fuse_pass(phases, layouts)
+        if vocab_rows_fused_:
+            group_records["vocab_rows"] = vocab_rows_fused_
+            producers = {w: k for k, phase in enumerate(phases) for w in phase["writes"]}
+            commit = len(phases)
+    else:
+        for _p in phases:
+            _p.pop("vocab_rows_terms", None)
+    # elementwise_rules 'permrows'/'embunroll' and accumulation_rules 'rnarrow'/'rmid' (ops/inflight_bodies.py): more
+    # independent loads in flight in permutation embedding-gradient, gather and narrow-row bodies; code text only,
+    # after the pack-sum fusion. No-op when none is selected.
+    from . import inflight_bodies as _inflight
+    if _inflight.any_enabled():
+        group_records["inflight_bodies"] = _inflight.rewrite(phases, layouts)
     intervals = _barrier_intervals(phases, layouts, barrier_schedule == "dependency")
     if "ulate" in features and compose and barrier_schedule == "dependency" and not staged and not retain_all:
         # TINYMOE-SELECTIVE-CADENCE (ops.update_schedule late_updates): bodies no loss/gradient output depends on
@@ -5499,6 +5938,23 @@ def _lower_serial(graph, *, retain_all=False, fuse_elementwise=True, loop_option
                                                                   lambda s_: phases[s_].get("code", ""))
         if cast_records_:
             group_records["cast_sums"] = cast_records_
+    # tile_readiness (ops/tile_ready.py; None without the option): per-row-block readiness plan.
+    tr_plan_ = None
+    if compose and barrier_schedule == "dependency" and not staged and not region_body and not retain_all:
+        from . import tile_ready as _tile_ready
+        tr_plan_ = _tile_ready.plan(phases, intervals, layouts, placement=placement, inputs=inputs,
+                                    state_writes=writes, returned=outputs,
+                                    state_inputs={n for n in inputs if _field(values[n], "role", "input") == "state"},
+                                    excluded=(set(cast_fusions_) | {v["producer"] for v in cast_fusions_.values()}
+                                              | set(pair_streams_) | set(pair_streams_.values())))
+        if _tile_ready.enabled():
+            group_records["tile_ready_census"] = list(_tile_ready.LAST_CENSUS)
+        if tr_plan_ is not None:
+            group_records["tile_ready"] = tr_plan_.record()
+            if '#include "tile_ready.cuh"\n' not in helper_parts:
+                helper_parts.append('#include "tile_ready.cuh"\n')
+            if "tile_ready.cuh" not in extra_headers:
+                extra_headers.append("tile_ready.cuh")
     interval_of = {index: k for k, members in enumerate(intervals) for index in members}
     for root, (index, mode) in placement.items():
         if not mode.startswith("inplace:"):
@@ -5544,7 +6000,22 @@ def _lower_serial(graph, *, retain_all=False, fuse_elementwise=True, loop_option
             if root in classes:
                 _, first, last = classes[root]
                 classes[root] = ("live", first, max(last, phase_id))
-    for name in outputs + list(writes.values()):
+    segmented_work = [row["work_counters"] for row in attention_decisions
+                      if row.get("decision") == "packed_segmented_native"]
+    segmented_offsets = [row["offsets_value"] for row in attention_decisions
+                         if row.get("decision") == "packed_segmented_native"]
+    ragged_work_records = [{"name": phase["ragged_work_counters"],
+                           "columns": phase["work_counter_columns"],
+                           "shape": list(layouts[phase["ragged_work_counters"]].shape),
+                           "retained_through_commit": True,
+                           **{key: phase[key] for key in ("work_contraction_tile", "work_output_tile",
+                                "work_offsets", "work_product", "work_output", "matrix_shape",
+                                "groups", "packed_rows", "engine")}}
+                          for phase in phases if phase.get("ragged_work_counters")]
+    ragged_work = [row["name"] for row in ragged_work_records]
+    ragged_offsets = [row["work_offsets"] for row in ragged_work_records]
+    retained_diagnostics = segmented_work + ragged_work + segmented_offsets + ragged_offsets
+    for name in outputs + list(writes.values()) + retained_diagnostics:
         root = layouts[name].root
         if root in classes:
             _, first, _ = classes[root]
@@ -5556,13 +6027,16 @@ def _lower_serial(graph, *, retain_all=False, fuse_elementwise=True, loop_option
         # Lifetimes in interval units: earliest writer interval through the latest
         # interval of any reader (phase order no longer implies interval order).
         plan_commit = len(intervals)
-        spans = {name: [min(interval_of[k] for k in [first, producers[name], *writers_of.get(name, ())])] * 2
+        # tile_readiness: lifetimes in barrier epochs (intervals joined by an elided barrier are one epoch), so no
+        # storage is reused between intervals that overlap in time. Identity without a plan.
+        epoch_of_ = tr_plan_.epoch_of(intervals) if tr_plan_ is not None else interval_of
+        spans = {name: [min(epoch_of_[k] for k in [first, producers[name], *writers_of.get(name, ())])] * 2
                  for name, (_, first, _) in classes.items()}
         for phase_id, phase in enumerate(phases):
             for name in phase["reads"]:
                 root = layouts[name].root
                 if root in spans:
-                    spans[root][1] = max(spans[root][1], interval_of[phase_id])
+                    spans[root][1] = max(spans[root][1], epoch_of_[phase_id])
         classes = {name: (kind, spans[name][0], plan_commit if last >= commit else spans[name][1])
                    for name, (kind, first, last) in classes.items()}
     from . import arena_assign   # LATCH-BUILD-600: arena_plan.assign's offsets without its quadratic scan
@@ -5577,7 +6051,8 @@ def _lower_serial(graph, *, retain_all=False, fuse_elementwise=True, loop_option
         # contracts, but Runtime binds every public manifest layout to storage.
         # Remove only explicitly elided values, never unexplained allocations.
         unmaterialized = dead | set(virtual_text)
-        required = set(inputs) | set(outputs) | set(writes) | set(writes.values()) | set(placement)
+        required = (set(inputs) | set(outputs) | set(writes) | set(writes.values()) | set(placement)
+                    | set(retained_diagnostics))
         lost = sorted(name for name in required if layouts[name].root in unmaterialized)
         if lost:
             raise LoweringError(f"required runtime values have elided storage: {lost}")
@@ -5686,7 +6161,25 @@ def _lower_serial(graph, *, retain_all=False, fuse_elementwise=True, loop_option
                                4 if "vec4m" in features and 16384 <= n4_ <= 2 * 32768 else
                                P9_VEC_UNROLL_FACTOR if ("vec4u" in features and n4_ > 2 * 32768) or
                                (P9_VEC_UNROLL is not None and n4_ >= P9_VEC_UNROLL) else 1)
-                    unrolled = vector_elementwise(phase, numel_main, texts, unroll=unroll_, bulk=bulk_)
+                    from . import vector_bodies
+                    bf16_texts = {}
+                    if vector_bodies.bf16vec():
+                        # elementwise_rules 'bf16vec': identity-indexed contiguous BF16 reads at offset 0 (8-byte
+                        # aligned).
+                        for ref in phase["reads"]:
+                            lay = layouts.get(ref)
+                            if (lay is None or dtypes.get(ref) != "bfloat16" or lay.offset or not lay.contiguous
+                                    or lay.numel != _numel(phase["shape"]) or ref in phase["writes"]
+                                    or lay.root not in offsets or lay.root in inputs or lay.root in placement):
+                                continue
+                            try:
+                                bf16_texts[f"{_ident(ref)}[{_index(lay, tuple(phase['shape']), 'i')}]"] = (
+                                    _ident(lay.root) if lay.root in layouts else _ident(ref))
+                            except LoweringError:
+                                continue
+                            bf16_texts[f"{_ident(ref)}[i]"] = _ident(lay.root) if lay.root in layouts else _ident(ref)
+                    unrolled = vector_elementwise(phase, numel_main, texts, unroll=unroll_, bulk=bulk_,
+                                                  bf16_texts=bf16_texts)
                 if bulk_ and unrolled and "p9bulk::" in unrolled:
                     if '#include "p9_bulk.cuh"\n' not in helper_parts:
                         helper_parts.append('#include "p9_bulk.cuh"\n')
@@ -5740,6 +6233,9 @@ def _lower_serial(graph, *, retain_all=False, fuse_elementwise=True, loop_option
                 if "padded_access.cuh" not in extra_headers:
                     extra_headers.append("padded_access.cuh")
             code = unrolled or f"for (long long i = (long long)blockIdx.x * blockDim.x + threadIdx.x; i < {_numel(phase['shape'])}LL; i += (long long)gridDim.x * blockDim.x) {{\n" + "\n".join(phase["body"]) + "\n}"
+            if "latch_out_col(" in code:
+                from .outer_readers import vector_lanes    # matrix_bodies 'shortk': float4 lanes of B column reads
+                code = vector_lanes(code)
         return code
 
     stage_info = []
@@ -6375,9 +6871,38 @@ def _lower_serial(graph, *, retain_all=False, fuse_elementwise=True, loop_option
             if fused_here_:
                 cs_substages[k_interval] = [[i for i in members if i not in fused_here_], list(fused_here_)]
             fused_producers_ = {cast_fusions_[i]["producer"] for i in fused_here_}
+            # tile_readiness emission (consumers last; producer publication; per-launch counters)
+            tr_open_ = tr_plan_ is not None and tr_plan_.closes_open(members)
+            if tr_plan_ is not None:
+                members = tr_plan_.order(members)
+
+            def _tr_alloc(n_):
+                if not phase_source:
+                    raise LoweringError("tile_ready: entry-zeroed counters cannot be used in the first interval")
+                offset_ = ectaq_count[0]
+                ectaq_count[0] += int(n_)
+                return f"reinterpret_cast<unsigned*>(arena + /*ECTAQ_BASE*/ + {offset_}LL)"
+            # matrix_bodies 'skinnybatch' (ops/skinny_backward.py): same-geometry skinny split products of this
+            # interval share one body.
+            from . import skinny_backward as _skinny
+            skinny_batch_ = _skinny.batch_interval(phases, members) if _skinny.batching() else {}
             for i in members:
                 # Independent pinned GEMMs in one interval start on rotated CTAs (vbase).
                 body_ = phase_code(i, phases[i].get('lpt_offset', vbase), tail_vbase=vbase)
+                if i in skinny_batch_:
+                    body_ = skinny_batch_[i]
+                tr_code_ = body_                                          # tile_readiness: the emitted loop
+                if tr_plan_ is not None and i in tr_plan_.products:
+                    body_ = tr_plan_.product_code(i, body_, _tr_alloc)   # tile_readiness: row publication
+                    tr_plan_.bound.append(i)
+                # segmented_attention 'claim' (ops/attention_claim.py): claimed width-32 attention items.
+                from . import attention_claim as _attention_claim
+                body_, claim_bound_ = _attention_claim.attention_claim(phases[i], body_, _tr_alloc)
+                if claim_bound_:
+                    group_records.setdefault("attention_claims", []).append(
+                        {"interval": len(phase_source), "phase": phases[i]["names"][0], "kind": phases[i]["kind"]})
+                    if _attention_claim.DEFINE not in helper_parts:
+                        helper_parts.insert(0, _attention_claim.DEFINE)
                 if i in fused_producers_:
                     # LATCH-TRAIN-SYNC cast_sums: computed and stored by its sums' lanes in the fsbatch body below.
                     body_ = "// fused into the update_schedule fsbatch body of its square sums (ops.cast_sums)"
@@ -6390,6 +6915,21 @@ def _lower_serial(graph, *, retain_all=False, fuse_elementwise=True, loop_option
                                                 rf"\1(g, smem, 0, {PAIR_SHARE}, 1000, \2)", body_)
                         if count_ != 1:
                             raise RuntimeError("pstream: unexpected TMA product call form")
+                if "/*GSKC:" in body_ and not phase_source and phases[i].get("route_fallback"):
+                    body_ = phases[i]["route_fallback"]   # segmented_products 'route': the first interval keeps the
+                                                          # single-CTA routing body
+                if "/*GSKC:" in body_:
+                    # Entry-zeroed counter words (matrix_bodies 'splitctr' split bodies, segmented_products 'route'):
+                    # the arrival counters take words past the arena; the first grid barrier orders the zeroing before
+                    # the first arrival.
+                    if not phase_source:
+                        raise LoweringError("entry-zeroed split counters cannot be used in the first interval")
+                    def _gskc(match_):
+                        offset_ = ectaq_count[0]
+                        ectaq_count[0] += int(match_.group(1))
+                        return f"reinterpret_cast<unsigned*>(arena + /*ECTAQ_BASE*/ + {offset_}LL)"
+                    body_ = re.sub(r"/\*GSKC:(\d+)\*/", _gskc, body_)
+                    group_records["split_counters_at_entry"] = group_records.get("split_counters_at_entry", 0) + 1
                 if phases[i].get("flat_claim"):
                     # LATCH-TRAIN-EXPERTS: a claimed segmented product takes one zeroed per-launch counter word (the
                     # ectaq words past the arena, zeroed at kernel entry and ordered by the first grid barrier); the
@@ -6452,6 +6992,9 @@ def _lower_serial(graph, *, retain_all=False, fuse_elementwise=True, loop_option
                         # Release step 14: FP32 small-tile products (whole-grid CTA slice, no rotation token) take the
                         # CTA slice the interval's TMA tiles leave idle; every task's arithmetic is unchanged.
                         body_ = body_.replace("smem, 0, 1, 1, ", f"smem, {ecta_tiles}, {ECTA_GRID}, {ECTA_GRID}, ")
+                if tr_plan_ is not None and i in tr_plan_.consumer:
+                    body_ = tr_plan_.consumer_code(i, _tr_alloc, tr_code_)   # tile_readiness: replaces the body
+                    tr_plan_.emitted.append(i)
                 parts.append(f"// Phase {i}: {', '.join(phases[i]['names'])}\n{{\n{body_}\n}}")
                 part_ids.append(i)
                 if "ctrace" in features and _ctrace_phase_stamps():
@@ -6496,8 +7039,22 @@ def _lower_serial(graph, *, retain_all=False, fuse_elementwise=True, loop_option
                 joined_ = "\n__syncthreads();\n".join(parts)
             phase_source.append(head_ + joined_
                                 + (ctrace_stamp(f"end:{len(phase_source)}") if "ctrace" in features else "")
-                                + "\ngrid.sync();\n"
-                                f"if (ticks && blockIdx.x == 0 && threadIdx.x == 0) {{ const unsigned long long t = stamp(); {stamps} }}")
+                                + ("\nlatch_tr::elided_barrier();\n" if tr_open_ else "\ngrid.sync();\n")
+                                + f"if (ticks && blockIdx.x == 0 && threadIdx.x == 0) {{ const unsigned long long t = stamp(); {stamps} }}")
+            if tr_open_:
+                tr_plan_.opened.append(len(phase_source) - 1)   # tile_readiness: elided barrier
+    if tr_plan_ is not None:
+        # tile_readiness: every planned boundary opened exactly once and every consumer re-emitted (fail closed).
+        if (len(tr_plan_.opened) != len(tr_plan_.boundaries)
+                or sorted(tr_plan_.emitted) != sorted(tr_plan_.consumer)
+                or sorted(tr_plan_.bound) != sorted(tr_plan_.products)):
+            missing_ = dict(opened=[b["interval"] for b in tr_plan_.boundaries][len(tr_plan_.opened):][:8],
+                            loops=sorted(phases[q]["names"][0] for q in set(tr_plan_.consumer) - set(tr_plan_.emitted))[:8],
+                            products=sorted(phases[q]["names"][0] for q in set(tr_plan_.products) - set(tr_plan_.bound))[:8])
+            raise LoweringError("tile_ready: planned boundaries/consumers were not emitted by the interval emitter: "
+                                + repr(missing_))
+        group_records["tile_ready"]["counter_words"] = ectaq_count[0]
+        group_records["tile_ready"]["consumer_forms"] = {phases[q]["names"][0]: f for q, f in tr_plan_.forms.items()}
     commit_code = []
     for target, source in writes.items():
         if target in in_place_commits:
@@ -6590,19 +7147,26 @@ def _lower_serial(graph, *, retain_all=False, fuse_elementwise=True, loop_option
             group_records["tensormap_prefetch"] = prefetched_
     if "/*XCLAIM*/nullptr" in kernel_body or "/*XCLAIM_S0*/" in kernel_body:
         raise LoweringError("a claimed segmented product was emitted outside the interval emitter (no counter)")
+    if "/*GSKC:" in kernel_body:
+        raise LoweringError("an entry-zeroed split product was emitted outside the interval emitter (no counter)")
     if ectaq_count[0]:
-        # Claim counters past the planned arena (never aliased), zeroed by CTA 0 at kernel entry; the first grid
-        # barrier orders the zeroing before any claim (no queued product runs in the first interval).
+        # Claim counters past the planned arena (never aliased), zeroed at kernel entry; the first grid barrier orders
+        # the zeroing before any claim (no queued product runs in the first interval). CTA 0 zeroes one word per thread
+        # per 256-word statement (claimed observed products and entry-zeroed split counters can exceed 256 words).
         ectaq_base = (arena_words + 63) // 64 * 64
         arena_words = ectaq_base + -(-ectaq_count[0] // 64) * 64
-        if ectaq_count[0] > 256:
-            raise LoweringError("more than 256 per-launch claim counters (CTA 0 zeroes one word per thread)")
+        if ectaq_count[0] >= 1 << 26:
+            raise LoweringError("per-launch counter words exceed the entry-zeroed area")
         kernel_body = kernel_body.replace("/*ECTAQ_BASE*/", f"{ectaq_base}LL")
+        # One kernel-scope statement per 256 words (the form the device-unit interval partitioner admits,
+        # step17_intervals.TEXT_STATEMENTS); a program with <= 256 words keeps its single unchanged statement.
+        zero_ = "\n" + "".join(
+            f"  if (blockIdx.x == 0 && threadIdx.x < {min(256, ectaq_count[0] - w_)}u) "
+            f"reinterpret_cast<unsigned*>(arena + {ectaq_base + w_}LL)[threadIdx.x] = 0u;\n"
+            for w_ in range(0, ectaq_count[0], 256))
         kernel_body = kernel_body.replace(
             "\n  if (ticks && blockIdx.x == 0 && threadIdx.x == 0) ticks[0] = stamp();\n",
-            f"\n  if (blockIdx.x == 0 && threadIdx.x < {ectaq_count[0]}u) "
-            f"reinterpret_cast<unsigned*>(arena + {ectaq_base}LL)[threadIdx.x] = 0u;\n"
-            "  if (ticks && blockIdx.x == 0 && threadIdx.x == 0) ticks[0] = stamp();\n", 1)
+            zero_ + "  if (ticks && blockIdx.x == 0 && threadIdx.x == 0) ticks[0] = stamp();\n", 1)
         group_records["ecta_queue_counters"] = {"base_word": ectaq_base, "count": ectaq_count[0]}
         if ("tmaq" in features and group_records.get("tma_claim")) or fill_claims_[0]:
             helper_parts.insert(0, "#define POPS4B_CLAIM_AHEAD 1")
@@ -6652,6 +7216,15 @@ def _lower_serial(graph, *, retain_all=False, fuse_elementwise=True, loop_option
     resource_policy = select_program_resources(shared_bytes, phases=phases, arch=target_arch)
     grid_bounds = [p["max_grid_blocks"] for p in phases if p.get("max_grid_blocks") is not None]
     max_grid_blocks = min(grid_bounds) if grid_bounds else None
+    # elementwise_rules 'divc' (ops/row_rewrites.py): exhaustively verified literal divisions without the slow-path
+    # call.
+    if _row_rewrites.divc():
+        divc_counts_ = {}
+        kernel_body = _row_rewrites.division_rewrite(kernel_body, divc_counts_)
+        helpers = _row_rewrites.division_rewrite(helpers, divc_counts_)
+        if divc_counts_:
+            helpers = _row_rewrites.DIVC_HELPER + "\n" + helpers
+            group_records["exact_divisions"] = dict(sorted(divc_counts_.items()))
     source = _translation_unit(kernel_body, helpers=helpers, shared_bytes=shared_bytes,
                                resident_blocks_per_sm=resource_policy['resident_blocks_per_sm'],
                                max_grid_blocks=max_grid_blocks)
@@ -6679,6 +7252,12 @@ def _lower_serial(graph, *, retain_all=False, fuse_elementwise=True, loop_option
         "lifetimes": classes, "retained_all": retain_all, "views": views,
         "undefined_metadata_only": sorted(undefined),
         "attention_groups": attention_decisions, "attention_refusals": attention_refusals,
+        **({"segmented_attention_work": [{"name": row["work_counters"], "half": row["half"],
+                "columns": row["work_counter_columns"], "shape": list(layouts[row["work_counters"]].shape),
+                **{key: row[key] for key in ("q_value", "offsets_value", "op_name", "packed_rows", "heads", "segments")},
+                "retained_through_commit": True} for row in attention_decisions
+                if row.get("decision") == "packed_segmented_native"]} if segmented_work else {}),
+        **({"ragged_projection_work": ragged_work_records} if ragged_work_records else {}),
         "ordered_index_gradients": index_decisions,
         **({"selective_scans": scan_decisions} if scan_decisions else {}),
         "phases": [{k: v for k, v in p.items() if k not in {"code", "body", "registers", "popsc_call", "code_r1", "row_parts"}} for p in phases],
@@ -6751,6 +7330,8 @@ def _lower_serial(graph, *, retain_all=False, fuse_elementwise=True, loop_option
         manifest["persistent_counter_words"] = counter_top
     if row_fusions:
         manifest["row_fusions"] = row_fusions
+    if slot_rows_records:
+        manifest["slot_token_rows"] = slot_rows_records
     if deferred:
         manifest["deferred_products"] = deferred
     if padded_operands:

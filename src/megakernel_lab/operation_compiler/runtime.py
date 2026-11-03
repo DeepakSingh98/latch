@@ -262,7 +262,7 @@ def build(program: GeneratedProgram, *, cache_dir="/out/cache", arch="sm_90", al
           step17=None, fast_device_compile=False, native_code_only=False,
           disable_expensive_optimizations=False, ptxas_optimization_level=None, device_units=None,
           device_unit_inline="wgmma", device_unit_cache=None, device_unit_jobs=None, device_unit_split=None,
-          device_unit_shared_pool=False) -> Path:
+          device_unit_shared_pool=False, device_unit_max_registers=None) -> Path:
     """CPU-only nvcc build, cached by source/headers/flags/toolchain identity.
 
     Run on the CPU adapter, then pass the returned library path to Runtime on a
@@ -285,20 +285,32 @@ def build(program: GeneratedProgram, *, cache_dir="/out/cache", arch="sm_90", al
     nvlinks them behind the one ``latch_ops`` entry, loaded by the STEP17 driver shim; see
     ``step17_intervals``. ``device_unit_inline`` keeps inline-wgmma intervals in the entry ("wgmma"),
     outlines every interval ("none"), or outlines every interval and moves each inline-wgmma phase into a
-    call-free piece of its own ("isolate"; relocatable calls otherwise serialize a function's wgmma, C7509). ``device_unit_cache`` optionally reuses unit cubins keyed by
+    call-free piece of its own ("isolate"; relocatable calls otherwise serialize a function's wgmma, C7509).
+    "isolate_all" also isolates every entry-resident warpgroup-MMA engine form the program emits and accepts
+    constant-offset argument views in split preludes (``unit_isolation``). ``device_unit_cache`` optionally reuses unit cubins keyed by
     unit source, transitive header, flag and toolchain identity; ``device_unit_jobs`` bounds concurrent
     unit compiles (default: one per unit). ``device_unit_split=B`` splits intervals larger than B source
     bytes into phase-run pieces (part of the cache key). ``device_unit_shared_pool=True`` lets block-scope
     4-byte ``__shared__`` flags of the sequentially executed interval functions share one static pool
-    (``step17_intervals.pool_shared_flags``; for shared plans with little static headroom). Requires the anchor host template; refusals raise.
+    (``step17_intervals.pool_shared_flags``; for shared plans with little static headroom).
+    ``device_unit_max_registers=R`` (255, or a multiple of 8 from 64 through 248; requires ``device_units``) adds
+    ``-maxrregcount=R`` to every unit's compile command; sources are unchanged and R is part of the cache key.
+    Requires the anchor host template; refusals raise.
     """
     if device_units is not None:
         if type(device_units) is not int or not 1 <= device_units <= 256:
             raise ValueError("device_units must be an integer from 1 through 256")
-        if device_unit_inline not in ("wgmma", "none", "isolate"):
-            raise ValueError("device_unit_inline must be 'wgmma', 'none' or 'isolate'")
+        if device_unit_inline not in ("wgmma", "none", "isolate", "isolate_all"):
+            raise ValueError("device_unit_inline must be 'wgmma', 'none', 'isolate' or 'isolate_all'")
         if step17 is not None or fast_device_compile:
             raise ValueError("device_units selects its own host-shim build; do not combine with step17/fast compile")
+    if device_unit_max_registers is not None:
+        if device_units is None:
+            raise ValueError("device_unit_max_registers requires device_units")
+        if (type(device_unit_max_registers) is not int
+                or not (device_unit_max_registers == 255
+                        or (64 <= device_unit_max_registers < 255 and device_unit_max_registers % 8 == 0))):
+            raise ValueError("device_unit_max_registers must be None, 255 or a multiple of 8 from 64 through 248")
     if type(fast_device_compile) is not bool:
         raise ValueError("fast_device_compile must be a boolean")
     if type(native_code_only) is not bool:
@@ -362,14 +374,22 @@ def build(program: GeneratedProgram, *, cache_dir="/out/cache", arch="sm_90", al
         keep = step17_intervals.wgmma_inline(program.source) if device_unit_inline == "wgmma" else ()
         if device_unit_split is not None and (type(device_unit_split) is not int or device_unit_split < 1000):
             raise ValueError("device_unit_split must be an integer of at least 1000 source bytes")
-        isolate = step17_intervals.wgmma_inline(program.source) if device_unit_inline == "isolate" else ()
+        isolating = device_unit_inline in ("isolate", "isolate_all")
+        isolate = step17_intervals.wgmma_inline(program.source) if isolating else ()
         if isolate:
             # LATCH-TRAIN-MATMUL (opt-in matrix_bodies 'isolate'): P5C/P8WS bodies and offset-view preludes.
             from .matrix_bodies import isolate_patterns
             isolate = isolate + isolate_patterns(program.manifest)
+            if device_unit_inline == "isolate_all":
+                # Every emitted entry-resident warpgroup-MMA engine form plus the offset-view sentinels,
+                # deduplicated over the whole tuple in first-occurrence order.
+                from . import unit_isolation
+                isolate = tuple(dict.fromkeys(isolate + unit_isolation.patterns(program.source)))
         intervals = step17_intervals.identity(device_units, keep, split_bytes=device_unit_split,
                                               isolate=isolate,
                                               shared_pool=bool(device_unit_shared_pool))
+        if device_unit_max_registers is not None:
+            intervals = dict(intervals, max_registers=device_unit_max_registers)
         key_data["device_units"] = {**step17_build.toolchain_identity(nvcc), **intervals}
     elif step17_build.enabled(step17):
         try:

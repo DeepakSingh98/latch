@@ -119,6 +119,13 @@ def emit_operation(target, args, kwargs, name, shape, layouts, dtypes, names, re
 }}'''
             return 'embedding', code, {}, '#include <cassert>\n'
         index = f'{_ident(ids)}[{_index(li, li.shape, f"(i / {width}LL)")}]'
+        from . import inflight_bodies as _inflight      # elementwise_rules 'embunroll': elements in flight
+        if _inflight.emb():
+            code = _inflight.scalar_embedding_code(
+                numel=numel, index=index, out=out, bound=lw.shape[0],
+                table=f'{_ident(weight)}[row * {lw.strides[0]}LL + (i % {width}LL) * {lw.strides[1]}LL]',
+                ctype='float' if dtypes[weight] == 'float32' else '__nv_bfloat16')
+            return 'embedding', code, {'emb_unroll': True}, '#include <cassert>\n'
         code = f'''{stride_loop} {{
   const int64_t row = {index};
   assert(row >= 0 && row < {lw.shape[0]}LL);
@@ -257,6 +264,13 @@ __device__ __forceinline__ bool {better}(float v, long long i, float b, long lon
 }}
 #endif
 '''
+        from . import inflight_bodies as _inflight      # accumulation_rules 'rnarrow': packed narrow rows
+        if _inflight.narrow() and ARGMAX_WARP_ROWS and width <= 16 and rows >= 256:
+            code = _inflight.narrow_argmax_code(rows=rows, width=width, x=x, out=out, better=better)
+            if code is not None:
+                return 'reduction', code, {'reduction_elements': width, 'engine': 'argmax_warp_row',
+                                           'narrow_rows': True,
+                                           'arithmetic': 'exact comparison; NaN maximal; first index on ties'}, helper
         if ARGMAX_WARP_ROWS and width <= ARGMAX_WARP_MAX_WIDTH and rows >= 256:
             # LATCH-MOESUP: short rows (e.g. expert-choice selection over 32 sequences) take one warp per row
             # instead of one CTA with two block barriers. Lane l scans k = l, l + 32, ...; an xor butterfly combines
@@ -380,7 +394,9 @@ __device__ __forceinline__ bool {better}(float v, long long i, float b, long lon
   {var} = smem[0];
   __syncthreads();'''
 
-    if (warp_rows == "pops2a" and width <= 1024) or (warp_rows and 256 < width <= 1024):
+    from . import inflight_bodies as _inflight_mid      # accumulation_rules 'rmid': 32 < W <= 256, W % 32 != 0
+    if (warp_rows == "pops2a" and width <= 1024) or (warp_rows and 256 < width <= 1024) or (
+            _inflight_mid.midrow() and warp_rows and 32 < width <= 256 and width % 32 and rows >= 128):
         return _warp_row_softmax(backward, logged, x, ref, layouts, shape, width, rows, out, position, _index,
                                  _ident, require_float, LoweringError, helpers, safe=safe)
     if SOFTMAX_LANE_ROWS and warp_rows and width == 32 and rows >= 128:
@@ -407,6 +423,14 @@ __device__ __forceinline__ bool {better}(float v, long long i, float b, long lon
     {var} = lane == 0 ? level : {identity};
     {var} = s101h::warp_{operation}({var});
   }}'''
+        from . import inflight_bodies as _inflight      # accumulation_rules 'rnarrow': packed narrow rows
+        packed = (_inflight.narrow_softmax_code(rows=rows, width=width, x=x, g=g if backward else None, out=out,
+                                                backward=backward, logged=logged, safe=safe)
+                  if _inflight.narrow() else None)
+        if packed is not None:
+            return ('log_softmax' if logged else 'softmax', packed,
+                    {'reduction_elements': width, 'engine': 'exact_cta_tree_per_warp_narrow' + ('_safe' if safe else ''),
+                     'work_items': (rows + 7) // 8, 'narrow_rows': True}, helpers)
         lines = [f'for (long long row = ((long long)blockIdx.x * blockDim.x + threadIdx.x) >> 5; row < {rows}LL; '
                  f'row += ((long long)gridDim.x * blockDim.x) >> 5) {{', '  const int lane = threadIdx.x & 31;',
                  '  const long long k = lane;',

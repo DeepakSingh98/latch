@@ -133,6 +133,21 @@ def test_cache_keys_separate_unit_settings(tmp_path):
         runtime.build(program, cache_dir=tmp_path, device_units=2, step17=True)
 
 
+def test_cache_keys_bind_unit_register_target(tmp_path):
+    program = _program(_body(3))
+
+    def path(**kw):
+        with pytest.raises(FileNotFoundError) as error:
+            runtime.build(program, cache_dir=tmp_path, allow_compile=False, device_units=3, **kw)
+        return str(error.value).split(': ', 1)[1]
+    default = path()
+    assert path(device_unit_max_registers=None) == default
+    keys = {default, path(device_unit_max_registers=255), path(device_unit_max_registers=168)}
+    assert len(keys) == 3
+    with pytest.raises(ValueError, match='requires device_units'):
+        runtime.build(program, cache_dir=tmp_path, allow_compile=False, device_unit_max_registers=255)
+
+
 def test_unit_state_allowlist():
     ptx = (".global .align 1 .b8 __nv_static_29__x__ZN38_INTERNAL_x4cuda3std3__419piecewise_constructE[1];\n"
            ".global .align 4 .b8 __cudart_i2opi_f[24] = {65, 144};\n"

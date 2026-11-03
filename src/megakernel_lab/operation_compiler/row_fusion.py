@@ -23,7 +23,10 @@ from __future__ import annotations
 
 import bisect
 import math
+import collections
 import re
+
+from .row_rewrites import earlyepi as _earlyepi, feeds_group as _feeds_group
 
 
 def _contiguous(shape):
@@ -103,7 +106,25 @@ _R_DECL = re.compile(r'\bconst ([\w:]+) r_(\w+) = ')
 _R_USE = re.compile(r'\br_(\w+)\b')
 
 
-def _chain_stages(code, chain, phases, body, stored, ident, root, nw, width, reduce_lines, group_loops):
+_GLOBAL_READ = re.compile(r'\bv_\w+\[')
+
+
+def _recomputable(line, name):
+    """accumulation_rules 'rleaf': the declaration head of a per-element value that a later chained stage may evaluate
+    again instead of keeping it in a ck_ register array: at most two loads of values read (never written) by the group
+    and at most one register operand, so keeping that operand (shared by many such values) replaces keeping each."""
+    head = line.strip().split('; ', 1)[0]
+    m = _R_DECL.match(head)
+    if not m or m.group(2) != name or m.group(1) != 'float':
+        return None
+    deps = {u.group(1) for u in _R_USE.finditer(head.split(' = ', 1)[1])}
+    if len(deps) > 1 or len(_GLOBAL_READ.findall(head)) > 2:
+        return None
+    return head + ';', deps
+
+
+def _chain_stages(code, chain, phases, body, stored, ident, root, nw, width, reduce_lines, group_loops,
+                  recompute=False):
     """LATCH-MOESUP-ROW ROW_CHAIN: append chained row stages to a group's per-row code (inside the row loop, after
     the group's own epilogues). Per-element values a later loop reads are kept in registers (ck_*), assigned where
     they are computed. Each stage replays the group's exact reduction tree on its kept source."""
@@ -123,43 +144,123 @@ def _chain_stages(code, chain, phases, body, stored, ident, root, nw, width, red
         every.update(d)
     loads, stores = [[] for _ in loops], [[] for _ in loops]
     kept = {}
-    for c in range(2, len(loops)):
-        used = {m.group(1) for line in loops[c] for m in _R_USE.finditer(line)}
-        for n in sorted(used - set(declared[c])):
+    lines_of = [{m.group(2): line for line in lp for m in [_R_DECL.match(line.strip())] if m} for lp in loops]
+
+    def keep_value(n, c):
+        producers = [q for q in range(c) if n in declared[q]]
+        if not producers:
+            return   # a row value (declared outside the per-element loops)
+        q = producers[-1]
+        kept[n] = declared[q][n]
+        if f'ck_{n}[w] = r_{n};' not in stores[q]:
+            stores[q].append(f'ck_{n}[w] = r_{n};')
+        load = f'const {kept[n]} r_{n} = ck_{n}[w];'
+        if load not in loads[c]:
+            loads[c].append(load)
+    # rleaf: stage leaves are re-evaluated from a shared kept operand, or (used only as their stage's leaf) summed
+    # into the stage tree's eight per-lane partials where they are produced, instead of 15-element ck_ arrays.
+    wide_tree = nw <= 8 or any(f'leaf_[w + 8' in x for x in reduce_lines)
+    plan, shared = {}, collections.Counter()
+    if recompute:
+        for c in range(2, len(loops), 2):
+            line = loops[c][0] if len(loops[c]) == 1 else ''
+            m = re.fullmatch(r'leaf_\[w\] = r_(\w+);', line)
+            if not m or m.group(1) in declared[c]:
+                continue
+            n = m.group(1)
             producers = [q for q in range(c) if n in declared[q]]
             if not producers:
-                continue   # a row value (declared outside the per-element loops)
-            q = producers[-1]
-            kept[n] = declared[q][n]
-            if f'ck_{n}[w] = r_{n};' not in stores[q]:
-                stores[q].append(f'ck_{n}[w] = r_{n};')
-            loads[c].append(f'const {kept[n]} r_{n} = ck_{n}[w];')
+                continue
+            redo = _recomputable(lines_of[producers[-1]].get(n, ''), n) if producers[-1] >= 1 else None
+            if redo is not None and not all(any(d in declared[q] for q in range(c)) for d in redo[1]):
+                redo = None
+            elsewhere = any(re.search(rf'\br_{n}\b', x) for k, lp in enumerate(loops)
+                            if k not in (producers[-1], c) for x in lp)
+            plan[c] = (n, producers[-1], redo, not elsewhere and wide_tree and producers[-1] < c)
+            for d in (redo[1] if redo else ()):
+                shared[d] += 1
+    partials = {}
+    for c in range(2, len(loops)):
+        used = {m.group(1) for line in loops[c] for m in _R_USE.finditer(line)}
+        again = []
+        for n in sorted(used - set(declared[c])):
+            producers = [q for q in range(c) if n in declared[q]]
+            entry = plan.get(c) if plan.get(c, (None,))[0] == n else None
+            redo = (_recomputable(lines_of[producers[-1]].get(n, ''), n)
+                    if recompute and producers and producers[-1] >= 1 else None)
+            if entry and entry[3] and not (redo and any(shared[d] >= 2 for d in redo[1])):
+                q = entry[1]
+                partials[n] = c
+                stores[q].append(f'if (w < 8) cp_{n}[w < 8 ? w : 0] = 0.0f + r_{n}; '
+                                 f'else cp_{n}[w & 7] = cp_{n}[w & 7] + r_{n};')
+                continue
+            if redo is not None and all(any(d in declared[q] for q in range(c)) for d in redo[1]):
+                # rleaf: evaluate the same expression again in this stage from its kept operand.
+                for d in sorted(redo[1]):
+                    keep_value(d, c)
+                again.append(redo[0])
+                continue
+            keep_value(n, c)
+        loads[c] += again
     head = f'    const long long i = o * {width}LL + 32 * w + lane;'
     out = []
+    from . import vector_bodies
+    staged_stores, deferred_stores = vector_bodies.rdefer(), []
     for line in code:
         if line == '/*CKDECL*/':
             out += [f'  {t} ck_{n}[{nw}];' for n, t in kept.items()]
+            out += [f'  float cp_{n}[8] = {{}};' for n in partials]
         elif line in ('/*CKSTORE0*/', '/*CKSTORE1*/'):
             out += ['    ' + x for x in stores[0 if line == '/*CKSTORE0*/' else 1]]
         else:
             out.append(line)
+    group = vector_bodies.rgroup()
+    pieces = []                                   # per stage: (A leaf part, B tree part, T tail, simple, out2)
     for j, (out2, scale2, leaf, row_lines, full_lines) in enumerate(stage_parts):
         c = 2 + 2 * j
         v, sec = f'v_c{j}', f'second_c{j}'
-        out += [f'  // chained row stage {j}: {out2}', '#pragma unroll', f'  for (int w = 0; w < {nw}; ++w) {{', head]
-        out += ['    ' + x for x in loads[c] + leaf + stores[c]] + ['  }']
-        out += [f'  float {v}[8];', '#pragma unroll'] + [x.replace('v[w]', f'{v}[w]') for x in reduce_lines]
-        out += ['#pragma unroll', f'  for (int w = 0; w < 8; ++w) {v}[w] = s101h::warp_sum({v}[w]);',
-                f'  float {sec} = 0.0f;', '#pragma unroll',
-                '  for (int w = 0; w < 8; ++w) {', f'    const float partial = __shfl_sync(0xffffffffu, {v}[w], 0);',
-                f'    if (lane == w) {sec} = partial;', '  }', f'  {sec} = s101h::warp_sum({sec});',
-                f'  const float r_{out2} = {sec}{scale2};']
+        lf = f'leaf{j}_' if group else 'leaf_'    # accumulation_rules 'rstage': one leaf array per stage
+        A, B, T = [], [], []
+        lone = next((n for n, at in partials.items() if at == c), None)
+        if lone is not None and not loads[c] and not stores[c]:
+            # rleaf partials: the eight per-lane tree sums were completed where the leaves were produced.
+            A += [f'  // chained row stage {j}: {out2} (leaf partials of r_{lone})', f'  float {v}[8];',
+                  '#pragma unroll', f'  for (int w = 0; w < 8; ++w) {v}[w] = cp_{lone}[w];']
+        else:
+            A += ([f'  float {lf}[{nw}];'] if group else []) + [f'  // chained row stage {j}: {out2}', '#pragma unroll',
+                                                                 f'  for (int w = 0; w < {nw}; ++w) {{', head]
+            A += ['    ' + x.replace('leaf_[', f'{lf}[') for x in loads[c] + leaf + stores[c]] + ['  }']
+            B += [f'  float {v}[8];', '#pragma unroll'] + [x.replace('v[w]', f'{v}[w]').replace('leaf_[', f'{lf}[')
+                                                             for x in reduce_lines]
+        B += ['#pragma unroll', f'  for (int w = 0; w < 8; ++w) {v}[w] = s101h::warp_sum({v}[w]);',
+              f'  float {sec} = 0.0f;', '#pragma unroll',
+              '  for (int w = 0; w < 8; ++w) {', f'    const float partial = __shfl_sync(0xffffffffu, {v}[w], 0);',
+              f'    if (lane == w) {sec} = partial;', '  }', f'  {sec} = s101h::warp_sum({sec});',
+              f'  const float r_{out2} = {sec}{scale2};']
         if out2 in stored:
-            out.append(f'  if (lane == 0) {ident(out2)}[o] = r_{out2};')
-        out += ['  {', '  const long long i = o;'] + ['  ' + x for x in row_lines]
+            (deferred_stores if staged_stores else B).append(f'  if (lane == 0) {ident(out2)}[o] = r_{out2};')
+        T += ['  {', '  const long long i = o;'] + ['  ' + x for x in row_lines]
+        simple = not row_lines and not (full_lines or loads[c + 1] or stores[c + 1])
         if full_lines or loads[c + 1] or stores[c + 1]:
-            out += ['#pragma unroll', f'  for (int w = 0; w < {nw}; ++w) {{', head]
-            out += ['    ' + x for x in loads[c + 1] + full_lines + stores[c + 1]] + ['  }']
+            T += ['#pragma unroll', f'  for (int w = 0; w < {nw}; ++w) {{', head]
+            T += ['    ' + x for x in loads[c + 1] + full_lines + stores[c + 1]] + ['  }']
+        pieces.append((A, B, T, simple, out2))
+    k = 0
+    while k < len(pieces):
+        # accumulation_rules 'rstage': stages k..k+g-1 issue their leaf loops before their trees when every member
+        # but the last has no row/element tail and no member's leaf part names an earlier member's row result.
+        g = 1
+        while (group and g < group and k + g < len(pieces) and pieces[k + g - 1][3]
+               and not any(re.search(rf'\br_{re.escape(pieces[q][4])}\b', x)
+                           for q in range(k, k + g) for x in pieces[k + g][0])):
+            g += 1
+        members = pieces[k:k + g]
+        for A, _, _, _, _ in members:
+            out += A
+        for _, B, T, _, _ in members:
+            out += B + T
+        k += g
+    out += deferred_stores                       # 'rstage': after the last stage, all results in scope
     out += ['  }'] * len(stage_parts)
     return out
 
@@ -276,6 +377,9 @@ _STORE_TAIL = re.compile(r'^(v_\w+)\[i\] = (r_\w+);$')
 _DECL = re.compile(r'^const (\w+) (r_\w+) = ')
 
 
+HOIST2_BUDGET = 128   # accumulation_rules 'rhoist2': hoisted read registers per thread
+
+
 def _sink(groups_of_lines, elements, slot):
     """P6-C rsink: a row group's plain per-element stores (``v_x[i] = r_x;``) are deferred until after its
     element loop: the stored values stay in registers and are written by a separate loop over the same elements.
@@ -305,8 +409,83 @@ def _sink(groups_of_lines, elements, slot):
     return decls, out_groups, flushes
 
 
+def _effect_writers(phases, root):
+    writers, mutations = {}, set()
+    for k, phase in enumerate(phases):
+        changed = {root(n) for n in phase.get('internal_mutations', ())}
+        mutations.update(changed)
+        for name in {root(n) for n in phase['writes']} | changed:
+            writers.setdefault(name, []).append(k)
+    return writers, mutations | {name for name, indices in writers.items() if len(indices) > 1}
+
+
+def _dependency_order(deps):
+    """Stable ready-index order, retaining the row-fusion cycle refusal."""
+    import heapq
+    pending = [len(parents) for parents in deps]
+    following = [[] for _ in deps]
+    for child, parents in enumerate(deps):
+        for parent in parents:
+            following[parent].append(child)
+    ready = [k for k, count in enumerate(pending) if not count]
+    heapq.heapify(ready)
+    order = []
+    while ready:
+        k = heapq.heappop(ready)
+        order.append(k)
+        for child in following[k]:
+            pending[child] -= 1
+            if not pending[child]:
+                heapq.heappush(ready, child)
+    if len(order) != len(deps):
+        raise ValueError('row fusion produced a dependency cycle')
+    return order
+
+
+def _fusion_dependencies(phases, result, owners, root):
+    """Contract the original SSA/effect DAG, preserving each read's version.
+
+    A fused group is initially placed at its first member. Rebuilding ordered
+    mutable effects from that new list could reinterpret a later member's read
+    as an earlier version. Keep the original RAW/WAR/WAW edges instead. Unique
+    SSA producers remain global, including producers later in the input list.
+    A new gather-order operand gets its unique producer edge separately.
+    """
+    from .group_rules import _topological_dependencies
+    if len(owners) != len(phases) or set(owners) != set(range(len(result))):
+        raise ValueError('row fusion has an incomplete phase ownership map')
+    original = _topological_dependencies(phases, root)
+    # A true cycle inside one group must not disappear as a contracted self edge.
+    _dependency_order(original)
+    writers, mutable = _effect_writers(phases, root)
+    deps = [set() for _ in result]
+    original_reads = [set() for _ in result]
+    members = [[] for _ in result]
+    for k, parents in enumerate(original):
+        owner = owners[k]
+        members[owner].append(k)
+        original_reads[owner].update(root(n) for n in
+                                     (*phases[k]['reads'], *phases[k].get('internal_mutations', ())))
+        deps[owner].update(owners[parent] for parent in parents if owners[parent] != owner)
+    for k, phase in enumerate(result):
+        if len(members[k]) > 1 and any(
+                phases[m].get('internal_mutations') or any(root(n) in mutable for n in phases[m]['writes'])
+                for m in members[k]):
+            raise ValueError('row fusion cannot combine mutable writers or internal mutations')
+        new_reads = {root(n) for n in (*phase['reads'], *phase.get('internal_mutations', ()))} - original_reads[k]
+        for name in new_reads:
+            if name in mutable:
+                raise ValueError('row fusion introduced a new read of mutable root: ' + name)
+            if name in writers:
+                producer = owners[writers[name][0]]
+                if producer != k:
+                    deps[k].add(producer)
+    return deps
+
+
 def fuse_rows(phases, layouts, dtypes, *, ident, index, kept, inplace_roots, flat=False, multi_warp=False,
-              absorb_early=False, hoist=False, sink=False, clamp=False, pipe=False, orders=None):
+              absorb_early=False, hoist=False, sink=False, clamp=False, pipe=False, orders=None,
+              leaf_again=False, hoist_wide=False):
     """Return (phases, records, elided_roots). phases keep their dict format.
 
     flat (P-OPS5-B group rules): members may have any shape with the reduction's
@@ -316,6 +495,11 @@ def fuse_rows(phases, layouts, dtypes, *, ident, index, kept, inplace_roots, fla
     row). Prologue members stay FP32 (their values may be carried in FP32 registers).
     """
     root = lambda name: layouts[name].root if name in layouts else name
+    _, mutable = _effect_writers(phases, root)
+    # The generated row bodies carry single-assignment values in registers and
+    # replace writes by names. They do not implement mutable effect versions.
+    effectful = {k for k, p in enumerate(phases) if p.get('internal_mutations')
+                 or any(root(n) in mutable for n in p['writes'])}
     writer, level = {}, []
     for k, phase in enumerate(phases):
         level.append(1 + max((level[writer[root(r)]] for r in phase['reads'] if root(r) in writer), default=-1))
@@ -356,7 +540,7 @@ def fuse_rows(phases, layouts, dtypes, *, ident, index, kept, inplace_roots, fla
 
     def elementwise(k, shape, bf16=False, prologue=False):
         p = phases[k]
-        if p['kind'] != 'elementwise' or any(root(n) in inplace_roots for n in p['names']):
+        if k in effectful or p['kind'] != 'elementwise' or any(root(n) in inplace_roots for n in p['names']):
             return False
         if flat:
             # LATCH-MOESUP (ROW_GATHERS): a prologue phase may also store BF16 values (e.g. the operand cast of a
@@ -379,7 +563,7 @@ def fuse_rows(phases, layouts, dtypes, *, ident, index, kept, inplace_roots, fla
         index_select) evaluated per element at the group's flat index: table[index[i / W]][i % W], the stored
         form's value and range trap. The caller requires the group to read it in its own flat order."""
         p = phases[k]
-        if (not ROW_GATHERS or not flat or p['kind'] != 'index_select' or p.get('engine') != 'index_select_warp_rows'
+        if (k in effectful or not ROW_GATHERS or not flat or p['kind'] != 'index_select' or p.get('engine') != 'index_select_warp_rows'
                 or len(p['names']) != 1 or 'gather_table' not in p):
             return False
         g, table, idx = p['names'][0], p['gather_table'], p['gather_index']
@@ -398,7 +582,7 @@ def fuse_rows(phases, layouts, dtypes, *, ident, index, kept, inplace_roots, fla
     chains = {}   # LATCH-MOESUP-ROW ROW_CHAIN: group index -> [(reduction phase, row epilogues, full epilogues)]
     for k, phase in enumerate(phases):
         info = phase.get('row_reduction')
-        if not info or k in consumed:
+        if not info or k in consumed or k in effectful:
             continue
         out = phase['names'][0]
         source, width, rows = info['source'], info['width'], info['rows']
@@ -469,11 +653,18 @@ def fuse_rows(phases, layouts, dtypes, *, ident, index, kept, inplace_roots, fla
         # they read is produced later (checked below). Phases a member reads are never taken.
         gathered = any(q in gather_lines for q in prologue)
         member_reads = {root(r) for m in members for r in phases[m]['reads']}
-        candidates = readers_after(min(members) if gathered else k, produced)
+        # accumulation_rules 'rearly' (row_rewrites.py): consumers of prologue values placed BEFORE the reduction
+        # (e.g. a scaled BF16 operand cast of a row's product) are epilogue candidates too, unless their outputs
+        # reach a group input through phases of that span (row_rewrites.feeds_group); the fused phase is re-ordered
+        # topologically afterwards, so no consumer can run before the group.
+        early = _earlyepi() and not gathered
+        candidates = readers_after(min(members) if gathered or early else k, produced)
         for e in candidates:
             if e in consumed or e in members:
                 continue
             if gathered and e < k and any(root(w) in member_reads for w in phases[e]['writes']):
+                continue
+            if early and e < k and _feeds_group(phases, e, k, member_reads, root, readers):
                 continue
             ctx = 'rows' if elementwise(e, rshape) else 'full' if elementwise(e, full, bf16=True) else None
             if ctx == 'rows' and flat and tuple(phases[e]['shape']) != rshape:
@@ -529,7 +720,7 @@ def fuse_rows(phases, layouts, dtypes, *, ident, index, kept, inplace_roots, fla
                 k2 = None
                 for c in row_reduction_phases[bisect.bisect_right(row_reduction_phases, k):]:
                     i2 = phases[c].get('row_reduction')
-                    if c in consumed or c in members or not i2 or i2['width'] != width or i2['rows'] != rows:
+                    if c in consumed or c in members or c in effectful or not i2 or i2['width'] != width or i2['rows'] != rows:
                         continue
                     s2, o2 = i2['source'], phases[c]['names'][0]
                     if (root(s2) in produced and writer.get(root(s2)) in full_set and dtypes.get(s2) == 'float32'
@@ -580,7 +771,7 @@ def fuse_rows(phases, layouts, dtypes, *, ident, index, kept, inplace_roots, fla
     softmax_groups = []
     for k, phase in enumerate(phases):
         info = phase.get('row_softmax')
-        if not info or k in consumed:
+        if not info or k in consumed or k in effectful:
             continue
         source, width, rows = info['source'], info['width'], info['rows']
         full = tuple(layouts[source].shape)
@@ -729,12 +920,16 @@ def fuse_rows(phases, layouts, dtypes, *, ident, index, kept, inplace_roots, fla
                    for read in _READ.findall(line.split('; ', 1)[0])):
                 from .lower import LoweringError
                 raise LoweringError("row fusion left an internal value as a global read: " + line)
-        hoisted = _hoist([pro_lines, epi_lines], nw, 'w', types, gathers=pipe) if hoist else None
+        # accumulation_rules 'rhoist2': warp-per-row groups may hoist up to HOIST2_BUDGET read registers; next-row
+        # pipelining (two read sets live) keeps the original 96-register admission.
+        hoisted = _hoist([pro_lines, epi_lines], nw, 'w', types, gathers=pipe,
+                         budget=HOIST2_BUDGET if hoist_wide else 96) if hoist else None
         piped = None
         if hoisted:
             decls, loads, (pro_lines, epi_lines) = hoisted
             code += ['  ' + d for d in decls]
-            if pipe and rpw == 1 and 'latch_philox_mask(' not in '\n'.join(pro_lines + epi_lines):
+            if (pipe and rpw == 1 and len(hoisted[1]) * nw <= 96
+                    and 'latch_philox_mask(' not in '\n'.join(pro_lines + epi_lines)):
                 # LATCH-MOESUP-ROW rpipe: the hoisted reads of the warp's NEXT row are issued (into p*_) before this
                 # row computes, reduces and stores. The group stores only values it produces and never reads them
                 # back from memory, so no read of any row can observe a store of the group; values are unchanged.
@@ -815,7 +1010,7 @@ def fuse_rows(phases, layouts, dtypes, *, ident, index, kept, inplace_roots, fla
             code += flush_loop(epi_flush)
         if chain:
             code = _chain_stages(code, chain, phases, body, stored, ident, root, nw, width, reduce_lines,
-                                 [pro_lines + [f'keep_{n}[w] = r_{n};' for n in carried],
+                                 recompute=leaf_again, group_loops=[pro_lines + [f'keep_{n}[w] = r_{n};' for n in carried],
                                   [f'const float r_{n} = keep_{n}[w];' for n in carried] + epi_lines if epilogue_full else []])
         if epilogue_rows:
             code.append('  }')
@@ -875,6 +1070,8 @@ def fuse_rows(phases, layouts, dtypes, *, ident, index, kept, inplace_roots, fla
             fused[g]['row_fusion']['gather_order'] = order_keys
         if sunk:
             fused[g]['row_fusion']['sunk_stores'] = len(sunk[0])
+        if hoist_wide and hoisted and len(hoisted[1]) * nw > 96:
+            fused[g]['row_fusion']['wide_hoist'] = True
         fused[g]['row_parts'] = {
             'prologue': [line for q in prologue for line in body(q, 'full')], 'carried': list(carried),
             'leaf': leaf, 'out': out, 'scale': scale, 'out_stored': out in stored,
@@ -903,40 +1100,19 @@ def fuse_rows(phases, layouts, dtypes, *, ident, index, kept, inplace_roots, fla
         records.append(fused[g]['row_fusion'])
     # Replace members by their fused phase at the first member position, then
     # restore a dependency-respecting order (stable topological sort).
-    result, placed = [], set()
+    result, placed, owners = [], {}, []
     for k, phase in enumerate(phases):
         g = member_of.get(k)
         if g is None:
+            owners.append(len(result))
             result.append(phase)
-        elif g not in placed:
-            placed.add(g)
-            result.append(fused[g])
-    produced_by = {}
-    for k, phase in enumerate(result):
-        for w in phase['writes']:
-            produced_by[root(w)] = k
-    deps = [{produced_by[root(r)] for r in phase['reads'] if root(r) in produced_by and produced_by[root(r)] != k}
-            for k, phase in enumerate(result)]
-    # LATCH-BUILD-600: the same order as repeatedly taking the lowest-index phase whose dependencies are placed
-    # (formerly a rescan from phase 0 per placement, O(phases^2)): a min-heap of ready phases.
-    import heapq
-    pending = [len(d) for d in deps]
-    dependents = {}
-    for k, d in enumerate(deps):
-        for q in d:
-            dependents.setdefault(q, []).append(k)
-    ready = [k for k, c in enumerate(pending) if not c]
-    heapq.heapify(ready)
-    order = []
-    while ready:
-        k = heapq.heappop(ready)
-        order.append(k)
-        for q in dependents.get(k, ()):
-            pending[q] -= 1
-            if not pending[q]:
-                heapq.heappush(ready, q)
-    if len(order) < len(result):
-        raise ValueError('row fusion produced a dependency cycle')
+        else:
+            if g not in placed:
+                placed[g] = len(result)
+                result.append(fused[g])
+            owners.append(placed[g])
+    deps = _fusion_dependencies(phases, result, owners, root)
+    order = _dependency_order(deps)
     return [result[k] for k in order], records, elided
 
 

@@ -576,10 +576,19 @@ class _MemorySampler:
         self.thread.join()
 
 
-def _unit_key(text, include_hashes, argv_flags, nvcc_version):
+def _unit_key(text, include_hashes, argv_flags, nvcc_version, *, header_staging):
     material = json.dumps(dict(text=hashlib.sha256(text.encode()).hexdigest(), headers=include_hashes,
-                               flags=argv_flags, nvcc=nvcc_version), sort_keys=True)
+                               header_staging=header_staging, flags=argv_flags, nvcc=nvcc_version), sort_keys=True)
     return hashlib.sha256(material.encode()).hexdigest()
+
+
+def _unit_commands(nvcc, device_flags, arch, directory, settings, names):
+    """nvcc argv per unit source. An explicit register target (``settings['max_registers']``) follows the unit
+    flags and precedes the include path in every unit's command."""
+    unit_flags = list(settings['unit_flags']) if int(settings['units']) > 1 else []
+    register_flags = [f"-maxrregcount={settings['max_registers']}"] if settings.get('max_registers') else []
+    return [[nvcc, *device_flags, f'-arch={arch}', *unit_flags, *register_flags, f'-I{directory}', '-cubin', name,
+             '-o', name[:-3] + '.cubin'] for name in names]
 
 
 def _build_intervals(program, directory, arch, device_flags, nvcc, settings, jobs, cubin, timings):
@@ -617,18 +626,27 @@ def _build_intervals(program, directory, arch, device_flags, nvcc, settings, job
         patched = intervals.unit_headers(prefix, headers)
     except intervals.Refusal as why:
         raise RuntimeError('interval partition refused: ' + str(why)) from None
+    transformed = {}
     for name, text in patched.items():
-        (folder / name).write_text(text)   # quoted includes from the unit sources find this copy first
-        include_hashes[name] = hashlib.sha256(text.encode()).hexdigest()
-    record['patched_unit_headers'] = {name: include_hashes[name] for name in patched}
+        # Unchanged wrapper copies keep nested quoted includes in this directory.
+        (folder / name).write_text(text)
+        digest = hashlib.sha256(text.encode()).hexdigest()
+        if digest != include_hashes[name]:
+            transformed[name] = digest
+        include_hashes[name] = digest
+    record['patched_unit_headers'] = transformed
+    record['copied_unit_headers'] = {name: include_hashes[name] for name in patched}
+    # Placement changes quoted-include resolution even when the set of header
+    # content hashes is identical. Bind it in the independent unit cache too.
+    header_staging = dict(version=intervals.RENEW_A_VERSION, copied_headers=record['copied_unit_headers'])
+    record['unit_header_staging'] = header_staging
     timings['interval_source_preparation'] = time.perf_counter() - started
     record.update(stats, include_hashes=include_hashes)
-    unit_flags = list(settings['unit_flags']) if units > 1 else []
-    commands = [[nvcc, *device_flags, f'-arch={arch}', *unit_flags, f'-I{directory}', '-cubin', name,
-                 '-o', name[:-3] + '.cubin'] for name, _ in sources]
+    commands = _unit_commands(nvcc, device_flags, arch, directory, settings, [name for name, _ in sources])
     nvcc_version = subprocess.run([nvcc, '--version'], text=True, capture_output=True, check=True).stdout
     cache_root = settings.get('unit_cache')
-    keys = [_unit_key(text, include_hashes, command[1:-5] + [command[-4]], nvcc_version)
+    keys = [_unit_key(text, include_hashes, command[1:-5] + [command[-4]], nvcc_version,
+                      header_staging=header_staging)
             for (_, text), command in zip(sources, commands)]
     hits = []
     for (name, _), key in zip(sources, keys):
