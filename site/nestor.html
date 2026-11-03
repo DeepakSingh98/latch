@@ -38,8 +38,8 @@
       <p>Each training update processes 262,144 tokens. The megakernel takes 1.55 seconds per update, and the authors’ code takes 3.28. The new build matched learning in 300-update comparisons from both fresh and trained weights.</p>
 
       <figure>
-        <a href="figures/nestor-learning.svg?v=2" aria-label="Open learning chart full size"><img src="figures/nestor-learning.svg?v=2" width="1200" height="675" loading="lazy" alt="Full-range historical Nestor-100M loss curves beginning near the same loss of 11.55. At the new measured update speeds, projected training time is 8.2 hours for Latch and 17.4 hours for the authors’ code."></a>
-        <figcaption>Projected training time: earlier 5-billion-token learning curves scaled by the new same-H100 update timings. Full loss range, 200-update moving average. The 8.2 and 17.4 hours are projections, not measured full-run times for the new build.</figcaption>
+        <a href="figures/nestor-learning.svg?v=3" aria-label="Open learning chart full size"><img src="figures/nestor-learning.svg?v=3" width="1200" height="675" loading="lazy" alt="Historical Nestor-100M learning curves, with hours calculated using the new measured update speeds: 8.2 hours for Latch and 17.4 hours for the authors’ code. The chart zooms in on the later part of training."></a>
+        <figcaption>Earlier 5-billion-token learning curves, with time calculated from the new same-H100 update timings. These are estimated full-run durations; the new build’s learning checks cover 300 updates. 200-update moving average.</figcaption>
       </figure>
 
       <h2>Why Nestor</h2>
