@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Training Nestor with Latch</title>
+<meta name="description" content="Using Latch to generate training megakernels for Nestor: 2.1× faster updates than the authors' implementation and 1.24× faster than tuned PyTorch on the same H100.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/site.css?v=16">
+<script src="assets/config.js" defer></script>
+<script src="assets/reading.js" defer></script>
+</head>
+<body>
+<div class="draft-banner"><div class="wrap">Research preview · v0</div></div>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="./">Latch <span>research preview</span></a>
+    <nav aria-label="Main">
+      <ul>
+        <li><a href="walkthrough.html">How it works</a></li>
+        <li><a href="capabilities.html">Open problems</a></li>
+        <li><a href="methodology.html">Results</a></li>
+        <li><a class="github-link" href="https://github.com/DeepakSingh98/latch"><svg class="github-icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82A7.65 7.65 0 0 1 8 3.86c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg><span>Get started</span></a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <article class="wrap">
+    <div class="article">
+      <p class="meta"><span>November 2026</span></p>
+      <h1>Training Nestor with Latch</h1>
+      <p class="lede">Training an unusual model twice as fast.</p>
+
+      <p>Latch generated a training megakernel from the PyTorch training code for <a href="https://arxiv.org/abs/2610.31818">Nestor</a>, a new language model architecture. The single GPU program covers the forward pass, loss, backward pass and optimizer update. On one H100, it trained Nestor to the same loss as the authors’ implementation <strong>2.1× faster</strong>.</p>
+
+      <p>Each training update processes 262,144 tokens. The megakernel takes 1.55 seconds per update, and the authors’ code takes 3.28.</p>
+
+      <figure>
+        <a href="figures/nestor-learning.svg" aria-label="Open learning chart full size"><img src="figures/nestor-learning.svg" width="1200" height="675" loading="lazy" alt="Training loss over a full Nestor-100M run of 19,080 updates. Latch reaches the final loss in 8.2 hours, the authors' PyTorch in 17.4 hours."></a>
+        <figcaption>One H100. Nestor-100M, 19,080 updates, 5 billion tokens, 200-update moving average.</figcaption>
+      </figure>
+
+      <h2>Why Nestor</h2>
+
+      <p>When I introduced Latch, I wrote that an unusual learning algorithm can leave you with a systems project to finish before you can test it. Nestor is a good example. It lets each token choose which parts of the model it uses:</p>
+
+      <ul class="plain">
+        <li><strong>Tokens choose their attention.</strong> Each block has eight attention “columns”, and each token joins between three and eight of them. The groups of tokens that attend to each other change from batch to batch.</li>
+        <li><strong>Tokens choose their experts.</strong> Each column has its own experts as well as a shared pool, and every expert gets a different number of tokens.</li>
+        <li><strong>There’s no residual stream.</strong> Each layer reads a learned mix of the layers before it.</li>
+      </ul>
+
+      <p>GPUs do best with a few large operations of the same shape. A Nestor training step is thousands of small operations whose sizes depend on the routing, and its attention heads are only 30 numbers wide. The authors’ PyTorch code issues about 87,000 GPU operations per update.</p>
+
+      <figure>
+        <a href="figures/nestor-structure.png" aria-label="Open Nestor structure diagram full size"><img src="figures/nestor-structure.png" width="1600" height="900" loading="lazy" alt="Schematic of Nestor’s depth mixing, routed attention columns and experts, with conventional execution and generated megakernel execution below."></a>
+        <figcaption>Nestor’s depth mixing, attention columns and experts. Schematic; block widths are illustrative.</figcaption>
+      </figure>
+
+      <p>This is the kind of model I built Latch for. I adapted Nestor’s training code to the PyTorch subset Latch supports. The generated program runs once per microbatch, eight times per update, and the last run also updates the weights.</p>
+
+      <h2>A stronger PyTorch comparison</h2>
+
+      <p>I also wanted to know how much of the 2.1× you could get by improving the PyTorch implementation, since it would be easy to give the compiler credit for work you could do without it.</p>
+
+      <p>So I tuned that version too. I streamed the vocabulary loss instead of storing the full logits, froze Python’s garbage collector, removed the distributed wrapper (there’s only one GPU), and used bigger microbatches. PyTorch got <strong>1.7× faster</strong>, down to 1.92 seconds per update. Latch’s program is still <strong>1.24× faster</strong> than that, on the same GPU and with the same model math.</p>
+
+      <figure>
+        <a href="figures/nestor-speed.svg" aria-label="Open timing chart full size"><img src="figures/nestor-speed.svg" width="1200" height="675" loading="lazy" alt="Nestor-100M on H100: Latch 1,553 ms per training update, 2.1 times faster than the authors' code at 3,280 ms and 1.24 times faster than hand-tuned PyTorch at 1,924 ms."></a>
+        <figcaption>One H100, complete training updates. Means of balanced paired rounds from fresh and trained weights.</figcaption>
+      </figure>
+
+      <h2>Where the time went</h2>
+
+      <p>The biggest improvement came from giving each warp more memory loads to work on at once. Nestor does a lot of gathers, copies and small reductions. When a warp waits for each load to finish before issuing the next, most of the GPU’s memory bandwidth sits idle. Generating code that keeps more loads in flight saved about 180 milliseconds per update.</p>
+
+      <p>The other changes removed work between operations. When two backward matrix products get added together, Latch now computes them as one larger product. Chains of row operations keep their intermediate values in registers, and attention’s backward pass takes one pass instead of two. Along with fixes to the optimizer and vocabulary head, these brought Latch from 1.90 to 1.55 seconds per update.</p>
+
+      <figure>
+        <a href="figures/nestor-sources.svg" aria-label="Open savings chart full size"><img src="figures/nestor-sources.svg" width="1200" height="675" loading="lazy" alt="Milliseconds saved per update: more memory loads in flight 178, single-pass attention backward 52, fused sibling matrix products 49, row fusion 43, optimizer and vocab head 30."></a>
+        <figcaption>Approximate contributions to the improvement from 1,898 to 1,553 ms per update. The changes interact; the combined result is measured directly.</figcaption>
+      </figure>
+
+      <p>One program isn’t automatically faster. Running two microbatches side by side on separate halves of the GPU helped only a little, since both halves share the same memory bandwidth. In earlier tests, splitting the program into separate kernels was sometimes faster, because a long program pays for instruction cache misses and synchronization.</p>
+
+      <p>What I’m most interested in is making these improvements reusable, so I can change the model and regenerate the program without redoing this work. There’s more to do before these optimizations apply across the models Latch supports, and contributions are welcome.</p>
+
+      <p>Many thanks to the Nestor team for open-sourcing their <a href="https://github.com/Ma-Lab-Berkeley/Nestor">code and training recipe</a>.</p>
+
+      <p><a class="github-link" href="https://github.com/DeepakSingh98/latch"><svg class="github-icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82A7.65 7.65 0 0 1 8 3.86c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg><span>Get started on GitHub</span></a></p>
+    </div>
+  </article>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>Latch · Research preview</span>
+    <a href="methodology.html">Results</a>
+    <a data-repo-link hidden aria-disabled="true" href="https://github.com/DeepakSingh98/latch">Repository</a>
+  </div>
+</footer>
+</body>
+</html>
