@@ -33,13 +33,13 @@
       <h1>Training Nestor with Latch</h1>
       <p class="lede">Training an unusual model twice as fast.</p>
 
-      <p>Latch generated a training megakernel from the PyTorch training code for <a href="https://arxiv.org/abs/2610.31818">Nestor</a>, a new language model architecture. The single GPU program covers the forward pass, loss, backward pass and optimizer update. On one H100, it trained Nestor to the same loss as the authors’ implementation <strong>2.1× faster</strong>.</p>
+      <p>Latch generated training megakernels from the PyTorch training code for <a href="https://arxiv.org/abs/2610.31818">Nestor</a>, a new language model architecture. The generated programs cover the forward pass, loss, backward pass and optimizer update. Complete training updates ran <strong>2.1× faster</strong> than the authors’ implementation on the same H100.</p>
 
-      <p>Each training update processes 262,144 tokens. The megakernel takes 1.55 seconds per update, and the authors’ code takes 3.28.</p>
+      <p>Each training update processes 262,144 tokens. The megakernel takes 1.55 seconds per update, and the authors’ code takes 3.28. The new build matched learning in 300-update comparisons from both fresh and trained weights.</p>
 
       <figure>
-        <a href="figures/nestor-learning.svg" aria-label="Open learning chart full size"><img src="figures/nestor-learning.svg" width="1200" height="675" loading="lazy" alt="Training loss over a full Nestor-100M run of 19,080 updates. Latch reaches the final loss in 8.2 hours, the authors' PyTorch in 17.4 hours."></a>
-        <figcaption>One H100. Nestor-100M, 19,080 updates, 5 billion tokens, 200-update moving average.</figcaption>
+        <a href="figures/nestor-learning.svg?v=2" aria-label="Open learning chart full size"><img src="figures/nestor-learning.svg?v=2" width="1200" height="675" loading="lazy" alt="Full-range historical Nestor-100M loss curves beginning near the same loss of 11.55. At the new measured update speeds, projected training time is 8.2 hours for Latch and 17.4 hours for the authors’ code."></a>
+        <figcaption>Projected training time: earlier 5-billion-token learning curves scaled by the new same-H100 update timings. Full loss range, 200-update moving average. The 8.2 and 17.4 hours are projections, not measured full-run times for the new build.</figcaption>
       </figure>
 
       <h2>Why Nestor</h2>
