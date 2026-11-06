@@ -108,7 +108,7 @@ class CapturedModule:
               segmented_products=None, norm_fusion=None, attention_rules=None, matrix_schedule=None,
               accumulation_rules=None, memory_rules=None, matrix_bodies=None, exact_bf16_products=None,
               segmented_attention=None, tile_readiness=None, vocab_rules=None, elementwise_rules=None,
-              graph_rules=None, device_unit_max_registers=None):
+              graph_rules=None, device_unit_max_registers=None, runtime_trace=None):
         """Write a bound native artifact; calls nvcc only on the build worker.
 
         explain=True additionally writes ``<directory>/explain/report.{json,md}`` (plus the captured IR
@@ -186,6 +186,8 @@ class CapturedModule:
         copy body rules; None leaves lowering unchanged. divc rewrites only divisions by the literals in
         ops.row_rewrites.VERIFIED_DIVISORS (the ones verified so far: 3, 5, 6, 7, 480, sqrt(480), 16380);
         every other literal keeps its IEEE division.
+        runtime_trace=True keeps per-interval, per-CTA land/done stamps and a shared-memory guard in the program,
+        written only on launches that pass the ticks buffer (Runtime.set_runtime_trace; ops.runtime_trace).
         graph_rules='cse' (a '+'-joined subset of cse, depth_reads, castshare) opts into ops.graph_rules' exact
         rewrites of the captured graph; None leaves it unchanged.
         Omitted execution (or 'auto') chooses a compatible common or retained
@@ -232,6 +234,7 @@ class CapturedModule:
                               **({'vocab_rules': vocab_rules} if vocab_rules is not None else {}),
                               **({'elementwise_rules': elementwise_rules} if elementwise_rules is not None else {}),
                               **({'graph_rules': graph_rules} if graph_rules is not None else {}),
+                              **({'runtime_trace': runtime_trace} if runtime_trace else {}),
                               **({'device_unit_max_registers': device_unit_max_registers}
                                  if device_unit_max_registers is not None else {}))
 
@@ -443,7 +446,7 @@ def prepare_module(captured, directory, *, cache_dir, arch='sm_90', retain_all=F
                    segmented_products=None, norm_fusion=None, attention_rules=None, matrix_schedule=None,
                    accumulation_rules=None, memory_rules=None, matrix_bodies=None, exact_bf16_products=None,
                    segmented_attention=None, tile_readiness=None, vocab_rules=None, elementwise_rules=None,
-                   graph_rules=None, device_unit_max_registers=None):
+                   graph_rules=None, device_unit_max_registers=None, runtime_trace=None):
     """Persist source, metadata and initial bindings with exact library identity.
 
     The receipt binds the recorded library path and toolchain. This is not a
@@ -514,6 +517,10 @@ def prepare_module(captured, directory, *, cache_dir, arch='sm_90', retain_all=F
     graph_rule_sets.validate(graph_rules)
     if graph_rules is not None and tuning is not None:
         raise ValueError("graph_rules is not yet supported with matrix tuning")
+    from . import runtime_trace as runtime_trace_option
+    runtime_trace_option.validate(runtime_trace)
+    if runtime_trace and tuning is not None:
+        raise ValueError("runtime_trace is not yet supported with matrix tuning")
     # Rules that reassociate FP32 arithmetic or make an addition order timing-dependent need practical precision.
     practical_only = [*(f"segmented_products '{rule}'" for rule in ("kcat",)
                         if rule in (ragged_experts_lower._features(segmented_products) or ())),
@@ -623,7 +630,8 @@ def prepare_module(captured, directory, *, cache_dir, arch='sm_90', retain_all=F
             tile_readiness_rule_sets.scope(tile_readiness), \
             vocab_rule_sets.scope(vocab_rules), \
             elementwise_rule_sets.scope(elementwise_rules), \
-            graph_rule_sets.scope(graph_rules):
+            graph_rule_sets.scope(graph_rules), \
+            (runtime_trace_option.scope(runtime_trace) if runtime_trace is not None else nullcontext()):
         program = lower(native_ir, retain_all=retain_all, policy=policy, target_arch=arch,
                         precision_policy=precision_policy, compact_codegen=compact_codegen,
                         execution=execution, compose_selection=compose_selection,

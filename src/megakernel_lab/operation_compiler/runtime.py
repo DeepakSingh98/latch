@@ -611,6 +611,7 @@ class Runtime:
                 self._pointers = torch.tensor([a.data_ptr() for a in self.args] + [self._tensor_maps.data_ptr()],
                                               device=self.device, dtype=torch.int64)
             self._ticks = torch.empty(self.manifest.get("tick_words", self.manifest["phase_count"] + 1), device=self.device, dtype=torch.int64)
+            self.runtime_trace = False
         self.allocated_bytes = self.arena.numel() * self.arena.element_size() + self._pointers.numel() * 8 + self._ticks.numel() * 8
         if self._tensor_maps is not None:
             self.allocated_bytes += self._tensor_maps.numel() * self._tensor_maps.element_size()
@@ -841,7 +842,7 @@ class Runtime:
                 self._sync_derived()
             stream = self.torch.cuda.current_stream(self.device).cuda_stream
             args = (self._pointers.data_ptr(), self.arena.data_ptr(),
-                    self._ticks.data_ptr() if profile else None, self.blocks, stream)
+                    self._ticks.data_ptr() if profile or self.runtime_trace else None, self.blocks, stream)
             if self._fast_launch is not None:
                 self._check(self._fast_launch(*args, self.max_blocks, self.device.index))
                 self.launch_cache_policy['cached_launches'] += 1
@@ -850,6 +851,19 @@ class Runtime:
                 self.launch_cache_policy['step_queries'] += 1
         self.launch_count += 1
         return self.outputs
+
+    def set_runtime_trace(self, enabled):
+        """The runtime flag of a program built with runtime_trace: later step() calls pass the ticks buffer."""
+        if enabled and "runtime_trace" not in self.manifest:
+            raise ValueError("this program was not built with runtime_trace")
+        self.runtime_trace = bool(enabled)
+        if enabled:
+            self._ticks.zero_()     # a CTA that takes no part in an interval leaves its stamps at zero
+
+    def runtime_trace_read(self):
+        """Decoded land/done times and fault words of the last traced launch (synchronizes; ops.runtime_trace)."""
+        from .runtime_trace import decode
+        return decode(self.manifest, self._ticks.cpu().tolist(), self.blocks)
 
     def profile_step(self):
         """One diagnostic update; returns boundary times in ns, separate from timing.
