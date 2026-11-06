@@ -1191,6 +1191,13 @@ def _serialized_lowering(function):
                     # The historical summary participates in retention proofs.
                     # Amend it only after every emitter/region has been selected.
                     program = _record_indexed_numerical_policy(program)
+                    from . import runtime_trace as _runtime_trace
+                    if _runtime_trace.current():
+                        # After every code-sharing pass: they see the same text as an unprobed program.
+                        try:
+                            program = _runtime_trace.instrument(program)
+                        except _runtime_trace.Refusal as error:
+                            raise LoweringError("runtime_trace refused: " + str(error)) from error
                 return program
             finally:
                 if conv_token is not None:
@@ -7214,6 +7221,12 @@ def _lower_serial(graph, *, retain_all=False, fuse_elementwise=True, loop_option
         helpers += f'\n#include "{exact_vocab_cache_header}"\n'
     from .resources import select_program_resources
     resource_policy = select_program_resources(shared_bytes, phases=phases, arch=target_arch)
+    # runtime_trace (ops/runtime_trace.py): guard words past the plan, chosen after every decision the plan drives.
+    from . import runtime_trace as _runtime_trace
+    trace_planned_ = shared_bytes if _runtime_trace.current() and not staged and not region_body \
+        and barrier_schedule == "dependency" and _LOWERING_DEPTH.get() == 1 else None
+    if trace_planned_ is not None:
+        shared_bytes = _runtime_trace.guard_extension(shared_bytes)
     grid_bounds = [p["max_grid_blocks"] for p in phases if p.get("max_grid_blocks") is not None]
     max_grid_blocks = min(grid_bounds) if grid_bounds else None
     # elementwise_rules 'divc' (ops/row_rewrites.py): exhaustively verified literal divisions without the slow-path
@@ -7267,6 +7280,7 @@ def _lower_serial(graph, *, retain_all=False, fuse_elementwise=True, loop_option
         **({"cast_sum_substages": {str(k): v for k, v in cs_substages.items()}} if cs_substages else {}),
         "max_gemm_tiles": max([p.get("tiles", 0) for p in phases] or [1]),
         "shared_bytes": shared_bytes,
+        **({"runtime_trace_planned_shared_bytes": trace_planned_} if trace_planned_ is not None else {}),
         **({"max_grid_blocks": max_grid_blocks} if max_grid_blocks is not None else {}),
         "matrix_decisions": matrix_decisions,
         **({"scalar_divisions": emitted_scalar_divisions} if emitted_scalar_divisions else {}),

@@ -48,6 +48,9 @@ TEXT_STATEMENTS = (
     # zeroing keeps its order relative to the first barrier and to every claim.
     re.compile(r'if \(blockIdx\.x == 0 && threadIdx\.x < \d+u\) '
                r'reinterpret_cast<unsigned\*>\(arena \+ \d+LL\)\[threadIdx\.x\] = 0u;'),
+    # ops.runtime_trace: probes, the closing barriers they bracket, and tile_readiness's barrier form.
+    re.compile(r'if \(ticks(?: && threadIdx\.x == 0u)?\) latch_rtp::\w+(?:<[\d,]*>)?\(ticks(?:, \d+u)?\);'),
+    re.compile(r'latch_tr::elided_barrier\(\);'),
 )
 SIGNATURE = 'float** args, float* arena, unsigned long long* ticks'
 NAMESPACE_VARIABLE = re.compile(r'^(?:static )?(?:__device__|__constant__|__managed__)(?: __device__)? [^(;{]*;', re.M)
