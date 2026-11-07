@@ -1,31 +1,32 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
-<title id="title">Nestor-100M training on H100</title><desc id="desc">Complete training updates (262,144 tokens) on one H100. Latch 1,553 ms versus the authors' PyTorch 3,280 ms (2.1x) and versus hand-tuned PyTorch 1,924 ms (1.24x).</desc>
-<style>:root{--bg:#f8f6f0;--panel:#f0ece2;--ink:#1a1b1a;--mute:#5f615b;--rule:#c9c4b6;--blue:#2c4a80;--gray:#969288;--wash:#e3e8f1}@media(prefers-color-scheme:dark){:root{--bg:#171714;--panel:#201f1b;--ink:#ecebe5;--mute:#aaa89f;--rule:#4a4840;--blue:#a3b9e3;--gray:#77766e;--wash:#1f2738}}text{font-family:Arial,Helvetica,sans-serif;fill:var(--ink)}.muted{fill:var(--mute)}.blue{fill:var(--blue)}</style>
-<rect width="1200" height="675" fill="var(--bg)"/>
-<text x="48.0" y="65.0" font-size="34" font-weight="600" class="" text-anchor="start">Nestor-100M on H100</text>
-<rect x="925.6" y="46.0" width="18.0" height="18.0" rx="3" fill="var(--blue)"/>
-<text x="953.6" y="63.0" font-size="21" font-weight="400" class="" text-anchor="start">Latch</text>
-<rect x="1045.6" y="46.0" width="18.0" height="18.0" rx="3" fill="var(--gray)"/>
-<text x="1073.6" y="63.0" font-size="21" font-weight="400" class="" text-anchor="start">PyTorch</text>
-<rect x="48.0" y="110.0" width="543.0" height="486.0" rx="10" fill="var(--panel)"/>
-<text x="70.0" y="165.0" font-size="32" font-weight="600" class="" text-anchor="start">2.1× faster</text>
-<text x="70.0" y="199.0" font-size="22" font-weight="400" class="" text-anchor="start">than the authors' code</text>
-<text x="70.0" y="235.0" font-size="19" font-weight="400" class="muted" text-anchor="start">training update · 262k tokens</text>
-<rect x="142.3" y="437.9" width="130.0" height="104.1" rx="3" fill="var(--blue)"/>
-<text x="207.3" y="419.9" font-size="20" font-weight="400" class="" text-anchor="middle">1,553 ms</text>
-<text x="207.3" y="574.0" font-size="20" font-weight="400" class="muted" text-anchor="middle">Latch</text>
-<rect x="366.7" y="322.0" width="130.0" height="220.0" rx="3" fill="var(--gray)"/>
-<text x="431.7" y="304.0" font-size="20" font-weight="400" class="" text-anchor="middle">3,280 ms</text>
-<text x="431.7" y="574.0" font-size="20" font-weight="400" class="muted" text-anchor="middle">Authors'</text>
-<rect x="609.0" y="110.0" width="543.0" height="486.0" rx="10" fill="var(--panel)"/>
-<text x="631.0" y="165.0" font-size="32" font-weight="600" class="" text-anchor="start">1.24× faster</text>
-<text x="631.0" y="199.0" font-size="22" font-weight="400" class="" text-anchor="start">than hand-tuned PyTorch</text>
-<text x="631.0" y="235.0" font-size="19" font-weight="400" class="muted" text-anchor="start">training update · 262k tokens</text>
-<rect x="703.3" y="364.5" width="130.0" height="177.5" rx="3" fill="var(--blue)"/>
-<text x="768.3" y="346.5" font-size="20" font-weight="400" class="" text-anchor="middle">1,553 ms</text>
-<text x="768.3" y="574.0" font-size="20" font-weight="400" class="muted" text-anchor="middle">Latch</text>
-<rect x="927.7" y="322.0" width="130.0" height="220.0" rx="3" fill="var(--gray)"/>
-<text x="992.7" y="304.0" font-size="20" font-weight="400" class="" text-anchor="middle">1,924 ms</text>
-<text x="992.7" y="574.0" font-size="20" font-weight="400" class="muted" text-anchor="middle">Hand-tuned</text>
-<text x="48.0" y="642.0" font-size="20" font-weight="400" class="muted" text-anchor="start">Same H100, same model math. Separate scales. Latch runs one generated program per microbatch.</text>
+<title id="title">Nestor-100M on H100</title><desc id="desc">Complete training updates (262,144 tokens) on one H100. Latch 1,553 ms versus the authors' PyTorch 3,280 ms (2.1x) and versus hand-tuned PyTorch 1,924 ms (1.24x).</desc>
+<style>text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Helvetica,Arial,sans-serif;fill:#ecebe5}.mute{fill:#9a988f}.bgink{fill:#151513}.serif{font-family:"Iowan Old Style",Charter,"Bitstream Charter","Sitka Text",Cambria,Georgia,serif}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}</style>
+<rect width="1200" height="675" fill="#151513"/>
+<text x="42.0" y="72.0" font-size="46" font-weight="400" class="serif" text-anchor="start">Nestor-100M on H100</text>
+<text x="42.0" y="114.0" font-size="20" font-weight="400" class="mute" text-anchor="start">Complete training updates of 262,144 tokens on one H100.</text>
+<text x="42.0" y="180.0" font-size="34" font-weight="400" class="serif" text-anchor="start">2.1× faster</text>
+<text x="42.0" y="210.0" font-size="18" font-weight="400" class="mute" text-anchor="start">than the authors' code</text>
+<text x="42.0" y="234.0" font-size="18" font-weight="400" class="mute" text-anchor="start">training update · 262k tokens</text>
+<line x1="42.0" y1="557.0" x2="470.0" y2="557.0" stroke="#55534c" stroke-width="2"/>
+<rect x="42.0" y="431.0" width="200.0" height="125.0" fill="#ff8a3d"/>
+<text x="142.0" y="419.0" font-size="18" font-weight="400" class="mono" text-anchor="middle">1,553 ms</text>
+<text x="142.0" y="586.0" font-size="18" font-weight="400" class="mute" text-anchor="middle">Latch</text>
+<rect x="270.0" y="292.0" width="200.0" height="264.0" fill="#77766e"/>
+<text x="370.0" y="280.0" font-size="18" font-weight="400" class="mono" text-anchor="middle">3,280 ms</text>
+<text x="370.0" y="586.0" font-size="18" font-weight="400" class="mute" text-anchor="middle">Authors'</text>
+<text x="640.0" y="180.0" font-size="34" font-weight="400" class="serif" text-anchor="start">1.24× faster</text>
+<text x="640.0" y="210.0" font-size="18" font-weight="400" class="mute" text-anchor="start">than hand-tuned PyTorch</text>
+<text x="640.0" y="234.0" font-size="18" font-weight="400" class="mute" text-anchor="start">training update · 262k tokens</text>
+<line x1="640.0" y1="557.0" x2="1068.0" y2="557.0" stroke="#55534c" stroke-width="2"/>
+<rect x="640.0" y="343.0" width="200.0" height="213.0" fill="#ff8a3d"/>
+<text x="740.0" y="331.0" font-size="18" font-weight="400" class="mono" text-anchor="middle">1,553 ms</text>
+<text x="740.0" y="586.0" font-size="18" font-weight="400" class="mute" text-anchor="middle">Latch</text>
+<rect x="868.0" y="292.0" width="200.0" height="264.0" fill="#77766e"/>
+<text x="968.0" y="280.0" font-size="18" font-weight="400" class="mono" text-anchor="middle">1,924 ms</text>
+<text x="968.0" y="586.0" font-size="18" font-weight="400" class="mute" text-anchor="middle">Hand-tuned</text>
+<text x="42.0" y="640.0" font-size="18" font-weight="400" class="mute" text-anchor="start">Same H100, same model math. Separate scales. Latch runs one generated program per microbatch.</text>
+<rect x="969.2" y="624.0" width="16.0" height="16.0" fill="#ff8a3d"/>
+<text x="993.2" y="638.0" font-size="18" font-weight="400" class="mute" text-anchor="start">Latch</text>
+<rect x="1068.2" y="624.0" width="16.0" height="16.0" fill="#77766e"/>
+<text x="1092.2" y="638.0" font-size="18" font-weight="400" class="mute" text-anchor="start">PyTorch</text>
 </svg>

@@ -1,41 +1,40 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
-<title id="title">GPU hours to train Nestor, MoE and dense transformer at 100M</title><desc id="desc">Measured H100 hours to train each 100M model on 5B tokens, with held-out losses from the Nestor paper (Table 3). dense-authors 9.2 h; dense-tuned 4.2 h; moe-authors 10.5 h; moe-tuned 5.1 h; nestor-authors 17.0 h; nestor-tuned 10.2 h; latch 8.2 h.</desc>
-<style>:root{--bg:#f8f6f0;--panel:#f0ece2;--ink:#1a1b1a;--mute:#5f615b;--rule:#c9c4b6;--blue:#2c4a80;--gray:#969288;--wash:#e3e8f1}@media(prefers-color-scheme:dark){:root{--bg:#171714;--panel:#201f1b;--ink:#ecebe5;--mute:#aaa89f;--rule:#4a4840;--blue:#a3b9e3;--gray:#77766e;--wash:#1f2738}}text{font-family:Arial,Helvetica,sans-serif;fill:var(--ink)}.muted{fill:var(--mute)}.blue{fill:var(--blue)}</style>
-<rect width="1200" height="675" fill="var(--bg)"/>
-<text x="48.0" y="65.0" font-size="34" font-weight="600" class="" text-anchor="start">GPU hours to train at 100M</text>
-<rect x="925.6" y="46.0" width="18.0" height="18.0" rx="3" fill="var(--blue)"/>
-<text x="953.6" y="63.0" font-size="21" font-weight="400" class="" text-anchor="start">Latch</text>
-<rect x="1045.6" y="46.0" width="18.0" height="18.0" rx="3" fill="var(--gray)"/>
-<text x="1073.6" y="63.0" font-size="21" font-weight="400" class="" text-anchor="start">PyTorch</text>
-<rect x="48.0" y="110.0" width="1104.0" height="486.0" rx="10" fill="var(--panel)"/>
-<text x="70.0" y="160.0" font-size="26" font-weight="600" class="" text-anchor="start">5B tokens on one H100</text>
-<text x="70.0" y="192.0" font-size="19" font-weight="400" class="muted" text-anchor="start">Outlined: the authors' code. Filled: tuned PyTorch, or Latch.</text>
-<rect x="331.5" y="237.5" width="325.5" height="23.0" rx="3" fill="none" stroke="var(--gray)" stroke-width="3"/>
-<text x="670.5" y="255.0" font-size="19" font-weight="400" class="" text-anchor="start">9.2 h</text>
-<text x="730.5" y="255.0" font-size="17" font-weight="400" class="muted" text-anchor="start">authors' code</text>
-<rect x="330.0" y="270.0" width="150.4" height="26.0" rx="3" fill="var(--gray)"/>
-<text x="492.4" y="289.0" font-size="19" font-weight="400" class="" text-anchor="start">4.2 h</text>
-<text x="552.4" y="289.0" font-size="17" font-weight="400" class="muted" text-anchor="start">tuned</text>
-<text x="300.0" y="263.0" font-size="21" font-weight="600" class="" text-anchor="end">Dense transformer</text>
-<text x="300.0" y="287.0" font-size="18" font-weight="400" class="muted" text-anchor="end">loss 3.578</text>
-<rect x="331.5" y="331.5" width="371.4" height="23.0" rx="3" fill="none" stroke="var(--gray)" stroke-width="3"/>
-<text x="716.4" y="349.0" font-size="19" font-weight="400" class="" text-anchor="start">10.5 h</text>
-<text x="776.4" y="349.0" font-size="17" font-weight="400" class="muted" text-anchor="start">authors' code</text>
-<rect x="330.0" y="364.0" width="182.4" height="26.0" rx="3" fill="var(--gray)"/>
-<text x="524.4" y="383.0" font-size="19" font-weight="400" class="" text-anchor="start">5.1 h</text>
-<text x="584.4" y="383.0" font-size="17" font-weight="400" class="muted" text-anchor="start">tuned</text>
-<text x="300.0" y="357.0" font-size="21" font-weight="600" class="" text-anchor="end">MoE</text>
-<text x="300.0" y="381.0" font-size="18" font-weight="400" class="muted" text-anchor="end">loss 3.386</text>
-<rect x="331.5" y="425.5" width="600.4" height="23.0" rx="3" fill="none" stroke="var(--gray)" stroke-width="3"/>
-<text x="945.4" y="443.0" font-size="19" font-weight="400" class="" text-anchor="start">17.0 h</text>
-<text x="1005.4" y="443.0" font-size="17" font-weight="400" class="muted" text-anchor="start">authors' code</text>
-<rect x="330.0" y="458.0" width="362.3" height="26.0" rx="3" fill="var(--gray)"/>
-<text x="704.3" y="477.0" font-size="19" font-weight="400" class="" text-anchor="start">10.2 h</text>
-<text x="764.3" y="477.0" font-size="17" font-weight="400" class="muted" text-anchor="start">tuned</text>
-<rect x="330.0" y="492.0" width="292.3" height="26.0" rx="3" fill="var(--blue)"/>
-<text x="634.3" y="511.0" font-size="19" font-weight="600" class="blue" text-anchor="start">8.2 h</text>
-<text x="694.3" y="511.0" font-size="17" font-weight="400" class="muted" text-anchor="start">Latch</text>
-<text x="300.0" y="468.0" font-size="21" font-weight="600" class="" text-anchor="end">Nestor</text>
-<text x="300.0" y="492.0" font-size="18" font-weight="400" class="muted" text-anchor="end">loss 3.356</text>
-<text x="48.0" y="642.0" font-size="20" font-weight="400" class="muted" text-anchor="start">Held-out losses from the Nestor paper (Table 3). Lower loss is better.</text>
+<title id="title">GPU hours to train at 100M</title><desc id="desc">Measured H100 hours to train each 100M model on 5B tokens, with held-out losses from the Nestor paper (Table 3). dense-authors 9.2 h; dense-tuned 4.2 h; moe-authors 10.5 h; moe-tuned 5.1 h; nestor-authors 17.0 h; nestor-tuned 10.2 h; latch 8.2 h.</desc>
+<style>text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Helvetica,Arial,sans-serif;fill:#ecebe5}.mute{fill:#9a988f}.bgink{fill:#151513}.serif{font-family:"Iowan Old Style",Charter,"Bitstream Charter","Sitka Text",Cambria,Georgia,serif}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}</style>
+<rect width="1200" height="675" fill="#151513"/>
+<text x="42.0" y="72.0" font-size="46" font-weight="400" class="serif" text-anchor="start">GPU hours to train at 100M</text>
+<text x="42.0" y="114.0" font-size="20" font-weight="400" class="mute" text-anchor="start">5B tokens on one H100. Held-out losses from the Nestor paper (Table 3); lower is better.</text>
+<rect x="293.0" y="167.0" width="312.2" height="34.0" fill="none" stroke="#77766e" stroke-width="2"/>
+<text x="618.2" y="191.0" font-size="19" font-weight="400" class="mono" text-anchor="start">9.2 h</text>
+<text x="690.2" y="191.0" font-size="17" font-weight="400" class="mute" text-anchor="start">authors' code</text>
+<rect x="292.0" y="212.0" width="143.8" height="36.0" fill="#77766e"/>
+<text x="447.8" y="237.0" font-size="19" font-weight="400" class="mono" text-anchor="start">4.2 h</text>
+<text x="519.8" y="237.0" font-size="17" font-weight="400" class="mute" text-anchor="start">tuned</text>
+<text x="268.0" y="205.0" font-size="22" font-weight="400" class="serif" text-anchor="end">Dense transformer</text>
+<text x="268.0" y="229.0" font-size="17" font-weight="400" class="mute mono" text-anchor="end">loss 3.578</text>
+<rect x="293.0" y="293.0" width="356.0" height="34.0" fill="none" stroke="#77766e" stroke-width="2"/>
+<text x="662.0" y="317.0" font-size="19" font-weight="400" class="mono" text-anchor="start">10.5 h</text>
+<text x="745.6" y="317.0" font-size="17" font-weight="400" class="mute" text-anchor="start">authors' code</text>
+<rect x="292.0" y="338.0" width="174.4" height="36.0" fill="#77766e"/>
+<text x="478.4" y="363.0" font-size="19" font-weight="400" class="mono" text-anchor="start">5.1 h</text>
+<text x="550.4" y="363.0" font-size="17" font-weight="400" class="mute" text-anchor="start">tuned</text>
+<text x="268.0" y="331.0" font-size="22" font-weight="400" class="serif" text-anchor="end">MoE</text>
+<text x="268.0" y="355.0" font-size="17" font-weight="400" class="mute mono" text-anchor="end">loss 3.386</text>
+<rect x="293.0" y="419.0" width="575.0" height="34.0" fill="none" stroke="#77766e" stroke-width="2"/>
+<text x="881.0" y="443.0" font-size="19" font-weight="400" class="mono" text-anchor="start">17.0 h</text>
+<text x="964.6" y="443.0" font-size="17" font-weight="400" class="mute" text-anchor="start">authors' code</text>
+<rect x="292.0" y="464.0" width="346.5" height="36.0" fill="#77766e"/>
+<text x="650.5" y="489.0" font-size="19" font-weight="400" class="mono" text-anchor="start">10.2 h</text>
+<text x="734.1" y="489.0" font-size="17" font-weight="400" class="mute" text-anchor="start">tuned</text>
+<rect x="292.0" y="510.0" width="279.5" height="36.0" fill="#ff8a3d"/>
+<text x="583.5" y="535.0" font-size="19" font-weight="400" class="mono" text-anchor="start">8.2 h</text>
+<text x="655.5" y="535.0" font-size="17" font-weight="400" class="mute" text-anchor="start">Latch</text>
+<text x="268.0" y="480.0" font-size="22" font-weight="400" class="serif" text-anchor="end">Nestor</text>
+<text x="268.0" y="504.0" font-size="17" font-weight="400" class="mute mono" text-anchor="end">loss 3.356</text>
+<rect x="738.6" y="624.0" width="16.0" height="16.0" fill="#ff8a3d"/>
+<text x="762.6" y="638.0" font-size="18" font-weight="400" class="mute" text-anchor="start">Latch</text>
+<rect x="837.6" y="624.0" width="16.0" height="16.0" fill="#77766e"/>
+<text x="861.6" y="638.0" font-size="18" font-weight="400" class="mute" text-anchor="start">Tuned PyTorch</text>
+<rect x="1012.8" y="625.0" width="14.0" height="14.0" fill="none" stroke="#77766e" stroke-width="2"/>
+<text x="1035.8" y="638.0" font-size="18" font-weight="400" class="mute" text-anchor="start">Authors' code</text>
 </svg>

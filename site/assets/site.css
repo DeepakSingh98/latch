@@ -1,5 +1,29 @@
 /* Latch research preview site. Plain CSS, no build step, no external fonts or scripts. */
+/* Palette and rules: deepaksingh98.github.io/style/STYLE.md. Dark by default; the toggle sets data-theme="light". */
 :root {
+  --paper: #151513;
+  --paper-2: #1e1d1a;
+  --ink: #ecebe5;
+  --ink-2: #c9c7bf;
+  --mute: #9a988f;
+  --faint: #8f8d85;
+  --rule: #2f2e29;
+  --rule-strong: #45433d;
+  --wash: #21201d;
+  --accent: #ff8a3d;
+  --accent-wash: #33231a;
+  --cost: #45a8ff;
+  --cost-wash: #16283a;
+  --chip: #1c1c19;
+  --serif: "Iowan Old Style", Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --prose: 40rem;
+  --wide: 64rem;
+  --plate: 56rem;
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
   --paper: #f8f6f0;
   --paper-2: #f0ece2;
   --ink: #1a1b1a;
@@ -9,35 +33,12 @@
   --rule: #e2ded3;
   --rule-strong: #c9c4b6;
   --wash: #efebe1;
-  --accent: #2c4a80;
-  --accent-wash: #e3e8f1;
-  --cost: #8f520c;
-  --cost-wash: #f2e6d3;
+  --accent: #b44f0a;
+  --accent-wash: #f7e4d6;
+  --cost: #1b6fc4;
+  --cost-wash: #dcebf8;
   --chip: #fcfbf7;
-  --serif: "Iowan Old Style", Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif;
-  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-  --prose: 40rem;
-  --wide: 64rem;
-  color-scheme: light dark;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --paper: #171714;
-    --paper-2: #201f1b;
-    --ink: #ecebe5;
-    --ink-2: #d0cec6;
-    --mute: #aaa89f;
-    --faint: #9a988f;
-    --rule: #2f2e29;
-    --rule-strong: #4a4840;
-    --wash: #232220;
-    --accent: #a3b9e3;
-    --accent-wash: #1f2738;
-    --cost: #e2a95f;
-    --cost-wash: #2e2517;
-    --chip: #1c1c19;
-  }
+  color-scheme: light;
 }
 
 * { box-sizing: border-box; }
@@ -46,12 +47,13 @@ body {
   margin: 0;
   background: var(--paper);
   color: var(--ink);
-  font: 17px/1.65 var(--sans);
+  font: 16px/1.65 var(--sans);
   font-feature-settings: "kern", "liga";
   -webkit-font-smoothing: antialiased;
 }
-a { color: var(--accent); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
-a:hover { text-decoration-thickness: 2px; }
+a { color: inherit; text-decoration: underline; text-decoration-color: var(--mute); text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+a:hover { text-decoration-color: var(--accent); }
+::selection { background: var(--accent); color: #151513; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
 .skip { position: absolute; left: -999px; top: 0; background: var(--paper); padding: 0.5rem 0.8rem; font: 600 0.9rem var(--sans); z-index: 10; }
 .skip:focus { left: 0.5rem; top: 0.5rem; }
@@ -80,8 +82,8 @@ nav a[aria-current="page"] { box-shadow: inset 0 -1px 0 var(--ink); }
 /* Type */
 h1, h2, h3 { color: var(--ink); }
 h1 { font: 400 3.25rem/1.08 var(--serif); letter-spacing: -0.025em; margin: 0 0 1.6rem; }
-h2 { font: 600 1.32rem/1.3 var(--sans); letter-spacing: -0.012em; margin: 0 0 1rem; }
-h3 { font: 600 1.05rem/1.4 var(--sans); letter-spacing: -0.005em; margin: 2.2rem 0 0.5rem; }
+h2 { font: 400 1.6rem/1.25 var(--serif); letter-spacing: -0.012em; margin: 0 0 1rem; }
+h3 { font: 500 1.05rem/1.4 var(--sans); letter-spacing: -0.005em; margin: 2.2rem 0 0.5rem; }
 p { margin: 0 0 1.1rem; }
 .lede { font: 400 1.38rem/1.5 var(--serif); color: var(--ink); letter-spacing: -0.006em; }
 .lede-2 { font-size: 1.1rem; color: var(--ink-2); }
@@ -141,6 +143,12 @@ figure { margin: 2rem 0 2.4rem; }
 figcaption { font: 0.84rem/1.55 var(--sans); color: var(--mute); margin-top: 0.9rem; max-width: var(--prose); }
 figcaption .tag { margin-right: 0.35rem; }
 figure img { display: block; width: 100%; height: auto; }
+:root[data-theme="light"] figure img { border-radius: 10px; }
+/* Plates run wider than the text; their captions stay on the reading column. */
+@media (min-width: 60rem) {
+  .article figure:has(img) { width: var(--plate); margin-left: calc((var(--prose) - var(--plate)) / 2); }
+  .article figure:has(img) figcaption { margin-left: auto; margin-right: auto; }
+}
 
 /* SVG vocabulary shared by all diagrams */
 svg text { font-family: var(--sans); fill: var(--ink); }
@@ -360,7 +368,6 @@ html:not(.js) .stage-detail + .stage-detail { border-top: 1px solid var(--rule);
   .toc ol { grid-template-columns: 1fr 1fr; }
 }
 @media (max-width: 640px) {
-  body { font-size: 16.5px; }
   .next-links li { grid-template-columns: 1fr; gap: 0.15rem; }
   .meta span + span::before { margin: 0 0.4rem; }
   .wrap { padding: 0 1.1rem; }
@@ -477,6 +484,9 @@ html:not(.js) .stage-detail + .stage-detail { border-top: 1px solid var(--rule);
 nav ul { align-items: center; }
 nav li { display: flex; align-items: center; }
 .github-icon { width: 1em; height: 1em; flex: none; }
+.theme-toggle { display: grid; place-items: center; width: 1.9rem; height: 1.9rem; margin-left: -0.6rem; padding: 0; border: 0; border-radius: 999px; background: none; color: var(--mute); cursor: pointer; transition: color 0.18s ease, background-color 0.18s ease; }
+.theme-toggle:hover { color: var(--ink); background: var(--wash); }
+.theme-toggle svg { width: 1rem; height: 1rem; }
 
 /* Blog index */
 .posts { list-style: none; padding: 0; margin: 2.4rem 0 0; }

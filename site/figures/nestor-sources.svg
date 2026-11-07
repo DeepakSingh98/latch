@@ -1,26 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
-<title id="title">Where Latch's Nestor speedup came from</title><desc id="desc">Approximate contributions to milliseconds saved per training update: More memory loads in flight 178 ms, Single-pass attention backward 52 ms, Fused sibling matrix products 49 ms, Row fusion 43 ms, Optimizer and vocab head 30 ms. The changes interact; the combined improvement from 1,898 to 1,553 ms is measured directly.</desc>
-<style>:root{--bg:#f8f6f0;--panel:#f0ece2;--ink:#1a1b1a;--mute:#5f615b;--rule:#c9c4b6;--blue:#2c4a80;--gray:#969288;--wash:#e3e8f1}@media(prefers-color-scheme:dark){:root{--bg:#171714;--panel:#201f1b;--ink:#ecebe5;--mute:#aaa89f;--rule:#4a4840;--blue:#a3b9e3;--gray:#77766e;--wash:#1f2738}}text{font-family:Arial,Helvetica,sans-serif;fill:var(--ink)}.muted{fill:var(--mute)}.blue{fill:var(--blue)}</style>
-<rect width="1200" height="675" fill="var(--bg)"/>
-<text x="48.0" y="65.0" font-size="34" font-weight="600" class="" text-anchor="start">Where the time went</text>
-<rect x="48.0" y="110.0" width="1104.0" height="486.0" rx="10" fill="var(--panel)"/>
-<text x="70.0" y="165.0" font-size="32" font-weight="600" class="" text-anchor="start">−345 ms</text>
-<text x="70.0" y="199.0" font-size="22" font-weight="400" class="" text-anchor="start">per update in the generated program</text>
-<text x="70.0" y="235.0" font-size="19" font-weight="400" class="muted" text-anchor="start">1,898 → 1,553 ms · approximate contributions</text>
-<text x="420.0" y="297.0" font-size="21" font-weight="400" class="" text-anchor="end">More memory loads in flight</text>
-<rect x="440.0" y="274.0" width="553.8" height="32.0" rx="3" fill="var(--blue)"/>
-<text x="1007.8" y="297.0" font-size="20" font-weight="600" class="" text-anchor="start">−178 ms</text>
-<text x="420.0" y="355.0" font-size="21" font-weight="400" class="" text-anchor="end">Single-pass attention backward</text>
-<rect x="440.0" y="332.0" width="161.8" height="32.0" rx="3" fill="var(--blue)"/>
-<text x="615.8" y="355.0" font-size="20" font-weight="400" class="" text-anchor="start">−52 ms</text>
-<text x="420.0" y="413.0" font-size="21" font-weight="400" class="" text-anchor="end">Fused sibling matrix products</text>
-<rect x="440.0" y="390.0" width="152.4" height="32.0" rx="3" fill="var(--blue)"/>
-<text x="606.4" y="413.0" font-size="20" font-weight="400" class="" text-anchor="start">−49 ms</text>
-<text x="420.0" y="471.0" font-size="21" font-weight="400" class="" text-anchor="end">Row fusion</text>
-<rect x="440.0" y="448.0" width="133.8" height="32.0" rx="3" fill="var(--blue)"/>
-<text x="587.8" y="471.0" font-size="20" font-weight="400" class="" text-anchor="start">−43 ms</text>
-<text x="420.0" y="529.0" font-size="21" font-weight="400" class="" text-anchor="end">Optimizer and vocab head</text>
-<rect x="440.0" y="506.0" width="93.3" height="32.0" rx="3" fill="var(--blue)"/>
-<text x="547.3" y="529.0" font-size="20" font-weight="400" class="" text-anchor="start">−30 ms</text>
-<text x="48.0" y="642.0" font-size="20" font-weight="400" class="muted" text-anchor="start">The changes interact. The combined 345 ms improvement is measured directly.</text>
+<title id="title">Where the time went</title><desc id="desc">Approximate contributions to milliseconds saved per training update: More memory loads in flight 178 ms, Single-pass attention backward 52 ms, Fused sibling matrix products 49 ms, Row fusion 43 ms, Optimizer and vocab head 30 ms. The changes interact; the combined improvement from 1,898 to 1,553 ms is measured directly.</desc>
+<style>text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Helvetica,Arial,sans-serif;fill:#ecebe5}.mute{fill:#9a988f}.bgink{fill:#151513}.serif{font-family:"Iowan Old Style",Charter,"Bitstream Charter","Sitka Text",Cambria,Georgia,serif}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}</style>
+<rect width="1200" height="675" fill="#151513"/>
+<text x="42.0" y="72.0" font-size="46" font-weight="400" class="serif" text-anchor="start">Where the time went</text>
+<text x="42.0" y="114.0" font-size="20" font-weight="400" class="mute" text-anchor="start">−345 ms per update in the generated program: 1,898 → 1,553 ms, approximate contributions.</text>
+<line x1="396.0" y1="172.0" x2="396.0" y2="568.0" stroke="#55534c" stroke-width="2"/>
+<text x="372.0" y="216.0" font-size="20" font-weight="400" class="" text-anchor="end">More memory loads in flight</text>
+<rect x="396.0" y="186.0" width="632.9" height="44.0" fill="#ff8a3d"/>
+<text x="1042.9" y="216.0" font-size="20" font-weight="400" class="mono" text-anchor="start">−178 ms</text>
+<text x="372.0" y="296.0" font-size="20" font-weight="400" class="" text-anchor="end">Single-pass attention backward</text>
+<rect x="396.0" y="266.0" width="184.9" height="44.0" fill="#ff8a3d"/>
+<text x="594.9" y="296.0" font-size="20" font-weight="400" class="mono" text-anchor="start">−52 ms</text>
+<text x="372.0" y="376.0" font-size="20" font-weight="400" class="" text-anchor="end">Fused sibling matrix products</text>
+<rect x="396.0" y="346.0" width="174.2" height="44.0" fill="#ff8a3d"/>
+<text x="584.2" y="376.0" font-size="20" font-weight="400" class="mono" text-anchor="start">−49 ms</text>
+<text x="372.0" y="456.0" font-size="20" font-weight="400" class="" text-anchor="end">Row fusion</text>
+<rect x="396.0" y="426.0" width="152.9" height="44.0" fill="#ff8a3d"/>
+<text x="562.9" y="456.0" font-size="20" font-weight="400" class="mono" text-anchor="start">−43 ms</text>
+<text x="372.0" y="536.0" font-size="20" font-weight="400" class="" text-anchor="end">Optimizer and vocab head</text>
+<rect x="396.0" y="506.0" width="106.7" height="44.0" fill="#ff8a3d"/>
+<text x="516.7" y="536.0" font-size="20" font-weight="400" class="mono" text-anchor="start">−30 ms</text>
+<text x="42.0" y="640.0" font-size="18" font-weight="400" class="mute" text-anchor="start">The changes interact. The combined 345 ms improvement is measured directly.</text>
 </svg>

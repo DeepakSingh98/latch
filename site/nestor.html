@@ -6,7 +6,9 @@
 <title>Training Nestor with Latch</title>
 <meta name="description" content="Using Latch to generate training megakernels for Nestor: 2.1× faster updates than the authors' implementation and 1.24× faster than tuned PyTorch on the same H100.">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="assets/site.css?v=17">
+<meta name="theme-color" content="#151513">
+<link rel="stylesheet" href="assets/site.css?v=18">
+<script src="assets/theme.js"></script>
 <script src="assets/config.js" defer></script>
 <script src="assets/reading.js" defer></script>
 </head>
@@ -21,6 +23,7 @@
         <li><a href="./">Blog</a></li>
         <li><a href="capabilities.html">Open problems</a></li>
         <li><a class="github-link" href="https://github.com/DeepakSingh98/latch"><svg class="github-icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82A7.65 7.65 0 0 1 8 3.86c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg><span>Get started</span></a></li>
+        <li><button class="theme-toggle" type="button" aria-label="Toggle dark mode"><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="6.6" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M8 1.4a6.6 6.6 0 0 1 0 13.2z" fill="currentColor"/></svg></button></li>
       </ul>
     </nav>
   </div>
@@ -38,7 +41,7 @@
       <p>Each training update processes 262,144 tokens. The megakernel takes 1.55 seconds per update, and the authors’ code takes 3.28. The new build matched learning in 300-update comparisons from both fresh and trained weights.</p>
 
       <figure>
-        <a href="figures/nestor-learning.svg?v=3" aria-label="Open learning chart full size"><img src="figures/nestor-learning.svg?v=3" width="1200" height="675" loading="lazy" alt="Historical Nestor-100M learning curves, with hours calculated using the new measured update speeds: 8.2 hours for Latch and 17.4 hours for the authors’ code. The chart zooms in on the later part of training."></a>
+        <a href="figures/nestor-learning.svg?v=4" aria-label="Open learning chart full size"><img src="figures/nestor-learning.svg?v=4" width="1200" height="675" loading="lazy" alt="Historical Nestor-100M learning curves, with hours calculated using the new measured update speeds: 8.2 hours for Latch and 17.4 hours for the authors’ code. The chart zooms in on the later part of training."></a>
         <figcaption>Earlier 5-billion-token learning curves, with time calculated from the new same-H100 update timings. These are estimated full-run durations; the new build’s learning checks cover 300 updates. 200-update moving average.</figcaption>
       </figure>
 
@@ -55,7 +58,7 @@
       <p>GPUs do best with a few large operations of the same shape. A Nestor training step is thousands of small operations whose sizes depend on the routing, and its attention heads are only 30 numbers wide. The authors’ PyTorch code issues about 87,000 GPU operations per update.</p>
 
       <figure>
-        <a href="figures/nestor-structure.png" aria-label="Open Nestor structure diagram full size"><img src="figures/nestor-structure.png" width="1600" height="900" loading="lazy" alt="Schematic of Nestor’s depth mixing, routed attention columns and experts, with conventional execution and generated megakernel execution below."></a>
+        <a href="figures/nestor-structure.svg" aria-label="Open Nestor structure diagram full size"><img src="figures/nestor-structure.svg" width="1600" height="900" loading="lazy" alt="Schematic of Nestor’s depth mixing, routed attention columns and experts, with conventional execution and generated megakernel execution below."></a>
         <figcaption>Nestor’s depth mixing, attention columns and experts. Schematic; block widths are illustrative.</figcaption>
       </figure>
 

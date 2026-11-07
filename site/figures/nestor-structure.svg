@@ -1,0 +1,180 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+<title id="title">Nestor is lots of small, uneven work</title><desc id="desc">Schematic of one Nestor layer, repeated 13 times: mixing earlier layers, attention over uneven columns, and uneven experts. PyTorch runs each step as a separate kernel with its own trip to GPU memory. Latch fuses them into one program per microbatch, with reads batched and routing fused into its neighbours.</desc>
+<style>text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Helvetica,Arial,sans-serif;fill:#ecebe5}.mute{fill:#9a988f}.bgink{fill:#151513}.serif{font-family:"Iowan Old Style",Charter,"Bitstream Charter","Sitka Text",Cambria,Georgia,serif}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}</style>
+<rect width="1200" height="675" fill="#151513"/>
+<text x="42.0" y="72.0" font-size="46" font-weight="400" class="serif" text-anchor="start">Nestor is lots of small, uneven work</text>
+<rect x="62.0" y="146.0" width="10.0" height="110.0" fill="#6fd08c" opacity="0.25"/>
+<path d="M67.0 146.0 Q178.5 100.0 290.0 136.0" fill="none" stroke="#6fd08c" stroke-width="1.6" opacity="0.25"/>
+<rect x="83.0" y="146.0" width="10.0" height="110.0" fill="#6fd08c" opacity="0.38"/>
+<path d="M88.0 146.0 Q189.0 102.0 290.0 136.0" fill="none" stroke="#6fd08c" stroke-width="1.6" opacity="0.38"/>
+<rect x="104.0" y="146.0" width="10.0" height="110.0" fill="#6fd08c" opacity="0.50"/>
+<path d="M109.0 146.0 Q199.5 104.0 290.0 136.0" fill="none" stroke="#6fd08c" stroke-width="1.6" opacity="0.50"/>
+<rect x="125.0" y="146.0" width="10.0" height="110.0" fill="#6fd08c" opacity="0.62"/>
+<path d="M130.0 146.0 Q210.0 106.0 290.0 136.0" fill="none" stroke="#6fd08c" stroke-width="1.6" opacity="0.62"/>
+<rect x="146.0" y="146.0" width="10.0" height="110.0" fill="#6fd08c" opacity="0.75"/>
+<path d="M151.0 146.0 Q220.5 108.0 290.0 136.0" fill="none" stroke="#6fd08c" stroke-width="1.6" opacity="0.75"/>
+<rect x="167.0" y="146.0" width="10.0" height="110.0" fill="#6fd08c" opacity="0.88"/>
+<path d="M172.0 146.0 Q231.0 110.0 290.0 136.0" fill="none" stroke="#6fd08c" stroke-width="1.6" opacity="0.88"/>
+<rect x="188.0" y="146.0" width="10.0" height="110.0" fill="#6fd08c"/>
+<path d="M193.0 146.0 Q241.5 112.0 290.0 136.0" fill="none" stroke="#6fd08c" stroke-width="1.6" opacity="1.00"/>
+<rect x="284.0" y="146.0" width="12.0" height="110.0" fill="#6fd08c"/>
+<rect x="71.2" y="279.0" width="14.0" height="14.0" fill="#6fd08c"/>
+<text x="93.2" y="292.0" font-size="19" font-weight="400" class="" text-anchor="start">mix earlier layers</text>
+<line x1="322.0" y1="201.0" x2="356.0" y2="201.0" stroke="#77766e" stroke-width="2"/>
+<polygon points="364.0,201.0 356.0,196.2 356.0,205.8" fill="#77766e"/>
+<rect x="392.0" y="246.0" width="10.0" height="10.0" fill="#77766e"/>
+<rect x="392.0" y="232.0" width="10.0" height="10.0" fill="#77766e"/>
+<rect x="392.0" y="218.0" width="10.0" height="10.0" fill="#77766e"/>
+<rect x="392.0" y="204.0" width="10.0" height="10.0" fill="#77766e"/>
+<rect x="392.0" y="190.0" width="10.0" height="10.0" fill="#77766e"/>
+<rect x="392.0" y="176.0" width="10.0" height="10.0" fill="#77766e"/>
+<rect x="392.0" y="162.0" width="10.0" height="10.0" fill="#77766e"/>
+<rect x="392.0" y="148.0" width="10.0" height="10.0" fill="#ecebe5"/>
+<rect x="495.5" y="157.5" width="19.0" height="103.0" fill="none" stroke="#55534c" stroke-width="1"/>
+<rect x="500.0" y="246.0" width="10.0" height="10.0" fill="#45a8ff"/>
+<rect x="500.0" y="232.0" width="10.0" height="10.0" fill="#45a8ff"/>
+<rect x="500.0" y="218.0" width="10.0" height="10.0" fill="#45a8ff"/>
+<rect x="500.0" y="204.0" width="10.0" height="10.0" fill="#45a8ff"/>
+<rect x="500.0" y="190.0" width="10.0" height="10.0" fill="#45a8ff"/>
+<rect x="500.0" y="176.0" width="10.0" height="10.0" fill="#45a8ff"/>
+<rect x="500.0" y="162.0" width="10.0" height="10.0" fill="#ecebe5"/>
+<rect x="543.5" y="213.5" width="19.0" height="47.0" fill="none" stroke="#55534c" stroke-width="1"/>
+<rect x="548.0" y="246.0" width="10.0" height="10.0" fill="#45a8ff"/>
+<rect x="548.0" y="232.0" width="10.0" height="10.0" fill="#45a8ff"/>
+<rect x="548.0" y="218.0" width="10.0" height="10.0" fill="#45a8ff"/>
+<rect x="591.5" y="157.5" width="19.0" height="103.0" fill="none" stroke="#55534c" stroke-width="1"/>
+<rect x="596.0" y="246.0" width="10.0" height="10.0" fill="#45a8ff"/>
+<rect x="596.0" y="232.0" width="10.0" height="10.0" fill="#45a8ff"/>
+<rect x="596.0" y="218.0" width="10.0" height="10.0" fill="#45a8ff"/>
+<rect x="596.0" y="204.0" width="10.0" height="10.0" fill="#45a8ff"/>
+<rect x="596.0" y="190.0" width="10.0" height="10.0" fill="#45a8ff"/>
+<rect x="596.0" y="176.0" width="10.0" height="10.0" fill="#45a8ff"/>
+<rect x="596.0" y="162.0" width="10.0" height="10.0" fill="#ecebe5"/>
+<rect x="639.5" y="227.5" width="19.0" height="33.0" fill="none" stroke="#55534c" stroke-width="1"/>
+<rect x="644.0" y="246.0" width="10.0" height="10.0" fill="#45a8ff"/>
+<rect x="644.0" y="232.0" width="10.0" height="10.0" fill="#ecebe5"/>
+<path d="M402.0 158.0 Q453.5 114.0 505.0 147.0" fill="none" stroke="#77766e" stroke-width="1.6" opacity="1.00"/>
+<polygon points="505.0,155.0 500.0,147.0 510.0,147.0" fill="#77766e"/>
+<path d="M402.0 158.0 Q501.5 114.0 601.0 147.0" fill="none" stroke="#77766e" stroke-width="1.6" opacity="1.00"/>
+<polygon points="601.0,155.0 596.0,147.0 606.0,147.0" fill="#77766e"/>
+<path d="M402.0 158.0 Q525.5 114.0 649.0 217.0" fill="none" stroke="#77766e" stroke-width="1.6" opacity="1.00"/>
+<polygon points="649.0,225.0 644.0,217.0 654.0,217.0" fill="#77766e"/>
+<rect x="423.8" y="279.0" width="14.0" height="14.0" fill="#45a8ff"/>
+<text x="445.8" y="292.0" font-size="19" font-weight="400" class="" text-anchor="start">attention columns</text>
+<line x1="700.0" y1="201.0" x2="734.0" y2="201.0" stroke="#77766e" stroke-width="2"/>
+<polygon points="742.0,201.0 734.0,196.2 734.0,205.8" fill="#77766e"/>
+<rect x="771.5" y="185.5" width="19.0" height="75.0" fill="none" stroke="#55534c" stroke-width="1"/>
+<rect x="776.0" y="246.0" width="10.0" height="10.0" fill="#ff8a3d"/>
+<rect x="776.0" y="232.0" width="10.0" height="10.0" fill="#ff8a3d"/>
+<rect x="776.0" y="218.0" width="10.0" height="10.0" fill="#ff8a3d"/>
+<rect x="776.0" y="204.0" width="10.0" height="10.0" fill="#ff8a3d"/>
+<rect x="776.0" y="190.0" width="10.0" height="10.0" fill="#ff8a3d"/>
+<rect x="803.5" y="241.5" width="19.0" height="19.0" fill="none" stroke="#55534c" stroke-width="1"/>
+<rect x="808.0" y="246.0" width="10.0" height="10.0" fill="#ff8a3d"/>
+<rect x="835.5" y="213.5" width="19.0" height="47.0" fill="none" stroke="#55534c" stroke-width="1"/>
+<rect x="840.0" y="246.0" width="10.0" height="10.0" fill="#ff8a3d"/>
+<rect x="840.0" y="232.0" width="10.0" height="10.0" fill="#ff8a3d"/>
+<rect x="840.0" y="218.0" width="10.0" height="10.0" fill="#ff8a3d"/>
+<rect x="867.5" y="157.5" width="19.0" height="103.0" fill="none" stroke="#55534c" stroke-width="1"/>
+<rect x="872.0" y="246.0" width="10.0" height="10.0" fill="#ff8a3d"/>
+<rect x="872.0" y="232.0" width="10.0" height="10.0" fill="#ff8a3d"/>
+<rect x="872.0" y="218.0" width="10.0" height="10.0" fill="#ff8a3d"/>
+<rect x="872.0" y="204.0" width="10.0" height="10.0" fill="#ff8a3d"/>
+<rect x="872.0" y="190.0" width="10.0" height="10.0" fill="#ff8a3d"/>
+<rect x="872.0" y="176.0" width="10.0" height="10.0" fill="#ff8a3d"/>
+<rect x="872.0" y="162.0" width="10.0" height="10.0" fill="#ff8a3d"/>
+<rect x="899.5" y="227.5" width="19.0" height="33.0" fill="none" stroke="#55534c" stroke-width="1"/>
+<rect x="904.0" y="246.0" width="10.0" height="10.0" fill="#ff8a3d"/>
+<rect x="904.0" y="232.0" width="10.0" height="10.0" fill="#ff8a3d"/>
+<rect x="931.5" y="199.5" width="19.0" height="61.0" fill="none" stroke="#55534c" stroke-width="1"/>
+<rect x="936.0" y="246.0" width="10.0" height="10.0" fill="#ff8a3d"/>
+<rect x="936.0" y="232.0" width="10.0" height="10.0" fill="#ff8a3d"/>
+<rect x="936.0" y="218.0" width="10.0" height="10.0" fill="#ff8a3d"/>
+<rect x="936.0" y="204.0" width="10.0" height="10.0" fill="#ff8a3d"/>
+<rect x="963.5" y="241.5" width="19.0" height="19.0" fill="none" stroke="#55534c" stroke-width="1"/>
+<rect x="968.0" y="246.0" width="10.0" height="10.0" fill="#ff8a3d"/>
+<rect x="995.5" y="213.5" width="19.0" height="47.0" fill="none" stroke="#55534c" stroke-width="1"/>
+<rect x="1000.0" y="246.0" width="10.0" height="10.0" fill="#ff8a3d"/>
+<rect x="1000.0" y="232.0" width="10.0" height="10.0" fill="#ff8a3d"/>
+<rect x="1000.0" y="218.0" width="10.0" height="10.0" fill="#ff8a3d"/>
+<rect x="833.8" y="279.0" width="14.0" height="14.0" fill="#ff8a3d"/>
+<text x="855.8" y="292.0" font-size="19" font-weight="400" class="" text-anchor="start">experts</text>
+<text x="1158.0" y="216.0" font-size="52" font-weight="400" class="serif" text-anchor="end">×13</text>
+<text x="1158.0" y="246.0" font-size="19" font-weight="400" class="mute" text-anchor="end">layers</text>
+<line x1="42.0" y1="318.0" x2="1158.0" y2="318.0" stroke="#55534c" stroke-width="1"/>
+<text x="42.0" y="380.0" font-size="30" font-weight="400" class="serif" text-anchor="start">PyTorch</text>
+<rect x="212.0" y="350.0" width="46.0" height="36.0" fill="#6fd08c"/>
+<line x1="230.0" y1="408.0" x2="230.0" y2="390.0" stroke="#77766e" stroke-width="1.5"/>
+<polygon points="230.0,384.0 226.4,390.0 233.6,390.0" fill="#77766e"/>
+<line x1="240.0" y1="390.0" x2="240.0" y2="408.0" stroke="#77766e" stroke-width="1.5"/>
+<polygon points="240.0,414.0 236.4,408.0 243.6,408.0" fill="#77766e"/>
+<rect x="269.0" y="350.0" width="46.0" height="36.0" fill="#6fd08c"/>
+<line x1="287.0" y1="408.0" x2="287.0" y2="390.0" stroke="#77766e" stroke-width="1.5"/>
+<polygon points="287.0,384.0 283.4,390.0 290.6,390.0" fill="#77766e"/>
+<line x1="297.0" y1="390.0" x2="297.0" y2="408.0" stroke="#77766e" stroke-width="1.5"/>
+<polygon points="297.0,414.0 293.4,408.0 300.6,408.0" fill="#77766e"/>
+<rect x="326.0" y="350.0" width="46.0" height="36.0" fill="#6fd08c"/>
+<line x1="344.0" y1="408.0" x2="344.0" y2="390.0" stroke="#77766e" stroke-width="1.5"/>
+<polygon points="344.0,384.0 340.4,390.0 347.6,390.0" fill="#77766e"/>
+<line x1="354.0" y1="390.0" x2="354.0" y2="408.0" stroke="#77766e" stroke-width="1.5"/>
+<polygon points="354.0,414.0 350.4,408.0 357.6,408.0" fill="#77766e"/>
+<rect x="383.0" y="350.0" width="46.0" height="36.0" fill="#6fd08c"/>
+<line x1="401.0" y1="408.0" x2="401.0" y2="390.0" stroke="#77766e" stroke-width="1.5"/>
+<polygon points="401.0,384.0 397.4,390.0 404.6,390.0" fill="#77766e"/>
+<line x1="411.0" y1="390.0" x2="411.0" y2="408.0" stroke="#77766e" stroke-width="1.5"/>
+<polygon points="411.0,414.0 407.4,408.0 414.6,408.0" fill="#77766e"/>
+<rect x="440.0" y="350.0" width="56.0" height="36.0" fill="#77766e"/>
+<line x1="463.0" y1="408.0" x2="463.0" y2="390.0" stroke="#77766e" stroke-width="1.5"/>
+<polygon points="463.0,384.0 459.4,390.0 466.6,390.0" fill="#77766e"/>
+<line x1="473.0" y1="390.0" x2="473.0" y2="408.0" stroke="#77766e" stroke-width="1.5"/>
+<polygon points="473.0,414.0 469.4,408.0 476.6,408.0" fill="#77766e"/>
+<rect x="507.0" y="350.0" width="212.0" height="36.0" fill="#45a8ff"/>
+<line x1="608.0" y1="408.0" x2="608.0" y2="390.0" stroke="#77766e" stroke-width="1.5"/>
+<polygon points="608.0,384.0 604.4,390.0 611.6,390.0" fill="#77766e"/>
+<line x1="618.0" y1="390.0" x2="618.0" y2="408.0" stroke="#77766e" stroke-width="1.5"/>
+<polygon points="618.0,414.0 614.4,408.0 621.6,408.0" fill="#77766e"/>
+<rect x="730.0" y="350.0" width="56.0" height="36.0" fill="#77766e"/>
+<line x1="753.0" y1="408.0" x2="753.0" y2="390.0" stroke="#77766e" stroke-width="1.5"/>
+<polygon points="753.0,384.0 749.4,390.0 756.6,390.0" fill="#77766e"/>
+<line x1="763.0" y1="390.0" x2="763.0" y2="408.0" stroke="#77766e" stroke-width="1.5"/>
+<polygon points="763.0,414.0 759.4,408.0 766.6,408.0" fill="#77766e"/>
+<rect x="797.0" y="350.0" width="270.0" height="36.0" fill="#ff8a3d"/>
+<line x1="927.0" y1="408.0" x2="927.0" y2="390.0" stroke="#77766e" stroke-width="1.5"/>
+<polygon points="927.0,384.0 923.4,390.0 930.6,390.0" fill="#77766e"/>
+<line x1="937.0" y1="390.0" x2="937.0" y2="408.0" stroke="#77766e" stroke-width="1.5"/>
+<polygon points="937.0,414.0 933.4,408.0 940.6,408.0" fill="#77766e"/>
+<rect x="1078.0" y="350.0" width="80.0" height="36.0" fill="#77766e"/>
+<line x1="1113.0" y1="408.0" x2="1113.0" y2="390.0" stroke="#77766e" stroke-width="1.5"/>
+<polygon points="1113.0,384.0 1109.4,390.0 1116.6,390.0" fill="#77766e"/>
+<line x1="1123.0" y1="390.0" x2="1123.0" y2="408.0" stroke="#77766e" stroke-width="1.5"/>
+<polygon points="1123.0,414.0 1119.4,408.0 1126.6,408.0" fill="#77766e"/>
+<rect x="212.0" y="414.0" width="946.0" height="24.0" fill="#2b2a26"/>
+<text x="1146.0" y="432.0" font-size="15" font-weight="400" class="mute" text-anchor="end">GPU memory</text>
+<text x="42.0" y="538.0" font-size="30" font-weight="400" class="serif" text-anchor="start">Latch</text>
+<rect x="206.0" y="502.0" width="958.0" height="48.0" fill="none" stroke="#ecebe5" stroke-width="2"/>
+<rect x="212.0" y="508.0" width="208.0" height="36.0" fill="#6fd08c"/>
+<line x1="435.0" y1="506.0" x2="435.0" y2="546.0" stroke="#ecebe5" stroke-width="2" stroke-dasharray="2 4"/>
+<rect x="450.0" y="508.0" width="62.0" height="36.0" fill="#77766e"/>
+<rect x="512.0" y="508.0" width="226.0" height="36.0" fill="#45a8ff"/>
+<line x1="753.0" y1="506.0" x2="753.0" y2="546.0" stroke="#ecebe5" stroke-width="2" stroke-dasharray="2 4"/>
+<rect x="768.0" y="508.0" width="62.0" height="36.0" fill="#77766e"/>
+<rect x="830.0" y="508.0" width="266.0" height="36.0" fill="#ff8a3d"/>
+<rect x="1096.0" y="508.0" width="62.0" height="36.0" fill="#77766e"/>
+<text x="316.0" y="490.0" font-size="18" font-weight="400" class="mute" text-anchor="middle">reads batched</text>
+<text x="690.0" y="490.0" font-size="18" font-weight="400" class="mute" text-anchor="middle">routing fused into its neighbours</text>
+<line x1="311.0" y1="574.0" x2="311.0" y2="556.0" stroke="#77766e" stroke-width="1.5"/>
+<polygon points="311.0,550.0 307.4,556.0 314.6,556.0" fill="#77766e"/>
+<line x1="321.0" y1="556.0" x2="321.0" y2="574.0" stroke="#77766e" stroke-width="1.5"/>
+<polygon points="321.0,580.0 317.4,574.0 324.6,574.0" fill="#77766e"/>
+<line x1="620.0" y1="574.0" x2="620.0" y2="556.0" stroke="#77766e" stroke-width="1.5"/>
+<polygon points="620.0,550.0 616.4,556.0 623.6,556.0" fill="#77766e"/>
+<line x1="630.0" y1="556.0" x2="630.0" y2="574.0" stroke="#77766e" stroke-width="1.5"/>
+<polygon points="630.0,580.0 626.4,574.0 633.6,574.0" fill="#77766e"/>
+<line x1="927.0" y1="574.0" x2="927.0" y2="556.0" stroke="#77766e" stroke-width="1.5"/>
+<polygon points="927.0,550.0 923.4,556.0 930.6,556.0" fill="#77766e"/>
+<line x1="937.0" y1="556.0" x2="937.0" y2="574.0" stroke="#77766e" stroke-width="1.5"/>
+<polygon points="937.0,580.0 933.4,574.0 940.6,574.0" fill="#77766e"/>
+<rect x="212.0" y="582.0" width="946.0" height="24.0" fill="#2b2a26"/>
+<text x="1146.0" y="600.0" font-size="15" font-weight="400" class="mute" text-anchor="end">GPU memory</text>
+<text x="685.0" y="638.0" font-size="19" font-weight="400" class="" text-anchor="middle">one program per microbatch</text>
+</svg>

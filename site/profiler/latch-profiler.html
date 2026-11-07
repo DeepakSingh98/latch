@@ -8,7 +8,7 @@
 <style>
 :root {
   color-scheme: dark;
-  --page: #121211;
+  --page: #151513;
   --surface: #1a1a19;
   --raised: #20201e;
   --ink: #f0efec;
@@ -33,7 +33,7 @@ h1 { margin: 0; font-size: 16px; font-weight: 600; color: var(--ink); }
 .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 button { font: inherit; font-size: 12.5px; color: var(--ink-2); background: transparent; border: 1px solid var(--border); border-radius: 7px; padding: 5px 10px; cursor: pointer; }
 button:hover:not(:disabled) { background: rgba(255, 255, 255, 0.05); color: var(--ink); }
-button:focus-visible, input:focus-visible { outline: 2px solid #3987e5; outline-offset: 1px; }
+button:focus-visible, input:focus-visible { outline: 2px solid #45a8ff; outline-offset: 1px; }
 button[aria-pressed="true"] { background: rgba(255, 255, 255, 0.11); color: var(--ink); }
 button:disabled { opacity: 0.4; cursor: default; }
 .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 7px; overflow: hidden; }
@@ -158,14 +158,14 @@ details#prov > summary { cursor: pointer; color: var(--ink); font-weight: 600; p
 
 // ---------------------------------------------------------------- constants
 // Category colours (dataviz validator, dark surface #1a1a19): attention / routing / expert products alternate inside
-// every layer and take the first three palette slots, which pass the all-pairs CVD and normal-vision checks; clip ->
+// every layer and take the site's blue / green / orange, which pass the CVD and normal-vision checks; clip ->
 // optimizer -> commit pass as an adjacent chain; loss (yellow) never borders expert products in time (the final norm
 // sits between them) and also carries the stage ribbon. "Other" forward/backward work is a low-chroma slate in two
 // steps (separated 18.9 dE, both >= 3:1 on the surface) so the named categories stand out without hiding real work.
 const CATS = {
-  attention: ['attention', '#3987e5'],
-  experts: ['expert products', '#d95926'],
-  routing: ['routing', '#199e70'],
+  attention: ['attention', '#45a8ff'],
+  experts: ['expert products', '#ff8a3d'],
+  routing: ['routing', '#6fd08c'],
   other_fwd: ['other forward work', '#a0a9ba'],
   loss: ['loss (readout, cross-entropy)', '#c98500'],
   other_bwd: ['other backward work', '#647089'],
