@@ -97,7 +97,9 @@ with `torch.optim.AdamW(fused=True)`.
 | GPT, 6 layers, width 384, context 256, batch 32 | 96.9 ms | 20.4 ms | 0.21× |
 
 Latch wins where launch overhead dominates and loses where matrix products do:
-its matrix product is a plain tiled float32 loop, not a tuned one.
+its matrix product is a plain tiled float32 loop, not a tuned one. The v0
+compiler, which has tuned kernels, ran these models 1.7 to 4.7 times faster in
+the same session, except the smallest MLP, where the two were level.
 
 ## Limits
 
