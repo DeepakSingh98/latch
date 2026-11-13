@@ -6,8 +6,8 @@ __pycache__/
 build/
 dist/
 latch-output/
+latch-gpt/
 *.so
 *.o
-*.cubin
 .env
 .env.*
